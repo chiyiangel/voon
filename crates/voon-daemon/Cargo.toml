@@ -1,0 +1,28 @@
+[package]
+name = "voon-daemon"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Voon daemon"
+
+[lib]
+name = "voon_daemon"
+path = "src/lib.rs"
+
+[[bin]]
+name = "voon"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+axum.workspace = true
+clap.workspace = true
+signal-hook.workspace = true
+tokio.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+voon-api = { path = "../voon-api" }
+voon-audio = { path = "../voon-audio" }
+voon-core = { path = "../voon-core" }
+voon-library = { path = "../voon-library" }

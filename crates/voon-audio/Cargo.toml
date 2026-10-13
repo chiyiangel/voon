@@ -1,0 +1,16 @@
+[package]
+name = "voon-audio"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Audio output backends for Voon. CoreAudio is macOS-only; ALSA can implement the same trait later."
+
+[dependencies]
+rtrb.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[target.'cfg(target_os = "macos")'.dependencies]
+coreaudio-sys = { version = "0.2.18", default-features = false, features = ["core_audio"] }
+libc.workspace = true

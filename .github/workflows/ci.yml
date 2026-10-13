@@ -1,0 +1,30 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Locate libclang for coreaudio-sys
+        if: runner.os == 'macOS'
+        run: |
+          set -euo pipefail
+          lib="$(xcrun --find clang)"
+          toolchain="$(dirname "$(dirname "$lib")")"
+          echo "LIBCLANG_PATH=${toolchain}/lib" >> "$GITHUB_ENV"
+          ls "${toolchain}/lib"/libclang.dylib
+      - name: Test
+        run: cargo test --workspace --locked
+      - name: Build
+        run: cargo build --workspace --locked
