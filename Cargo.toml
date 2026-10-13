@@ -1,0 +1,35 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/voon-core",
+    "crates/voon-audio",
+    "crates/voon-engine",
+    "crates/voon-library",
+    "crates/voon-api",
+    "crates/voon-daemon",
+    "crates/voon-audiotest",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/chiyiangel/voon"
+rust-version = "1.85"
+
+[workspace.dependencies]
+anyhow = "1"
+axum = "0.7"
+clap = { version = "4", features = ["derive"] }
+libc = "0.2"
+rtrb = "0.3"
+rusqlite = { version = "0.32", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+signal-hook = "0.3"
+symphonia = { version = "0.5.5", default-features = false, features = ["flac", "pcm", "wav", "aiff", "alac", "isomp4"] }
+thiserror = "1"
+tokio = { version = "1", features = ["macros", "net", "rt-multi-thread", "signal", "sync", "time"] }
+toml = "0.8"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tower = { version = "0.5", features = ["util"] }

@@ -1,0 +1,20 @@
+[package]
+name = "voon-audiotest"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "CoreAudio hog-mode playback probe for a USB DAC"
+
+[[bin]]
+name = "voon-audiotest"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+clap.workspace = true
+signal-hook.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+voon-audio = { path = "../voon-audio" }
+voon-engine = { path = "../voon-engine" }

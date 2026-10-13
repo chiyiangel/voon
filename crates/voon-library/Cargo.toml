@@ -1,0 +1,11 @@
+[package]
+name = "voon-library"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "SQLite music library schema and queries"
+
+[dependencies]
+rusqlite.workspace = true
+thiserror.workspace = true

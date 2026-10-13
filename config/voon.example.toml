@@ -1,0 +1,16 @@
+# Example Voon configuration. Paths must be reachable by the launchd agent.
+# Keep the SQLite file on local disk. The library itself may be an SMB/NFS mount.
+
+library_path = "/Volumes/Music"
+database_path = "/Users/YOURNAME/Library/Application Support/Voon/library.db"
+
+# CoreAudio device UID (preferred) or a unique device name.
+# Omit the key to use the system default output device.
+# output_device = "AppleUSBAudioEngine:Schiit Audio:Modi:..."
+
+# Health endpoint, and later the LAN control API.
+listen = "0.0.0.0:8876"
+
+# Incremental scan period in seconds. 0 disables the timer.
+# The scanner is not in this build; the value is stored for the next slice.
+scan_interval_secs = 3600

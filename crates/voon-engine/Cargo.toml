@@ -1,0 +1,13 @@
+[package]
+name = "voon-engine"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Symphonia decode and bit-perfect playback pipeline"
+
+[dependencies]
+symphonia.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+voon-audio = { path = "../voon-audio" }

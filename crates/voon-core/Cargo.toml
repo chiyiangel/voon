@@ -1,0 +1,12 @@
+[package]
+name = "voon-core"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+description = "Shared configuration for the Voon music server"
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+toml.workspace = true
