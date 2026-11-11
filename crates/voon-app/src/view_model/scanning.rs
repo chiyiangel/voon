@@ -406,11 +406,13 @@ impl AppState {
                     let cancelled = scan.cancelled || session.cancel.load(Ordering::Relaxed);
                     let scoped = session.request.scoped() && !session.request.full_root;
                     let incremental = session.request.operation == ScanOperation::Incremental;
+                    let confirm_structure = session.request.confirm_structure;
+                    let scopes = session.request.paths.clone();
                     let mut remaining = session.remaining.clone();
                     let reads = session.reads_before + reads;
                     self.scan_session = None;
                     if !cancelled
-                        && incremental
+                        && (incremental || (confirm_structure && scopes.contains(&root)))
                         && scan.albums.is_empty()
                         && scan.incomplete_paths().is_empty()
                         && scan.root_was_listed(&root)
@@ -432,7 +434,9 @@ impl AppState {
                             }
                         }
                     }
-                    let stored = if cancelled || scoped {
+                    let stored = if !cancelled && confirm_structure {
+                        self.index.store_scoped_scan(&root, &scan, &scopes)
+                    } else if cancelled || scoped {
                         self.index.store_partial_scan(&root, &scan)
                     } else {
                         self.index.store_scan(&root, &scan)

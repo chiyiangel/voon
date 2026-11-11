@@ -14,6 +14,8 @@ pub struct AttentionItem {
     /// Structure failures retain the last accepted Album, when one exists.
     pub stage: Option<String>,
     pub retains_previous: bool,
+    /// All affected Albums; the navigation target above is only one shortcut.
+    pub affected_albums: Vec<PathBuf>,
 }
 
 impl AttentionItem {
@@ -128,14 +130,46 @@ impl Index {
                 } else {
                     detail
                 };
-                let album_path = related_album(&path).map(|album| album.path.clone());
+                let mut album_path = related_album(&path).map(|album| album.path.clone());
                 let stage = match kind.as_str() {
                     "Unreadable" => Some("目录列表"),
                     "CueUnreadable" => Some("分轨表读取"),
                     "CueWithoutTracks" | "CueTargetMissing" => Some("分轨表结构"),
                     _ => None,
                 };
-                let retains_previous = stage.is_some() && album_path.is_some();
+                let affected_albums: Vec<PathBuf> = if stage.is_some() {
+                    albums
+                        .iter()
+                        .filter(|album| {
+                            let loose = album
+                                .path
+                                .components()
+                                .any(|part| part.as_os_str() == crate::LOOSE_DIR);
+                            album.source_directories.iter().any(|source| {
+                                source.starts_with(&path)
+                                    || if loose {
+                                        path.parent() == Some(source.as_path())
+                                            && path
+                                                .extension()
+                                                .and_then(|extension| extension.to_str())
+                                                .and_then(crate::AudioFormat::from_extension)
+                                                .is_some()
+                                    } else {
+                                        path.starts_with(source)
+                                    }
+                            })
+                        })
+                        .map(|album| album.path.clone())
+                        .collect()
+                } else {
+                    vec![]
+                };
+                if stage.is_some() {
+                    album_path = album_path
+                        .filter(|album| affected_albums.contains(album))
+                        .or_else(|| affected_albums.first().cloned());
+                }
+                let retains_previous = !affected_albums.is_empty();
                 let explanation = if let Some(stage) = stage {
                     format!(
                         "阶段：{stage}；{explanation}。{}",
@@ -162,6 +196,7 @@ impl Index {
                     previous_path,
                     stage: stage.map(str::to_owned),
                     retains_previous,
+                    affected_albums,
                 }
             })
             .collect())
@@ -172,7 +207,9 @@ impl Index {
         Ok(self
             .attention_items()?
             .into_iter()
-            .filter(|item| item.stage.is_some() && item.album_path.as_deref() == Some(album))
+            .filter(|item| {
+                item.stage.is_some() && item.affected_albums.iter().any(|path| path == album)
+            })
             .collect())
     }
 }

@@ -124,3 +124,46 @@ fn tag_failure_is_visible_after_reopen_and_links_to_the_preserved_album(cx: &mut
         assert_eq!(state.album_detail().unwrap().tracks().count(), 1);
     });
 }
+
+#[gpui::test]
+fn each_split_detail_has_stale_status_even_when_attention_navigation_targets_another_album(
+    cx: &mut TestAppContext,
+) {
+    let library = tempfile::tempdir().unwrap();
+    let root = library.path();
+    let collection = root.join("系列");
+    let album = collection.join("套装");
+    for path in [album.join("CD1"), album.join("CD2")] {
+        fs::create_dir_all(&path).unwrap();
+        fs::write(path.join("01.flac"), b"fixture").unwrap();
+    }
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(root, &scan_root(root, &mut NoTags))
+        .unwrap();
+    let outputs = index
+        .split_album(&album, voon_core::db::SplitMode::Discs)
+        .unwrap();
+    let mut failed = voon_core::ScanResult::default();
+    failed.issues.push(voon_core::scan::ScanIssue {
+        path: collection.clone(),
+        kind: voon_core::scan::IssueKind::Unreadable {
+            error: "临时断连".into(),
+        },
+    });
+    index.store_partial_scan(root, &failed).unwrap();
+    let state = cx.new(|_| AppState::new(index, root.into()).unwrap());
+    for output in outputs {
+        state.update(cx, |state, cx| state.select_album(Some(output.clone()), cx));
+        state.read_with(cx, |state, _| {
+            assert_eq!(state.album_scan_issues(&output).len(), 1);
+            assert!(state.album_scan_issues(&output)[0].retains_previous);
+            let fields = state.album_metadata_comparison().unwrap();
+            let title = fields.iter().find(|field| field.name == "title").unwrap();
+            assert!(title.candidates.iter().any(|candidate| matches!(
+                candidate.status,
+                voon_core::SourceStatus::Unconfirmed { .. }
+            )));
+        });
+    }
+}

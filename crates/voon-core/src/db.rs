@@ -243,6 +243,23 @@ fn p(path: &Path) -> String {
     path.to_string_lossy().into_owned()
 }
 
+fn album_overlaps_scope(album: &Album, scope: &Path) -> bool {
+    let loose = album
+        .path
+        .components()
+        .any(|part| part.as_os_str() == LOOSE_DIR);
+    album.physical_directories().iter().any(|source| {
+        source.starts_with(scope)
+            || if loose {
+                album
+                    .tracks()
+                    .any(|track| track.source.audio_path().starts_with(scope))
+            } else {
+                scope.starts_with(source)
+            }
+    })
+}
+
 impl Index {
     pub fn open(path: &Path) -> std::result::Result<Self, OpenError> {
         if path.try_exists()? {
@@ -370,26 +387,134 @@ impl Index {
     /// Albums. Without successful root coverage this commits additions and
     /// updates only, just like `store_partial_scan`.
     pub fn store_scan(&mut self, root: &Path, scan: &ScanResult) -> Result<()> {
-        self.store_scan_result(root, scan, true)
+        self.store_scan_result(root, scan, true, &[])
     }
 
     /// Save completed portions of a cancelled scan without discarding folders
     /// the scanner has not visited or inferring renames from incomplete input.
     pub fn store_partial_scan(&mut self, root: &Path, scan: &ScanResult) -> Result<()> {
-        self.store_scan_result(root, scan, false)
+        self.store_scan_result(root, scan, false, &[])
     }
 
-    fn store_scan_result(&mut self, root: &Path, scan: &ScanResult, complete: bool) -> Result<()> {
+    /// Confirm structural changes only around explicitly retried locations.
+    /// Other Albums and the complete-root rename baseline remain untouched.
+    /// Cancellation or missing directory coverage cannot confirm a removal.
+    pub fn store_scoped_scan(
+        &mut self,
+        root: &Path,
+        scan: &ScanResult,
+        scopes: &[PathBuf],
+    ) -> Result<()> {
+        self.store_scan_result(root, scan, false, scopes)
+    }
+
+    fn store_scan_result(
+        &mut self,
+        root: &Path,
+        scan: &ScanResult,
+        complete: bool,
+        scopes: &[PathBuf],
+    ) -> Result<()> {
         // Cancellation is part of the result's contract, even if a caller uses
         // the ordinary commit entry point instead of store_partial_scan.
         let complete = complete && !scan.cancelled && scan.root_was_listed(root);
         let root_id = self.add_root(root)?;
         let tx = self.conn.transaction()?;
         let incomplete = scan.incomplete_paths();
+        let bounded = !scopes.is_empty();
+        let requested: Vec<PathBuf> = scopes
+            .iter()
+            .filter_map(|scope| {
+                if scope == root {
+                    Some(root.to_path_buf())
+                } else {
+                    crate::scan::relative_ignored_path(root, scope).map(|path| root.join(path))
+                }
+            })
+            .collect();
+        let previous = if bounded {
+            structure::physical_albums(&tx, root_id)?
+        } else {
+            vec![]
+        };
         let mut accepted = scan.clone();
-        accepted
-            .albums
-            .retain(|album| scan.album_is_complete(album));
+        accepted.albums.retain(|album| {
+            scan.album_is_complete(album)
+                && (!bounded
+                    || requested
+                        .iter()
+                        .any(|scope| album_overlaps_scope(album, scope)))
+        });
+        if bounded {
+            let relevant: Vec<_> = previous
+                .iter()
+                .chain(&scan.albums)
+                .filter(|album| {
+                    requested
+                        .iter()
+                        .any(|scope| album_overlaps_scope(album, scope))
+                })
+                .collect();
+            accepted.issues.retain(|issue| {
+                let path = match &issue.kind {
+                    crate::scan::IssueKind::LooseUntagged { file } => file.as_path(),
+                    _ => issue.path.as_path(),
+                };
+                requested
+                    .iter()
+                    .any(|scope| path.starts_with(scope) || scope.starts_with(path))
+                    || relevant
+                        .iter()
+                        .any(|album| album_overlaps_scope(album, path))
+            });
+            accepted.collections.retain(|collection| {
+                requested.iter().any(|scope| {
+                    collection.path.starts_with(scope) || scope.starts_with(&collection.path)
+                })
+            });
+        }
+        let scopes: Vec<PathBuf> = requested
+            .into_iter()
+            .filter(|path| {
+                if scan.cancelled {
+                    return false;
+                }
+                scan.coverage
+                    .listed_directories
+                    .iter()
+                    .any(|listed| path.starts_with(listed))
+            })
+            .collect();
+        if !scopes.is_empty() {
+            for previous in previous {
+                let selected = scopes
+                    .iter()
+                    .any(|scope| album_overlaps_scope(&previous, scope));
+                let observed = previous.physical_directories().iter().all(|source| {
+                    scan.coverage
+                        .listed_directories
+                        .iter()
+                        .any(|listed| source.starts_with(listed))
+                });
+                if selected
+                    && observed
+                    && scan.album_is_complete(&previous)
+                    && !accepted
+                        .albums
+                        .iter()
+                        .any(|album| album.path == previous.path)
+                {
+                    tx.execute(
+                        "DELETE FROM album WHERE root_id=?1 AND path=?2",
+                        params![root_id, p(&previous.path)],
+                    )?;
+                    tx.execute(
+                        "DELETE FROM structure_raw WHERE root_id=?1 AND path=?2",
+                        params![root_id, p(&previous.path)],
+                    )?;
+                }
+            }
+        }
         if complete && !incomplete.is_empty() {
             accepted.albums.extend(
                 structure::physical_albums(&tx, root_id)?
@@ -434,12 +559,16 @@ impl Index {
                     .collect::<Result<_>>()?
             };
             for (id, path) in issues {
-                if scan.albums.iter().any(|album| {
-                    album
-                        .physical_directories()
-                        .iter()
-                        .any(|source| Path::new(&path).starts_with(source))
-                }) {
+                if scopes
+                    .iter()
+                    .any(|scope| Path::new(&path).starts_with(scope))
+                    || scan.albums.iter().any(|album| {
+                        album
+                            .physical_directories()
+                            .iter()
+                            .any(|source| Path::new(&path).starts_with(source))
+                    })
+                {
                     tx.execute("DELETE FROM scan_issue WHERE id=?1", [id])?;
                 }
             }
@@ -499,12 +628,39 @@ impl Index {
                 "UPDATE library_root SET last_scan = strftime('%s','now') WHERE id = ?1",
                 [root_id],
             )?;
-        } else if complete {
+        } else if complete || !scopes.is_empty() {
             // A confirmed removal/change can expire an existing proposal even
             // when another subtree is protected. Never infer a new pairing.
             prune_rename_candidates(&tx, root_id)?;
         }
         structure::record_scan_and_replay(&tx, root_id, root, scan, complete)?;
+        if !scopes.is_empty() {
+            let collections: Vec<String> = {
+                let mut statement = tx.prepare("SELECT path FROM collection WHERE root_id=?1")?;
+                statement
+                    .query_map([root_id], |row| row.get(0))?
+                    .collect::<Result<_>>()?
+            };
+            for path in collections {
+                let path = Path::new(&path);
+                if scopes
+                    .iter()
+                    .any(|scope| path.starts_with(scope) || scope.starts_with(path))
+                    && !scan
+                        .collections
+                        .iter()
+                        .any(|collection| collection.path == path)
+                    && !incomplete
+                        .iter()
+                        .any(|failed| path.starts_with(failed) || failed.starts_with(path))
+                {
+                    tx.execute(
+                        "DELETE FROM collection WHERE root_id=?1 AND path=?2",
+                        params![root_id, p(path)],
+                    )?;
+                }
+            }
+        }
         tx.commit()
     }
 

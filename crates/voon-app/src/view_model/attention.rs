@@ -15,7 +15,9 @@ impl AppState {
     pub fn album_scan_issues(&self, album: &Path) -> Vec<&AttentionItem> {
         self.attention
             .iter()
-            .filter(|item| item.stage.is_some() && item.album_path.as_deref() == Some(album))
+            .filter(|item| {
+                item.stage.is_some() && item.affected_albums.iter().any(|path| path == album)
+            })
             .collect()
     }
 
@@ -47,6 +49,10 @@ impl AppState {
                 operation: ScanOperation::Retry,
                 paths: vec![path.to_path_buf()],
                 full_root: false,
+                confirm_structure: self
+                    .attention
+                    .iter()
+                    .any(|item| item.path == path && item.kind == kind && item.stage.is_some()),
             }]),
             cx,
         )

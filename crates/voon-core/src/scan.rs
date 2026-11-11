@@ -165,10 +165,30 @@ impl ScanResult {
     }
 
     pub fn album_is_complete(&self, album: &Album) -> bool {
+        let loose = album
+            .path
+            .components()
+            .any(|part| part.as_os_str() == LOOSE_DIR);
         !album.physical_directories().iter().any(|source| {
-            self.incomplete_paths()
-                .iter()
-                .any(|failed| source.starts_with(failed) || failed.starts_with(source))
+            if loose && !self.root_was_listed(source) {
+                return true;
+            }
+            self.incomplete_paths().iter().any(|failed| {
+                source.starts_with(failed)
+                    || if loose {
+                        // Root files form independent tag groups. A child Album
+                        // is not part of their structure, even though it shares
+                        // the root as a directory ancestor.
+                        failed.parent() == Some(*source)
+                            && failed
+                                .extension()
+                                .and_then(|extension| extension.to_str())
+                                .and_then(AudioFormat::from_extension)
+                                .is_some()
+                    } else {
+                        failed.starts_with(source)
+                    }
+            })
         })
     }
 }

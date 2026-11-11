@@ -209,3 +209,55 @@ fn an_expired_rename_cannot_move_user_data_to_an_unrelated_album() {
     );
     assert_eq!(index.album(&second).unwrap().unwrap().display_title(), "乙");
 }
+
+#[test]
+fn ancestor_failures_mark_every_affected_split_album_and_its_candidates_unconfirmed() {
+    for root_failure in [false, true] {
+        let library = tempfile::tempdir().unwrap();
+        let root = library.path();
+        let collection = root.join("系列");
+        let album = collection.join("套装");
+        for path in [album.join("CD1"), album.join("CD2"), root.join("独立专辑")] {
+            fs::create_dir_all(&path).unwrap();
+            fs::write(path.join("01.flac"), b"fixture").unwrap();
+        }
+        let mut index = Index::open_in_memory().unwrap();
+        index
+            .store_scan(root, &scan_root(root, &mut NoTags))
+            .unwrap();
+        let outputs = index
+            .split_album(&album, voon_core::db::SplitMode::Discs)
+            .unwrap();
+        let path = if root_failure {
+            root.to_path_buf()
+        } else {
+            collection
+        };
+        let mut failed = voon_core::ScanResult::default();
+        failed.issues.push(voon_core::scan::ScanIssue {
+            path: path.clone(),
+            kind: voon_core::scan::IssueKind::Unreadable {
+                error: "断连".into(),
+            },
+        });
+        index.store_partial_scan(root, &failed).unwrap();
+        for output in outputs {
+            let issues = index.album_scan_issues(&output).unwrap();
+            assert_eq!(issues.len(), 1);
+            assert!(issues[0].retains_previous);
+            let fields = index.metadata_comparison(&output).unwrap();
+            let title = fields.iter().find(|field| field.name == "title").unwrap();
+            assert!(title.candidates.iter().any(|candidate| matches!(
+                candidate.status,
+                voon_core::SourceStatus::Unconfirmed { .. }
+            )));
+        }
+        assert_eq!(
+            index
+                .album_scan_issues(&root.join("独立专辑"))
+                .unwrap()
+                .len(),
+            usize::from(root_failure)
+        );
+    }
+}

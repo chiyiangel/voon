@@ -215,6 +215,69 @@ fn retrying_one_tag_failure_reads_only_that_source_and_clears_only_its_issue(
 }
 
 #[gpui::test]
+fn retrying_a_recovered_directory_confirms_its_removed_album_without_touching_other_failures(
+    cx: &mut TestAppContext,
+) {
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    let scope = root.join("失败的系列");
+    let removed = scope.join("已删除");
+    let other = root.join("其他系列/保留");
+    for path in [&removed, &other] {
+        fs::create_dir_all(path).unwrap();
+        write_wave(&path.join("01.wav"));
+    }
+    let database = local.path().join("index.sqlite3");
+    let mut index = Index::open(&database).unwrap();
+    let original = {
+        let mut tags = CachedTags::new(
+            &index,
+            SeedTags {
+                failed: vec![other.clone()],
+            },
+        );
+        scan_root(&root, &mut tags)
+    };
+    index.store_scan(&root, &original).unwrap();
+    index
+        .set_user_edit(&removed, "title", "保留的本地整理")
+        .unwrap();
+    let untouched = index.tag_observation(&other.join("01.wav")).unwrap();
+    let mut failed = voon_core::ScanResult::default();
+    failed.issues.push(voon_core::scan::ScanIssue {
+        path: scope.clone(),
+        kind: voon_core::scan::IssueKind::Unreadable {
+            error: "临时断连".into(),
+        },
+    });
+    index.store_partial_scan(&root, &failed).unwrap();
+    fs::remove_dir_all(&removed).unwrap();
+    let state = cx.new(|_| AppState::new(index, root.clone()).unwrap());
+    state.update(cx, |state, cx| {
+        state.retry_attention(&scope, "Unreadable", cx).unwrap()
+    });
+    assert_eq!(finish(&state, cx), 0);
+    state.read_with(cx, |state, _| {
+        assert!(!state.albums().iter().any(|album| album.path == removed));
+        assert_eq!(state.albums().len(), 1);
+        assert!(
+            !state
+                .attention_items()
+                .iter()
+                .any(|item| item.path == scope)
+        );
+    });
+    let reopened = Index::open(&database).unwrap();
+    assert!(reopened.album(&removed).unwrap().is_none());
+    assert_eq!(
+        reopened.tag_observation(&other.join("01.wav")).unwrap(),
+        untouched
+    );
+    assert!(reopened.rename_candidates().unwrap().is_empty());
+}
+
+#[gpui::test]
 fn forcing_a_merged_album_rereads_all_its_sources_across_library_roots(cx: &mut TestAppContext) {
     let first = tempfile::tempdir().unwrap();
     let second = tempfile::tempdir().unwrap();

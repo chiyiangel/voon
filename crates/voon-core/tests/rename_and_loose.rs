@@ -297,6 +297,130 @@ fn loose_root_audio_is_grouped_by_album_tags() {
     assert_eq!(index.albums().unwrap().len(), scan.albums.len());
 }
 
+#[cfg(unix)]
+#[test]
+fn an_unrelated_failed_child_does_not_block_loose_audio_updates_or_new_groups() {
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let root = library.path();
+    touch(root, "a1.flac", b"first");
+    let mut tags = FakeTags(HashMap::from([
+        (
+            "a1.flac".into(),
+            tagged(Some("原分组"), Some("艺术家"), 1, None),
+        ),
+        (
+            "a2.flac".into(),
+            tagged(Some("原分组"), Some("艺术家"), 2, None),
+        ),
+        (
+            "b1.flac".into(),
+            tagged(Some("新分组"), Some("艺术家"), 1, None),
+        ),
+    ]));
+    let database = local.path().join("index.sqlite3");
+    let mut index = Index::open(&database).unwrap();
+    index.store_scan(root, &scan_root(root, &mut tags)).unwrap();
+    touch(root, "a2.flac", b"second");
+    touch(root, "b1.flac", b"new group");
+    std::os::unix::fs::symlink(root.join("不存在"), root.join("无关专辑链接")).unwrap();
+    index.store_scan(root, &scan_root(root, &mut tags)).unwrap();
+    let reopened = Index::open(&database).unwrap();
+    let original = root.join(LOOSE_DIR).join("艺术家/原分组");
+    let added = root.join(LOOSE_DIR).join("艺术家/新分组");
+    assert_eq!(
+        reopened.album(&original).unwrap().unwrap().tracks().count(),
+        2
+    );
+    assert_eq!(reopened.album(&added).unwrap().unwrap().tracks().count(), 1);
+    assert!(
+        reopened
+            .attention_items()
+            .unwrap()
+            .iter()
+            .any(|item| item.path == root.join("无关专辑链接"))
+    );
+}
+
+#[test]
+fn confirming_a_child_retry_does_not_remove_unobserved_loose_audio() {
+    let library = tempfile::tempdir().unwrap();
+    let root = library.path();
+    touch(root, "loose.flac", b"root audio");
+    touch(root, "重试范围/专辑/01.flac", b"nested audio");
+    let mut tags = FakeTags(HashMap::from([(
+        "loose.flac".into(),
+        tagged(Some("散音频"), Some("艺术家"), 1, None),
+    )]));
+    let mut index = Index::open_in_memory().unwrap();
+    index.store_scan(root, &scan_root(root, &mut tags)).unwrap();
+    fs::remove_dir_all(root.join("重试范围/专辑")).unwrap();
+    let mut scoped = scan_root(root, &mut NoTags);
+    scoped.issues.clear();
+    index
+        .store_scoped_scan(root, &scoped, &[root.join("重试范围")])
+        .unwrap();
+    assert!(
+        index
+            .album(&root.join(LOOSE_DIR).join("艺术家/散音频"))
+            .unwrap()
+            .is_some()
+    );
+    assert!(index.album(&root.join("重试范围/专辑")).unwrap().is_none());
+}
+
+#[test]
+fn scoped_structural_commits_preserve_outside_state_and_the_complete_rename_baseline() {
+    let library = tempfile::tempdir().unwrap();
+    let root = library.path();
+    touch(root, "范围/旧路径/scoped.flac", b"longer scoped audio");
+    touch(root, "范围外/other.flac", b"other");
+    let mut tags = FakeTags(HashMap::from([(
+        "other.flac".into(),
+        tagged(Some("范围外已知标题"), None, 1, None),
+    )]));
+    let mut index = Index::open_in_memory().unwrap();
+    index.store_scan(root, &scan_root(root, &mut tags)).unwrap();
+    let old = root.join("范围/旧路径");
+    let new = root.join("范围/新路径");
+    fs::rename(&old, &new).unwrap();
+    let current = scan_root(root, &mut NoTags);
+    index
+        .store_scoped_scan(root, &current, &[root.join("范围")])
+        .unwrap();
+    assert_eq!(
+        index
+            .album(&root.join("范围外"))
+            .unwrap()
+            .unwrap()
+            .display_title(),
+        "范围外已知标题"
+    );
+    assert!(index.album(&old).unwrap().is_none());
+    assert!(index.album(&new).unwrap().is_some());
+    assert!(index.rename_candidates().unwrap().is_empty());
+    let mut cancelled = voon_core::ScanResult {
+        cancelled: true,
+        ..Default::default()
+    };
+    cancelled
+        .coverage
+        .listed_directories
+        .push(root.to_path_buf());
+    index
+        .store_scoped_scan(root, &cancelled, &[root.join("范围")])
+        .unwrap();
+    assert!(index.album(&new).unwrap().is_some());
+    index.store_scan(root, &current).unwrap();
+    assert_eq!(
+        index.rename_candidates().unwrap(),
+        [RenameCandidate {
+            old_path: old,
+            new_path: new
+        }]
+    );
+}
+
 #[test]
 fn nested_album_is_kept_and_flagged() {
     let dir = tempfile::tempdir().unwrap();

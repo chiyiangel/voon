@@ -39,6 +39,8 @@ pub struct ScanRequest {
     /// Loose audio is grouped by tags, so a full structural observation must
     /// replace its old synthetic groups after a successful explicit reread.
     pub full_root: bool,
+    /// Only a structure retry can confirm missing content in its finite scope.
+    pub confirm_structure: bool,
 }
 
 impl ScanRequest {
@@ -48,6 +50,7 @@ impl ScanRequest {
             operation: ScanOperation::Incremental,
             paths: vec![],
             full_root: true,
+            confirm_structure: false,
         }
     }
 
@@ -76,6 +79,10 @@ impl ScanRequest {
                 .tracks()
                 .any(|track| self.reads(track.source.audio_path()))
             || (self.operation == ScanOperation::Retry
+                && !album
+                    .path
+                    .components()
+                    .any(|part| part.as_os_str() == voon_core::LOOSE_DIR)
                 && album
                     .physical_directories()
                     .iter()
@@ -194,6 +201,7 @@ impl AppState {
                     operation: ScanOperation::ForceTags,
                     paths,
                     full_root,
+                    confirm_structure: false,
                 }
             })
             .collect();
