@@ -298,3 +298,86 @@ fn an_interrupted_worker_preserves_completed_discoveries_on_reopen(cx: &mut Test
         assert!(state.error().is_some());
     });
 }
+
+#[gpui::test]
+fn complete_loose_previews_survive_cancellation_switch_and_worker_disconnect(
+    cx: &mut TestAppContext,
+) {
+    struct Tags;
+    impl voon_core::scan::TagReader for Tags {
+        fn read(
+            &mut self,
+            _: &std::path::Path,
+            _: voon_core::AudioFormat,
+            _: voon_core::scan::FileStamp,
+        ) -> Option<voon_core::tags::TagInfo> {
+            Some(voon_core::tags::TagInfo {
+                album: Some("新散音频".into()),
+                ..Default::default()
+            })
+        }
+    }
+    struct Queued(Mutex<std::collections::VecDeque<Receiver<ScanUpdate>>>);
+    impl Scanner for Queued {
+        fn start(&self, _: PathBuf, _: Arc<AtomicBool>) -> Receiver<ScanUpdate> {
+            self.0.lock().unwrap().pop_front().unwrap()
+        }
+    }
+    for switch in [false, true] {
+        let library = tempfile::tempdir().unwrap();
+        let local = tempfile::tempdir().unwrap();
+        let first = library.path().join("第一根");
+        let second = library.path().join("第二根");
+        std::fs::create_dir(&first).unwrap();
+        std::fs::create_dir(&second).unwrap();
+        std::fs::write(first.join("a.wav"), b"fixture").unwrap();
+        let result = scan_root(&first, &mut Tags);
+        let discovered = result.albums[0].clone();
+        let database = local.path().join("index.sqlite3");
+        let index = Index::open(&database).unwrap();
+        index.add_root(&first).unwrap();
+        index.add_root(&second).unwrap();
+        let (sender, receiver) = mpsc::channel();
+        let (_next_sender, next_receiver) = mpsc::channel();
+        let state = cx.new(|_| {
+            AppState::new(index, first.clone())
+                .unwrap()
+                .with_scanner(Box::new(Queued(Mutex::new(
+                    [receiver, next_receiver].into(),
+                ))))
+        });
+        state.update(cx, |state, cx| state.start_scan(first.clone(), cx).unwrap());
+        sender
+            .send(ScanUpdate::Album(Box::new(discovered.clone())))
+            .unwrap();
+        state.update(cx, |state, cx| state.poll_scan(cx));
+        if switch {
+            state.update(cx, |state, cx| {
+                state.cancel_scan(cx);
+                state.start_scan(second.clone(), cx).unwrap();
+            });
+        } else {
+            drop(sender);
+            state.update(cx, |state, cx| state.poll_scan(cx));
+        }
+        let reopened = Index::open(&database).unwrap();
+        assert_eq!(
+            reopened
+                .album(&discovered.path)
+                .unwrap()
+                .unwrap()
+                .tracks()
+                .count(),
+            1
+        );
+        assert!(reopened.rename_candidates().unwrap().is_empty());
+        state.read_with(cx, |state, _| {
+            assert!(
+                state
+                    .albums()
+                    .iter()
+                    .any(|album| album.path == discovered.path)
+            )
+        });
+    }
+}

@@ -421,6 +421,36 @@ fn scoped_structural_commits_preserve_outside_state_and_the_complete_rename_base
     );
 }
 
+#[cfg(unix)]
+#[test]
+fn an_unknown_root_audio_entry_never_reports_a_partial_loose_album_as_complete() {
+    let library = tempfile::tempdir().unwrap();
+    let root = library.path();
+    touch(root, "b.wav", b"remaining audio");
+    std::os::unix::fs::symlink(root.join("missing"), root.join("a.wav")).unwrap();
+    let mut tags = FakeTags(HashMap::from([(
+        "b.wav".into(),
+        tagged(Some("共同分组"), None, 2, None),
+    )]));
+    let mut reported = vec![];
+    let scan = voon_core::scan_root_with(
+        root,
+        &mut tags,
+        &std::sync::atomic::AtomicBool::new(false),
+        &mut |event| {
+            if let voon_core::scan::ScanEvent::Album(album) = event {
+                reported.push(album.path.clone());
+            }
+        },
+    );
+    assert!(reported.is_empty());
+    assert!(scan.albums.is_empty());
+    assert!(
+        scan.incomplete_paths()
+            .contains(&root.join("a.wav").as_path())
+    );
+}
+
 #[test]
 fn nested_album_is_kept_and_flagged() {
     let dir = tempfile::tempdir().unwrap();

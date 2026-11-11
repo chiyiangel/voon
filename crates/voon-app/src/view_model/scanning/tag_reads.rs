@@ -93,7 +93,20 @@ impl ScanRequest {
         if !self.scoped() || self.full_root {
             return;
         }
-        scan.albums.retain(|album| self.album_matches(album));
+        let root_audio_retry = self.confirm_structure
+            && self.paths.iter().any(|path| {
+                path.parent() == Some(self.root.as_path())
+                    && path
+                        .extension()
+                        .and_then(|extension| extension.to_str())
+                        .and_then(AudioFormat::from_extension)
+                        .is_some()
+            });
+        scan.albums.retain(|album| {
+            self.album_matches(album)
+                || (root_audio_retry
+                    && album.path.starts_with(self.root.join(voon_core::LOOSE_DIR)))
+        });
         let directories: Vec<_> = scan
             .albums
             .iter()

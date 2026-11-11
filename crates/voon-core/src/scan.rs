@@ -987,8 +987,10 @@ impl Scanner<'_> {
                 &[],
                 &self.out.tag_observations,
             );
-            (self.progress)(ScanEvent::Album(&album));
-            self.out.albums.push(album);
+            if self.out.album_is_complete(&album) {
+                (self.progress)(ScanEvent::Album(&album));
+                self.out.albums.push(album);
+            }
         }
     }
 }

@@ -437,13 +437,23 @@ impl Index {
         } else {
             vec![]
         };
+        let previously_affected: Vec<PathBuf> = previous
+            .iter()
+            .filter(|album| {
+                requested
+                    .iter()
+                    .any(|scope| album_overlaps_scope(album, scope))
+            })
+            .map(|album| album.path.clone())
+            .collect();
         let mut accepted = scan.clone();
         accepted.albums.retain(|album| {
             scan.album_is_complete(album)
                 && (!bounded
                     || requested
                         .iter()
-                        .any(|scope| album_overlaps_scope(album, scope)))
+                        .any(|scope| album_overlaps_scope(album, scope))
+                    || previously_affected.contains(&album.path))
         });
         if bounded {
             let relevant: Vec<_> = previous
@@ -453,6 +463,7 @@ impl Index {
                     requested
                         .iter()
                         .any(|scope| album_overlaps_scope(album, scope))
+                        || previously_affected.contains(&album.path)
                 })
                 .collect();
             accepted.issues.retain(|issue| {
@@ -563,6 +574,15 @@ impl Index {
                     .iter()
                     .any(|scope| Path::new(&path).starts_with(scope))
                     || scan.albums.iter().any(|album| {
+                        if album
+                            .path
+                            .components()
+                            .any(|part| part.as_os_str() == LOOSE_DIR)
+                        {
+                            return album
+                                .tracks()
+                                .any(|track| track.source.audio_path() == Path::new(&path));
+                        }
                         album
                             .physical_directories()
                             .iter()

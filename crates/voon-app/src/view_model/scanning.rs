@@ -198,6 +198,29 @@ impl ScanSession {
         self.previews.get(path)
     }
 
+    fn completed_scan(&self) -> ScanResult {
+        let mut scan = ScanResult {
+            albums: self.previews.values().cloned().collect(),
+            cancelled: true,
+            ..Default::default()
+        };
+        // Album events carry complete discoveries. Retain their own physical
+        // directory evidence, including the root for a completed Loose group.
+        scan.coverage.listed_directories = scan
+            .albums
+            .iter()
+            .flat_map(|album| {
+                album
+                    .physical_directories()
+                    .into_iter()
+                    .map(Path::to_path_buf)
+            })
+            .collect();
+        scan.coverage.listed_directories.sort();
+        scan.coverage.listed_directories.dedup();
+        scan
+    }
+
     fn discard_late_results(&self, scan: &mut ScanResult) {
         if self.cancel.load(Ordering::Relaxed) {
             scan.cancelled = true;
@@ -290,11 +313,7 @@ impl AppState {
             return Err("音乐库根目录不存在".into());
         }
         if let Some(previous) = &self.scan_session {
-            let completed = ScanResult {
-                albums: previous.previews.values().cloned().collect(),
-                cancelled: true,
-                ..Default::default()
-            };
+            let completed = previous.completed_scan();
             self.index.store_partial_scan(&previous.root, &completed)?;
             // Dropping this receiver isolates the next task from every late
             // event of the cancelled worker, even if it cannot stop an I/O yet.
@@ -343,11 +362,7 @@ impl AppState {
         let Some(session) = self.scan_session.take() else {
             return Ok(());
         };
-        let completed = ScanResult {
-            albums: session.previews.values().cloned().collect(),
-            cancelled: true,
-            ..Default::default()
-        };
+        let completed = session.completed_scan();
         let stored = self.index.store_partial_scan(&session.root, &completed);
         let reloaded = self.reload_library(cx);
         stored?;

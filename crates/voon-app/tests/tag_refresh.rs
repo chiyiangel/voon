@@ -277,6 +277,106 @@ fn retrying_a_recovered_directory_confirms_its_removed_album_without_touching_ot
     assert!(reopened.rename_candidates().unwrap().is_empty());
 }
 
+#[cfg(unix)]
+#[gpui::test]
+fn retrying_a_deleted_loose_member_keeps_the_remaining_group_and_unrelated_failure(
+    cx: &mut TestAppContext,
+) {
+    struct GroupedTags {
+        fail_other: bool,
+    }
+    impl TagReader for GroupedTags {
+        fn read(&mut self, path: &Path, _: AudioFormat, _: FileStamp) -> Option<TagInfo> {
+            Some(TagInfo {
+                album: Some(
+                    if path.file_name().unwrap() == "other.wav" {
+                        "其他分组"
+                    } else {
+                        "共同分组"
+                    }
+                    .into(),
+                ),
+                ..Default::default()
+            })
+        }
+        fn read_observation(
+            &mut self,
+            path: &Path,
+            format: AudioFormat,
+            stamp: FileStamp,
+        ) -> TagObservation {
+            TagObservation::new(
+                if self.fail_other && path.file_name().unwrap() == "other.wav" {
+                    TagReadResult::IoFailure("范围外暂时失败".into())
+                } else {
+                    TagReadResult::Tagged(self.read(path, format, stamp).unwrap())
+                },
+            )
+        }
+    }
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    let removed = root.join("a.wav");
+    let remaining = root.join("b.wav");
+    let other = root.join("other.wav");
+    for path in [&removed, &remaining, &other] {
+        write_wave(path);
+    }
+    let database = local.path().join("index.sqlite3");
+    let mut index = Index::open(&database).unwrap();
+    let initial = {
+        let mut tags = CachedTags::new(&index, GroupedTags { fail_other: false });
+        scan_root(&root, &mut tags)
+    };
+    index.store_scan(&root, &initial).unwrap();
+    fs::remove_file(&removed).unwrap();
+    std::os::unix::fs::symlink(root.join("不存在的文件"), &removed).unwrap();
+    let failed = {
+        let mut tags = CachedTags::new(&index, GroupedTags { fail_other: true })
+            .with_forced_paths(vec![other.clone()]);
+        scan_root(&root, &mut tags)
+    };
+    index.store_scan(&root, &failed).unwrap();
+    let group = root.join(voon_core::LOOSE_DIR).join("_/共同分组");
+    let other_group = root.join(voon_core::LOOSE_DIR).join("_/其他分组");
+    assert_eq!(index.album(&group).unwrap().unwrap().tracks().count(), 2);
+    let other_metadata = index.metadata_comparison(&other_group).unwrap();
+    let other_observation = index.tag_observation(&other).unwrap();
+    let other_issue = index
+        .attention_items()
+        .unwrap()
+        .into_iter()
+        .find(|item| item.path == other)
+        .unwrap();
+    fs::remove_file(&removed).unwrap();
+    let state = cx.new(|_| AppState::new(index, root.clone()).unwrap());
+    state.update(cx, |state, cx| {
+        state.retry_attention(&removed, "Unreadable", cx).unwrap()
+    });
+    assert_eq!(finish(&state, cx), 0);
+    let reopened = Index::open(&database).unwrap();
+    let saved = reopened.album(&group).unwrap().unwrap();
+    assert_eq!(saved.tracks().count(), 1);
+    assert_eq!(
+        saved.tracks().next().unwrap().source.audio_path(),
+        &remaining
+    );
+    assert_eq!(
+        reopened.metadata_comparison(&other_group).unwrap(),
+        other_metadata
+    );
+    assert_eq!(reopened.tag_observation(&other).unwrap(), other_observation);
+    assert!(reopened.attention_items().unwrap().contains(&other_issue));
+    assert!(
+        !reopened
+            .attention_items()
+            .unwrap()
+            .iter()
+            .any(|item| item.path == removed)
+    );
+}
+
 #[gpui::test]
 fn forcing_a_merged_album_rereads_all_its_sources_across_library_roots(cx: &mut TestAppContext) {
     let first = tempfile::tempdir().unwrap();
