@@ -177,7 +177,7 @@ impl Render for AlbumDetail {
         );
         match observations {
             Ok(observations) => {
-                for (path, observation) in observations {
+                for (position, (path, observation)) in observations.into_iter().enumerate() {
                     let label = match observation.result.status() {
                         "Tagged" => "已读取标签",
                         "NoTags" => "已确认无标签",
@@ -197,11 +197,65 @@ impl Render for AlbumDetail {
                                 }
                             ),
                         ));
+                    if let Some(reason) = observation.result.reason() {
+                        tag_status = tag_status.child(div().text_xs().child(reason.to_owned()));
+                    }
+                    if observation.result.retryable() && !offline {
+                        let retry_state = self.state.clone();
+                        let kind = if observation.result.status() == "IoFailure" {
+                            "TagIoFailure"
+                        } else {
+                            "TagParseFailure"
+                        };
+                        tag_status = tag_status.child(
+                            div()
+                                .id(("retry-tag-read", position))
+                                .cursor_pointer()
+                                .text_color(rgb(theme.accent))
+                                .child("重试此文件的标签读取")
+                                .on_click(move |_, _, cx| {
+                                    retry_state.update(cx, |state, cx| {
+                                        if let Err(error) = state.retry_attention(&path, kind, cx) {
+                                            state.report_error(error, cx);
+                                        }
+                                    });
+                                }),
+                        );
+                    }
                 }
             }
             Err(_) => tag_status = tag_status.child("无法读取本地标签状态，请重新打开专辑"),
         }
         body = body.child(tag_status);
+        if let Some(notice) = self.state.read(cx).album_tag_refresh_notice() {
+            body = body.child(
+                div()
+                    .px_4()
+                    .py_2()
+                    .text_xs()
+                    .text_color(rgb(theme.secondary))
+                    .child(notice),
+            );
+        }
+        if !offline {
+            let state = self.state.clone();
+            body = body.child(
+                div()
+                    .id("force-album-tags")
+                    .cursor_pointer()
+                    .px_4()
+                    .py_2()
+                    .text_color(rgb(theme.accent))
+                    .child("强制重读此专辑标签")
+                    .on_click(move |_, _, cx| {
+                        state.update(cx, |state, cx| {
+                            if let Err(error) = state.force_selected_album_tags(cx) {
+                                state.report_error(error, cx);
+                            }
+                        })
+                    }),
+            );
+        }
         body = body.child(
             div()
                 .id("toggle-metadata-sources")

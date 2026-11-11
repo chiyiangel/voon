@@ -165,6 +165,7 @@ INSERT INTO scan_baseline (root_id, path, signature) SELECT root_id, path, signa
     covers::SOURCE_DIRECTORIES_MIGRATION,
     tag_cache::MIGRATION,
     candidates::MIGRATION,
+    tag_cache::READ_ORDER_MIGRATION,
 ];
 
 /// A proposed pairing of a vanished album path with a new one.
@@ -808,13 +809,14 @@ fn prune_rename_candidates(tx: &rusqlite::Transaction<'_>, root_id: i64) -> Resu
     Ok(())
 }
 
-/// A tag reader that consults the index first and reads the file only when
-/// its size or modification time changed since the last scan.
+/// Reuses successful unchanged observations, retries failed reads, and can
+/// explicitly bypass the cache for selected audio sources.
 pub struct CachedTags<'a, R: TagReader> {
     pub index: &'a Index,
     pub inner: R,
     /// Files actually read from disk during this scan.
     pub reads: usize,
+    forced_paths: std::collections::BTreeSet<PathBuf>,
 }
 
 impl<'a, R: TagReader> CachedTags<'a, R> {
@@ -823,7 +825,15 @@ impl<'a, R: TagReader> CachedTags<'a, R> {
             index,
             inner,
             reads: 0,
+            forced_paths: Default::default(),
         }
+    }
+
+    /// Force only the selected audio sources; every other cache keeps its
+    /// normal incremental behavior, including its original observation time.
+    pub fn with_forced_paths(mut self, paths: impl IntoIterator<Item = PathBuf>) -> Self {
+        self.forced_paths = paths.into_iter().collect();
+        self
     }
 }
 
@@ -846,10 +856,12 @@ impl<R: TagReader> TagReader for CachedTags<'_, R> {
         let previous = self.index.tag_observation(path).ok().flatten();
         if let Ok(Some(cached)) = self.index.cached_observation(path, stamp)
             && !cached.result.retryable()
+            && !self.forced_paths.contains(path)
         {
             return cached;
         }
         self.reads += 1;
+        let read_started_at = tag_cache::next_read_order();
         let mut observation = self.inner.read_observation(path, format, stamp);
         if observation.result.reason().is_some() {
             observation.last_success = previous.and_then(|old| {
@@ -860,7 +872,14 @@ impl<R: TagReader> TagReader for CachedTags<'_, R> {
             });
         }
         // A cache write failure cannot turn a successful source read into missing metadata.
-        let _ = self.index.cache_observation(path, stamp, &observation);
+        if matches!(
+            self.index
+                .cache_observation(path, stamp, &observation, read_started_at),
+            Ok(false)
+        ) && let Ok(Some(newer)) = self.index.tag_observation(path)
+        {
+            return newer;
+        }
         observation
     }
 }

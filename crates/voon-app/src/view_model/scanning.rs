@@ -2,7 +2,7 @@
 use super::{AppState, Result, ScanState};
 use gpui::Context;
 use std::{
-    collections::HashMap,
+    collections::{HashMap, VecDeque},
     path::{Path, PathBuf},
     sync::{
         Arc,
@@ -10,6 +10,8 @@ use std::{
         mpsc::{self, Receiver, TryRecvError},
     },
 };
+mod tag_reads;
+pub use tag_reads::{ScanOperation, ScanRequest};
 use voon_core::{
     Album, AudioFormat, ScanResult,
     db::{AlbumRow, CachedTags, Index},
@@ -28,6 +30,10 @@ pub enum ScanUpdate {
 /// Tests can deliver scanner events without scheduling native filesystem work.
 pub trait Scanner {
     fn start(&self, root: PathBuf, cancel: Arc<AtomicBool>) -> Receiver<ScanUpdate>;
+
+    fn start_request(&self, request: ScanRequest, cancel: Arc<AtomicBool>) -> Receiver<ScanUpdate> {
+        self.start(request.root, cancel)
+    }
 }
 
 pub struct DiskScanner {
@@ -40,9 +46,14 @@ impl DiskScanner {
 }
 impl Scanner for DiskScanner {
     fn start(&self, root: PathBuf, cancel: Arc<AtomicBool>) -> Receiver<ScanUpdate> {
+        self.start_request(ScanRequest::incremental(root), cancel)
+    }
+
+    fn start_request(&self, request: ScanRequest, cancel: Arc<AtomicBool>) -> Receiver<ScanUpdate> {
         let (sender, receiver) = mpsc::channel();
         let database_path = self.database_path.clone();
         std::thread::spawn(move || {
+            let root = request.root.clone();
             use std::os::unix::fs::MetadataExt;
             let device_before = root.metadata().ok().map(|metadata| metadata.dev());
             let index = match database_path.map(|path| Index::open(&path)).transpose() {
@@ -68,14 +79,25 @@ impl Scanner for DiskScanner {
             let mut progress = |event: ScanEvent<'_>| {
                 let update = match event {
                     ScanEvent::Directory(path) => ScanUpdate::Directory(path.into()),
-                    ScanEvent::Album(album) => ScanUpdate::Album(Box::new(album.clone())),
+                    ScanEvent::Album(album) if request.album_matches(album) => {
+                        ScanUpdate::Album(Box::new(album.clone()))
+                    }
+                    ScanEvent::Album(_) => return,
                 };
                 if sender.send(update).is_err() {
                     cancel.store(true, Ordering::Relaxed);
                 }
             };
-            let (scan, reads) = if let Some(index) = index {
-                let mut tags = CachedTags::new(&index, DiskTags);
+            let (mut scan, reads) = if let Some(index) = index {
+                let forced = if request.operation == ScanOperation::ForceTags {
+                    request.paths.clone()
+                } else {
+                    vec![]
+                };
+                let mut tags = tag_reads::ScopedTags {
+                    inner: CachedTags::new(&index, DiskTags).with_forced_paths(forced),
+                    request: &request,
+                };
                 let scan = voon_core::scan::scan_root_with_options(
                     &root,
                     &mut tags,
@@ -83,11 +105,12 @@ impl Scanner for DiskScanner {
                     &mut progress,
                     &options,
                 );
-                (scan, tags.reads)
+                (scan, tags.inner.reads)
             } else {
                 let mut tags = CountingTags {
                     inner: DiskTags,
                     reads: 0,
+                    request: request.clone(),
                 };
                 let scan = voon_core::scan::scan_root_with_options(
                     &root,
@@ -98,6 +121,7 @@ impl Scanner for DiskScanner {
                 );
                 (scan, tags.reads)
             };
+            request.retain_result(&mut scan);
             let device_after = root.metadata().ok().map(|metadata| metadata.dev());
             let unavailable = !root.is_dir()
                 || device_before != device_after
@@ -119,8 +143,19 @@ impl Scanner for DiskScanner {
 struct CountingTags<R> {
     inner: R,
     reads: usize,
+    request: ScanRequest,
 }
 impl<R: TagReader> TagReader for CountingTags<R> {
+    fn observe(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        stamp: FileStamp,
+    ) -> Option<voon_core::tags::TagObservation> {
+        self.request
+            .reads(path)
+            .then(|| self.read_observation(path, format, stamp))
+    }
     fn read(
         &mut self,
         path: &Path,
@@ -148,6 +183,9 @@ pub(super) struct ScanSession {
     cancel: Arc<AtomicBool>,
     previews: HashMap<PathBuf, Album>,
     suppress_previews: bool,
+    request: ScanRequest,
+    remaining: VecDeque<ScanRequest>,
+    reads_before: usize,
 }
 
 pub(super) struct PendingEmptyScan {
@@ -221,6 +259,26 @@ impl AppState {
     }
 
     pub fn start_scan(&mut self, root: PathBuf, cx: &mut Context<Self>) -> Result<()> {
+        self.start_requests(VecDeque::from([ScanRequest::incremental(root)]), cx)
+    }
+
+    pub(super) fn start_requests(
+        &mut self,
+        mut requests: VecDeque<ScanRequest>,
+        cx: &mut Context<Self>,
+    ) -> Result<()> {
+        let first = requests.pop_front().ok_or("这张专辑没有可重读的音频文件")?;
+        self.begin_request(first, requests, 0, cx)
+    }
+
+    fn begin_request(
+        &mut self,
+        request: ScanRequest,
+        remaining: VecDeque<ScanRequest>,
+        reads_before: usize,
+        cx: &mut Context<Self>,
+    ) -> Result<()> {
+        let root = request.root.clone();
         if self
             .scan_session
             .as_ref()
@@ -252,7 +310,8 @@ impl AppState {
         self.forget_root_availability(&root);
         let suppress_previews = self.index.has_structure_operations(&root)?;
         let cancel = Arc::new(AtomicBool::new(false));
-        let receiver = self.scanner.start(root.clone(), cancel.clone());
+        let receiver = self.scanner.start_request(request.clone(), cancel.clone());
+        self.scan_operation = request.operation;
         self.scan_state = ScanState::Scanning {
             root: root.clone(),
             current_directory: root.clone(),
@@ -264,6 +323,9 @@ impl AppState {
             cancel,
             previews: HashMap::new(),
             suppress_previews,
+            request,
+            remaining,
+            reads_before,
         });
         self.error = None;
         cx.notify();
@@ -316,6 +378,9 @@ impl AppState {
                     }
                 }
                 Ok(ScanUpdate::Album(album)) => {
+                    if !session.request.album_matches(&album) {
+                        continue;
+                    }
                     if session.cancel.load(Ordering::Relaxed) {
                         continue;
                     }
@@ -336,10 +401,16 @@ impl AppState {
                     }
                 }
                 Ok(ScanUpdate::Finished(mut scan, reads)) => {
+                    session.request.retain_result(&mut scan);
                     session.discard_late_results(&mut scan);
                     let cancelled = scan.cancelled || session.cancel.load(Ordering::Relaxed);
+                    let scoped = session.request.scoped() && !session.request.full_root;
+                    let incremental = session.request.operation == ScanOperation::Incremental;
+                    let mut remaining = session.remaining.clone();
+                    let reads = session.reads_before + reads;
                     self.scan_session = None;
                     if !cancelled
+                        && incremental
                         && scan.albums.is_empty()
                         && scan.incomplete_paths().is_empty()
                         && scan.root_was_listed(&root)
@@ -361,7 +432,7 @@ impl AppState {
                             }
                         }
                     }
-                    let stored = if cancelled {
+                    let stored = if cancelled || scoped {
                         self.index.store_partial_scan(&root, &scan)
                     } else {
                         self.index.store_scan(&root, &scan)
@@ -383,6 +454,13 @@ impl AppState {
                             if let Err(error) = self.reload_library(cx) {
                                 self.error = Some(error.to_string());
                             }
+                            if !cancelled
+                                && self.error.is_none()
+                                && let Some(next) = remaining.pop_front()
+                                && let Err(error) = self.begin_request(next, remaining, reads, cx)
+                            {
+                                self.error = Some(format!("无法继续重读其他音乐库来源：{error}"));
+                            }
                         }
                         Err(error) => {
                             self.error = Some(format!("无法保存扫描结果：{error}"));
@@ -398,6 +476,7 @@ impl AppState {
                     });
                 }
                 Ok(ScanUpdate::Unavailable(mut scan)) => {
+                    session.request.retain_result(&mut scan);
                     session.discard_late_results(&mut scan);
                     self.scan_session = None;
                     if let Err(error) = self.index.store_partial_scan(&root, &scan) {

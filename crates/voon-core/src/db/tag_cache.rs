@@ -17,6 +17,20 @@ CREATE TABLE tag_observation (
 );
 "#;
 
+pub(super) const READ_ORDER_MIGRATION: &str =
+    "ALTER TABLE tag_observation ADD COLUMN read_started_at INTEGER NOT NULL DEFAULT 0;";
+
+pub(super) fn next_read_order() -> i64 {
+    use std::sync::atomic::{AtomicI64, Ordering};
+    static LAST_START: AtomicI64 = AtomicI64::new(0);
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|duration| i64::try_from(duration.as_nanos()).unwrap_or(i64::MAX - 1))
+        .unwrap_or(0);
+    LAST_START.fetch_max(now, Ordering::SeqCst);
+    LAST_START.fetch_add(1, Ordering::SeqCst).saturating_add(1)
+}
+
 impl Index {
     pub fn album_tag_observations(
         &self,
@@ -116,21 +130,24 @@ impl Index {
         path: &Path,
         stamp: FileStamp,
         observation: &TagObservation,
-    ) -> Result<()> {
+        read_started_at: i64,
+    ) -> Result<bool> {
         let json = observation
             .info()
             .map(serde_json::to_string)
             .transpose()
             .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
-        self.conn.execute(
-            "INSERT INTO tag_observation(path,size,mtime,status,reason,observed_at,success_json,success_at)
-             VALUES(?1,?2,?3,?4,?5,?6,?7,?8)
+        let changed = self.conn.execute(
+            "INSERT INTO tag_observation(path,size,mtime,status,reason,observed_at,success_json,success_at,read_started_at)
+             VALUES(?1,?2,?3,?4,?5,?6,?7,?8,?9)
              ON CONFLICT(path) DO UPDATE SET size=excluded.size,mtime=excluded.mtime,
              status=excluded.status,reason=excluded.reason,observed_at=excluded.observed_at,
-             success_json=excluded.success_json,success_at=excluded.success_at",
+             success_json=excluded.success_json,success_at=excluded.success_at,
+             read_started_at=excluded.read_started_at
+             WHERE excluded.read_started_at >= tag_observation.read_started_at",
             params![p(path), stamp.size as i64, stamp.mtime, observation.result.status(),
-                observation.result.reason(), observation.observed_at, json, observation.data_observed_at()],
+                observation.result.reason(), observation.observed_at, json, observation.data_observed_at(), read_started_at],
         )?;
-        Ok(())
+        Ok(changed != 0)
     }
 }

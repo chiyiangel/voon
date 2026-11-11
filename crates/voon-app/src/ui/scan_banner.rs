@@ -3,6 +3,7 @@ use gpui::{App, Entity, IntoElement, ParentElement, Styled, div, prelude::*, rgb
 
 pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
     let snapshot = state.read(cx);
+    let operation = snapshot.scan_operation();
     let mut banner = div().flex().flex_col().text_sm();
     if let Some(notice) = snapshot.index_notice() {
         banner = banner.child(div().px_4().py_2().child(notice.to_owned()));
@@ -14,7 +15,8 @@ pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
             discovered,
             ..
         } => Some(format!(
-            "正在扫描 · 已发现 {discovered} 张专辑\n{}",
+            "正在{} · 已发现 {discovered} 张专辑\n{}",
+            operation.label(),
             current_directory.display()
         )),
         ScanState::Done {
@@ -22,7 +24,12 @@ pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
             discovered,
             reads,
         } => Some(
-            if snapshot
+            if operation != crate::view_model::scanning::ScanOperation::Incremental {
+                format!(
+                    "本轮{}结束 · 实际读取 {reads} 个音频文件；读取状态见专辑详情和待处理",
+                    operation.label()
+                )
+            } else if snapshot
                 .attention_items()
                 .iter()
                 .any(|item| item.stage.is_some() && item.path.starts_with(root))
@@ -35,7 +42,8 @@ pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
             },
         ),
         ScanState::Cancelled { discovered, .. } => Some(format!(
-            "已取消 · 本次发现 {discovered} 张专辑 · 扫描结果已保留"
+            "{}已取消 · 本次发现 {discovered} 张专辑 · 已接受的完整资料已保留",
+            operation.label()
         )),
         ScanState::Missing { .. } => None,
         ScanState::Empty { root } => Some(format!(

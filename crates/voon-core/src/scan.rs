@@ -183,6 +183,17 @@ pub enum ScanEvent<'a> {
 pub trait TagReader {
     fn read(&mut self, path: &Path, format: AudioFormat, stamp: FileStamp) -> Option<TagInfo>;
 
+    /// A scoped task may reuse a known observation or omit an unrelated source
+    /// entirely; omission is not a successful read of an untagged file.
+    fn observe(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        stamp: FileStamp,
+    ) -> Option<TagObservation> {
+        Some(self.read_observation(path, format, stamp))
+    }
+
     /// Existing structure-only readers remain valid. Real readers report failures explicitly.
     fn read_observation(
         &mut self,
@@ -843,7 +854,7 @@ impl Scanner<'_> {
         format: AudioFormat,
         stamp: FileStamp,
     ) -> Option<TagInfo> {
-        let observation = self.tags.read_observation(path, format, stamp);
+        let observation = self.tags.observe(path, format, stamp)?;
         if let Some(reason) = observation.result.reason() {
             self.out.issues.push(ScanIssue {
                 path: path.to_path_buf(),
@@ -875,6 +886,11 @@ impl Scanner<'_> {
             };
             self.out.stamps.push((path.clone(), stamp));
             let info = self.observe_tags(path, *format, stamp);
+            if !self.out.tag_observations.contains_key(path) {
+                // A scoped reader omitted this source. Its missing observation
+                // must not be presented as a confirmed absence of album tags.
+                continue;
+            }
             match info {
                 Some(info) if info.album.is_some() => {
                     let key = (

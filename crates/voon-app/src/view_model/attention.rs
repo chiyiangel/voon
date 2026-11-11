@@ -1,3 +1,4 @@
+use super::scanning::{ScanOperation, ScanRequest};
 use super::{AppState, Result};
 use gpui::Context;
 use std::path::Path;
@@ -26,11 +27,11 @@ impl AppState {
         kind: &str,
         cx: &mut Context<Self>,
     ) -> Result<()> {
-        if !self
-            .attention
-            .iter()
-            .any(|item| item.path == path && item.kind == kind && item.stage.is_some())
-        {
+        if !self.attention.iter().any(|item| {
+            item.path == path
+                && item.kind == kind
+                && (item.stage.is_some() || matches!(kind, "TagIoFailure" | "TagParseFailure"))
+        }) {
             return Err("读取问题已失效，请刷新后重试".into());
         }
         let root = self
@@ -40,7 +41,15 @@ impl AppState {
             .ok_or("音乐库根目录不存在")?
             .path
             .clone();
-        self.start_scan(root, cx)
+        self.start_requests(
+            std::collections::VecDeque::from([ScanRequest {
+                root,
+                operation: ScanOperation::Retry,
+                paths: vec![path.to_path_buf()],
+                full_root: false,
+            }]),
+            cx,
+        )
     }
 
     pub fn open_attention(&mut self, path: &Path, kind: &str, cx: &mut Context<Self>) {

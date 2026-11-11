@@ -42,7 +42,8 @@ pub fn render(entity: &Entity<AppState>, theme: Theme, cx: &App) -> impl IntoEle
             .on_click(move |_, _, cx| {
                 state.update(cx, |state, cx| state.open_attention(&path, &kind, cx))
             });
-        if item.stage.is_some() {
+        if item.stage.is_some() || matches!(item.kind.as_str(), "TagIoFailure" | "TagParseFailure")
+        {
             let retry_state = entity.clone();
             let retry_path = item.path.clone();
             let retry_kind = item.kind.clone();

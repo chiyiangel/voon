@@ -33,14 +33,34 @@ fn finish_scan(state: &Entity<AppState>, cx: &mut TestAppContext) -> usize {
     }
 }
 
+fn write_wave(path: &std::path::Path, samples: &[i16]) {
+    let length = (samples.len() * 2) as u32;
+    let mut bytes = b"RIFF".to_vec();
+    bytes.extend((36 + length).to_le_bytes());
+    bytes.extend(b"WAVEfmt ");
+    bytes.extend(16u32.to_le_bytes());
+    bytes.extend(1u16.to_le_bytes());
+    bytes.extend(1u16.to_le_bytes());
+    bytes.extend(44_100u32.to_le_bytes());
+    bytes.extend(88_200u32.to_le_bytes());
+    bytes.extend(2u16.to_le_bytes());
+    bytes.extend(16u16.to_le_bytes());
+    bytes.extend(b"data");
+    bytes.extend(length.to_le_bytes());
+    for sample in samples {
+        bytes.extend(sample.to_le_bytes());
+    }
+    std::fs::write(path, bytes).unwrap();
+}
+
 #[gpui::test]
 fn rescanning_reads_only_audio_files_whose_stamp_changed(cx: &mut TestAppContext) {
     let library = tempfile::tempdir().unwrap();
     let local = tempfile::tempdir().unwrap();
     let album = library.path().join("Philips Duo/CD1");
     std::fs::create_dir_all(&album).unwrap();
-    std::fs::write(album.join("01.flac"), b"first fixture").unwrap();
-    std::fs::write(album.join("02.flac"), b"second fixture").unwrap();
+    write_wave(&album.join("01.wav"), &[0, 0]);
+    write_wave(&album.join("02.wav"), &[0, 0]);
     let database = local.path().join("library.sqlite3");
     let root = library.path().canonicalize().unwrap();
     let state =
@@ -54,7 +74,7 @@ fn rescanning_reads_only_audio_files_whose_stamp_changed(cx: &mut TestAppContext
     state.update(cx, |state, cx| state.start_scan(root.clone(), cx).unwrap());
     assert_eq!(finish_scan(&state, cx), 0);
 
-    std::fs::write(album.join("02.flac"), b"changed audio fixture").unwrap();
+    write_wave(&album.join("02.wav"), &[1, 2, 3, 4]);
     state.update(cx, |state, cx| state.start_scan(root, cx).unwrap());
     assert_eq!(finish_scan(&state, cx), 1);
 }
