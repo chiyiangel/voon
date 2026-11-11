@@ -4,6 +4,76 @@ use gpui::{
 };
 use std::path::{Path, PathBuf};
 
+pub fn index_unavailable(
+    state: &Entity<AppState>,
+    theme: super::theme::Theme,
+    cx: &App,
+) -> impl IntoElement {
+    let snapshot = state.read(cx);
+    let problem = snapshot.index_open_problem().expect("索引错误状态");
+    let create = state.clone();
+    div()
+        .size_full()
+        .p_6()
+        .flex()
+        .flex_col()
+        .gap_4()
+        .bg(rgb(theme.window))
+        .text_color(rgb(theme.ink))
+        .child(div().text_lg().child("本地资料库暂不可用"))
+        .child(problem.message.clone())
+        .children(problem.path.as_ref().map(|path| {
+            div()
+                .text_sm()
+                .text_color(rgb(theme.secondary))
+                .child(path.display().to_string())
+        }))
+        .children(
+            snapshot
+                .error()
+                .map(|error| div().text_color(rgb(theme.accent)).child(error.to_owned())),
+        )
+        .child(
+            div()
+                .id("create-index-after-error")
+                .cursor_pointer()
+                .text_color(rgb(theme.accent))
+                .child("保留原库，新建索引…")
+                .on_click(move |_, _, cx| choose_new_index(create.clone(), cx)),
+        )
+}
+
+fn choose_new_index(state: Entity<AppState>, cx: &mut App) {
+    let snapshot = state.read(cx);
+    let directory = snapshot
+        .index_path()
+        .or_else(|| snapshot.index_open_problem()?.path.as_deref())
+        .and_then(Path::parent)
+        .unwrap_or_else(|| Path::new("/"));
+    let choice = cx.prompt_for_new_path(directory, Some("library-0002-new.sqlite3"));
+    cx.spawn(async move |cx| match choice.await {
+        Ok(Ok(Some(path))) => {
+            let _ = state.update(cx, |state, cx| {
+                if let Err(error) = state.create_new_index(path, cx) {
+                    state.report_error(error, cx);
+                }
+            });
+        }
+        Ok(Ok(None)) => {}
+        Ok(Err(error)) => {
+            let _ = state.update(cx, |state, cx| {
+                state.report_error(format!("无法选择索引位置：{error}"), cx)
+            });
+        }
+        Err(error) => {
+            let _ = state.update(cx, |state, cx| {
+                state.report_error(format!("索引位置选择器已关闭：{error}"), cx)
+            });
+        }
+    })
+    .detach();
+}
+
 pub fn choose_root(state: Entity<AppState>, cx: &mut App) {
     let choice = cx.prompt_for_paths(PathPromptOptions {
         files: false,
@@ -183,6 +253,7 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
     let removal = snapshot.pending_root_removal().map(|p| p.to_path_buf());
     let close_state = state.clone();
     let add_state = state.clone();
+    let create_state = state.clone();
     let mut panel = div()
         .id("library-settings")
         .flex()
@@ -212,6 +283,19 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
                 .text_sm()
                 .text_color(rgb(0x6e6e73))
                 .child("Voon 只读取音乐库；扫描结果和你的整理保存在本机。"),
+        )
+        .children(snapshot.index_path().map(|path| {
+            div()
+                .text_sm()
+                .child(format!("本地索引：{}", path.display()))
+        }))
+        .child(
+            div()
+                .id("create-separate-index")
+                .cursor_pointer()
+                .text_color(rgb(0xb4532a))
+                .child("保留当前资料库，新建索引…")
+                .on_click(move |_, _, cx| choose_new_index(create_state.clone(), cx)),
         );
     for (position, root) in roots.into_iter().enumerate() {
         let remove_state = state.clone();

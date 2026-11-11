@@ -6,21 +6,23 @@ use gpui::{
     size,
 };
 use voon_app::{
-    platform::{index_path, library_root},
+    platform::{index_location, library_root},
     ui::{Assets, VoonWindow},
     view_model::AppState,
 };
-use voon_core::db::Index;
 
 fn main() {
     let suggested_root = library_root();
-    let index = match index_path()
-        .map_err(|error| error.to_string())
-        .and_then(|path| Index::open(&path).map_err(|error| error.to_string()))
-    {
-        Ok(index) => index,
+    let startup = match index_location() {
+        Ok(location) => {
+            AppState::open_index(location.path, location.selection_file, suggested_root)
+        }
+        Err(error) => AppState::unavailable_index(None, suggested_root, error),
+    };
+    let state = match startup {
+        Ok(state) => state,
         Err(error) => {
-            eprintln!("无法打开本地索引：{error}");
+            eprintln!("无法建立应用状态：{error}");
             return;
         }
     };
@@ -28,7 +30,7 @@ fn main() {
         .with_assets(Assets)
         .run(move |cx: &mut App| {
             let bounds = Bounds::centered(None, size(px(1280.), px(800.)), cx);
-            let state = cx.new(|_| AppState::new(index, suggested_root).expect("读取音乐库状态"));
+            let state = cx.new(|_| state);
             cx.open_window(
                 WindowOptions {
                     window_bounds: Some(WindowBounds::Windowed(bounds)),

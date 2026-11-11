@@ -77,7 +77,25 @@ pub fn library_root() -> PathBuf {
     )
 }
 
-pub fn index_path() -> std::io::Result<PathBuf> {
+pub struct IndexLocation {
+    pub path: PathBuf,
+    pub selection_file: Option<PathBuf>,
+}
+
+/// A fixed override keeps development and acceptance runs away from user data.
+pub fn index_location() -> std::io::Result<IndexLocation> {
+    if let Some(path) = std::env::var_os("VOON_INDEX_PATH").filter(|path| !path.is_empty()) {
+        let path = PathBuf::from(path);
+        if !path.is_absolute() {
+            return Err(std::io::Error::other(
+                "VOON_INDEX_PATH 必须是本地索引的绝对路径",
+            ));
+        }
+        return Ok(IndexLocation {
+            path,
+            selection_file: None,
+        });
+    }
     let home = std::env::var_os("HOME")
         .map(PathBuf::from)
         .ok_or_else(|| std::io::Error::other("无法确定本机用户目录"))?;
@@ -90,7 +108,17 @@ pub fn index_path() -> std::io::Result<PathBuf> {
         .unwrap_or_else(|| home.join(".local/share"))
         .join("voon");
     std::fs::create_dir_all(&directory)?;
-    Ok(directory.join("library.sqlite3"))
+    // Spec 0002 starts from a fresh index. Never initialize or migrate the
+    // previous default library.sqlite3 as an implicit upgrade action.
+    Ok(IndexLocation {
+        path: directory.join("library-0002.sqlite3"),
+        selection_file: Some(directory.join("current-index-path")),
+    })
+}
+
+/// The requested default or override; startup also restores a saved selection.
+pub fn index_path() -> std::io::Result<PathBuf> {
+    Ok(index_location()?.path)
 }
 
 #[cfg(test)]

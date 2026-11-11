@@ -28,6 +28,8 @@ mod organization;
 pub use organization::{ManualCollectionRow, UserTagRow};
 mod attention;
 pub use attention::AttentionItem;
+mod protection;
+pub use protection::OpenError;
 
 pub type Result<T> = rusqlite::Result<T>;
 
@@ -182,6 +184,8 @@ pub struct RenameMigration {
 
 /// Schema version after all migrations.
 pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
+/// SQLite application identity, independent of the structure version.
+pub const APPLICATION_ID: u32 = u32::from_be_bytes(*b"VOON");
 
 pub struct Index {
     conn: Connection,
@@ -239,8 +243,39 @@ fn p(path: &Path) -> String {
 }
 
 impl Index {
-    pub fn open(path: &Path) -> Result<Self> {
-        Self::init(Connection::open(path)?)
+    pub fn open(path: &Path) -> std::result::Result<Self, OpenError> {
+        if path.try_exists()? {
+            let path = path.canonicalize()?;
+            protection::check_existing(&path, MIGRATIONS)?;
+            return Self::open_validated(&path);
+        }
+        Self::create(path)
+    }
+
+    /// Create a separate Index. An existing file or sidecar is never replaced.
+    pub fn create(path: &Path) -> std::result::Result<Self, OpenError> {
+        for suffix in ["", "-wal", "-shm", "-journal"] {
+            let mut related = path.as_os_str().to_os_string();
+            related.push(suffix);
+            match std::fs::symlink_metadata(related) {
+                Ok(_) => return Err(OpenError::AlreadyExists),
+                Err(error) if error.kind() == std::io::ErrorKind::NotFound => {}
+                Err(error) => return Err(error.into()),
+            }
+        }
+        std::fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(path)?;
+        Self::open_validated(path)
+    }
+
+    fn open_validated(path: &Path) -> std::result::Result<Self, OpenError> {
+        let connection = Connection::open_with_flags(
+            path.canonicalize()?,
+            rusqlite::OpenFlags::SQLITE_OPEN_READ_WRITE | rusqlite::OpenFlags::SQLITE_OPEN_NO_MUTEX,
+        )?;
+        Self::init(connection).map_err(OpenError::from)
     }
 
     pub fn open_in_memory() -> Result<Self> {
@@ -252,6 +287,9 @@ impl Index {
         conn.pragma_update(None, "journal_mode", "WAL")?;
         let mut index = Self { conn };
         index.migrate()?;
+        index
+            .conn
+            .pragma_update(None, "application_id", APPLICATION_ID)?;
         Ok(index)
     }
 

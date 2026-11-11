@@ -20,6 +20,7 @@ pub mod edit;
 pub mod facets;
 pub mod grid;
 pub mod ignore;
+pub mod library_index;
 mod offline;
 pub mod organization;
 pub mod player;
@@ -96,6 +97,7 @@ pub enum SortOrder {
 
 pub struct AppState {
     index: Index,
+    library_index: library_index::LibraryIndexState,
     roots: Vec<LibraryRoot>,
     albums: Vec<AlbumRow>,
     suggested_root: PathBuf,
@@ -144,6 +146,7 @@ impl AppState {
             attention: index.attention_items()?,
             attention_path: None,
             index,
+            library_index: library_index::LibraryIndexState::default(),
             suggested_root,
             navigation: Navigation::AllAlbums,
             scan_state: ScanState::Idle,

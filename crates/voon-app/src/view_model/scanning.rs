@@ -173,6 +173,9 @@ impl AppState {
     }
 
     pub fn add_root(&mut self, root: PathBuf, cx: &mut Context<Self>) -> Result<()> {
+        if self.index_open_problem().is_some() {
+            return Err("请先新建可用的本地索引，再添加音乐库重新扫描".into());
+        }
         if self.scan_session.is_some() {
             return Err("请等待当前扫描结束，或先取消扫描".into());
         }

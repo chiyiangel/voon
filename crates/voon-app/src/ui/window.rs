@@ -68,6 +68,9 @@ impl Render for VoonWindow {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = Theme::for_window(window);
         let state = self.state.read(cx);
+        if state.index_open_problem().is_some() {
+            return settings::index_unavailable(&self.state, theme, cx).into_any_element();
+        }
         let settings_state = self.state.clone();
         let choose_state = self.state.clone();
         let start_state = self.state.clone();
@@ -208,5 +211,6 @@ impl Render for VoonWindow {
             .child(self.cover_picker.clone())
             .child(self.organization.clone())
             .child(self.structure.clone())
+            .into_any_element()
     }
 }

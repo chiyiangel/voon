@@ -4,6 +4,9 @@ use gpui::{App, Entity, IntoElement, ParentElement, Styled, div, prelude::*, rgb
 pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
     let snapshot = state.read(cx);
     let mut banner = div().flex().flex_col().text_sm();
+    if let Some(notice) = snapshot.index_notice() {
+        banner = banner.child(div().px_4().py_2().child(notice.to_owned()));
+    }
     let status = match snapshot.scan_state() {
         ScanState::Idle => None,
         ScanState::Scanning {
