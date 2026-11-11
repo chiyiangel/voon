@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/voon-core"]
+members = ["crates/voon-core", "crates/voon-app"]
 default-members = ["crates/voon-core"]
 
 [workspace.package]

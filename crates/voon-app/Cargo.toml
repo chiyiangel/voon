@@ -1,0 +1,15 @@
+[package]
+name = "voon-app"
+description = "Voon: organize a NAS music library on macOS."
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "voon"
+path = "src/main.rs"
+
+[dependencies]
+gpui = "0.2"
+voon-core.workspace = true
