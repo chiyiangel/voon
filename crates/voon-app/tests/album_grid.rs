@@ -89,6 +89,7 @@ fn grid_exposes_every_indexed_album_in_responsive_rows_and_selects_by_path(
                 albums: (0..1003)
                     .map(|number| Album {
                         source_directories: vec![],
+                        candidates: vec![],
                         path: format!("/假库/{number:04}").into(),
                         folder_name: format!("专辑{number:04}"),
                         discs: vec![],

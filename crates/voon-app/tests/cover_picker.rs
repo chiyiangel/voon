@@ -32,6 +32,7 @@ fn cover_drafts_apply_cancel_and_restore_without_changing_automatic_cover(cx: &m
     };
     let album = Album {
         source_directories: vec![],
+        candidates: vec![],
         path: "/假库/专辑".into(),
         folder_name: "专辑".into(),
         metadata: AlbumMetadata::default(),

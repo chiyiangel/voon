@@ -13,6 +13,7 @@ mod facet_view;
 mod icons;
 mod inbox_view;
 mod merge_sheet;
+mod metadata_sources;
 mod scan_banner;
 mod settings;
 mod sidebar;

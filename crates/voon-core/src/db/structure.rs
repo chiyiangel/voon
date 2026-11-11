@@ -786,6 +786,10 @@ fn merged_album(id: i64, operation: &Operation, sources: &[RawAlbum]) -> Result<
         discs,
         cover: ordered.iter().find_map(|source| source.album.cover.clone()),
         metadata,
+        candidates: ordered
+            .iter()
+            .flat_map(|source| source.album.candidates.clone())
+            .collect(),
         collection: ordered
             .iter()
             .find_map(|source| source.album.collection.clone()),

@@ -15,6 +15,7 @@ fn index() -> Index {
                     .into_iter()
                     .map(|title| Album {
                         source_directories: vec![],
+                        candidates: vec![],
                         path: format!("/假音乐库/{title}").into(),
                         folder_name: title.into(),
                         discs: vec![],

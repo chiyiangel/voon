@@ -26,7 +26,7 @@ pub(super) fn stored_album(
 ) -> Result<Option<Album>> {
     let found = conn
             .query_row(
-                "SELECT id, folder_name, collection_path, cover_path, cover_embedded, signature, cover_picture_index, source_directories
+                "SELECT id, folder_name, collection_path, cover_path, cover_embedded, signature, cover_picture_index, source_directories,candidates_json
              FROM album WHERE path = ?1",
                 [p(path)],
                 |row| {
@@ -41,6 +41,7 @@ pub(super) fn stored_album(
                             cover,
                             signature: row.get(5)?,
                             metadata: AlbumMetadata::default(),
+                            candidates: serde_json::from_str(&row.get::<_,String>(8)?).map_err(|error| rusqlite::Error::FromSqlConversionFailure(8,rusqlite::types::Type::Text,Box::new(error)))?,
                             discs: Vec::new(),
                         },
                     ))
@@ -185,6 +186,12 @@ pub(super) fn store_album(conn: &Connection, root_id: i64, album: &Album) -> Res
     conn.execute("INSERT INTO album(root_id,path,folder_name,collection_path,cover_path,cover_embedded,signature,cover_picture_index,source_directories)
         VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9)", params![root_id, p(&album.path), album.folder_name, album.collection.as_deref().map(p), cover_path, embedded, album.signature, picture_index, source_directories])?;
     let album_id = conn.last_insert_rowid();
+    let candidates = serde_json::to_string(&album.candidates)
+        .map_err(|error| rusqlite::Error::ToSqlConversionFailure(Box::new(error)))?;
+    conn.execute(
+        "UPDATE album SET candidates_json=?1 WHERE id=?2",
+        params![candidates, album_id],
+    )?;
     for (name, value, source) in album.metadata.entries() {
         conn.execute(
             "INSERT INTO album_field(album_id,name,source,value) VALUES (?1,?2,?3,?4)",

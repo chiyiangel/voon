@@ -46,6 +46,13 @@ impl Drop for AttachmentSession {
 }
 
 impl AppState {
+    pub fn album_metadata_comparison(&self) -> Result<Vec<voon_core::FieldComparison>> {
+        match self.album_detail() {
+            Some(album) => Ok(self.index.metadata_comparison(&album.path)?),
+            None => Ok(vec![]),
+        }
+    }
+
     pub fn album_tag_observations(
         &self,
     ) -> Result<Vec<(PathBuf, voon_core::tags::TagObservation)>> {

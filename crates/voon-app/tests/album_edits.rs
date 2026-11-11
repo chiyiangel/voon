@@ -6,6 +6,7 @@ use voon_core::{Album, AlbumMetadata, Field, FieldSource, ScanResult, db::Index}
 fn fixture(title: &str) -> Album {
     Album {
         source_directories: vec![],
+        candidates: vec![],
         path: Path::new("/假音乐库").join(title),
         folder_name: title.into(),
         discs: vec![],

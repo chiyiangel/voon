@@ -47,6 +47,7 @@ fn classical_metadata_uses_tag_or_cue_composers_and_distinct_track_performers() 
             &ScanResult {
                 albums: vec![Album {
                     source_directories: vec![],
+                    candidates: vec![],
                     path: "/假库/古典".into(),
                     folder_name: "古典".into(),
                     metadata: tag_metadata,

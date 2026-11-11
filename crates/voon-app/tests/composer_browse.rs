@@ -15,6 +15,7 @@ fn composer_names_are_sorted_and_selection_filters_the_shared_album_result(
     .into_iter()
     .map(|(name, composer)| Album {
         source_directories: vec![],
+        candidates: vec![],
         path: format!("/假库/{name}").into(),
         folder_name: name.into(),
         metadata: AlbumMetadata {

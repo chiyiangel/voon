@@ -17,6 +17,14 @@ use crate::cue::{self, CueSheet};
 use crate::folder_name::{self, FolderHints};
 use crate::model::*;
 use crate::tags::{TagInfo, TagObservation, TagReadResult};
+mod candidates;
+
+struct ObservedCue {
+    path: PathBuf,
+    sheet: CueSheet,
+    observed_at: i64,
+    audio_paths: Vec<PathBuf>,
+}
 
 pub const IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp", "bmp", "gif"];
 
@@ -505,7 +513,7 @@ impl Scanner<'_> {
         attachment_dirs: &[PathBuf],
         collection: Option<&Path>,
     ) -> Album {
-        let mut sheets: Vec<CueSheet> = Vec::new();
+        let mut sheets: Vec<ObservedCue> = Vec::new();
         let mut discs: Vec<Disc> = Vec::new();
 
         // The album folder's own audio first, then the disc subfolders.
@@ -541,6 +549,7 @@ impl Scanner<'_> {
         let mut album = Album {
             path: dir.to_path_buf(),
             source_directories: vec![dir.to_path_buf()],
+            candidates: vec![],
             folder_name,
             discs,
             cover: None,
@@ -549,7 +558,9 @@ impl Scanner<'_> {
             signature: String::new(),
         };
         let tag_infos = self.read_tags(&mut album);
-        album.metadata = resolve_metadata(&hints, &sheets, &tag_infos);
+        let resolved_sheets: Vec<_> = sheets.iter().map(|sheet| sheet.sheet.clone()).collect();
+        album.metadata = resolve_metadata(&hints, &resolved_sheets, &tag_infos);
+        album.candidates = candidates::collect(&album, &hints, &sheets, &self.out.tag_observations);
         album.cover = find_cover(&listing.images, &disc_dirs, attachment_dirs)
             .map(|p| Cover {
                 source: CoverSource::File(p),
@@ -582,7 +593,7 @@ impl Scanner<'_> {
         &mut self,
         dir: &Path,
         l: &Listing,
-        sheets: &mut Vec<CueSheet>,
+        sheets: &mut Vec<ObservedCue>,
     ) -> Vec<Vec<Track>> {
         let mut groups = Vec::new();
         let mut claimed: HashSet<PathBuf> = HashSet::new();
@@ -635,6 +646,7 @@ impl Scanner<'_> {
                 // A second sheet for the same image (e.g. a UTF-8 copy) is skipped.
                 continue;
             }
+            let audio_paths = resolved.iter().map(|(path, _)| path.clone()).collect();
             if single_file {
                 let (image, format) = resolved.remove(0);
                 let tracks = &sheet.files[0].tracks;
@@ -670,7 +682,12 @@ impl Scanner<'_> {
                     }
                 }
             }
-            sheets.push(sheet);
+            sheets.push(ObservedCue {
+                path: cue_path.clone(),
+                sheet,
+                observed_at: crate::tags::observation_time(),
+                audio_paths,
+            });
         }
 
         let loose: Vec<Track> = l
@@ -848,9 +865,10 @@ impl Scanner<'_> {
                     }
                 })
                 .collect();
-            let album = Album {
+            let mut album = Album {
                 path,
                 source_directories: vec![root.to_path_buf()],
+                candidates: vec![],
                 folder_name: title,
                 discs,
                 cover: infos
@@ -863,6 +881,12 @@ impl Scanner<'_> {
                 collection: None,
                 signature: content_signature(&mut sizes),
             };
+            album.candidates = candidates::collect(
+                &album,
+                &FolderHints::default(),
+                &[],
+                &self.out.tag_observations,
+            );
             (self.progress)(ScanEvent::Album(&album));
             self.out.albums.push(album);
         }

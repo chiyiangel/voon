@@ -49,6 +49,7 @@ fn an_injected_index_supplies_albums_and_selection_stays_in_the_state(cx: &mut T
             &ScanResult {
                 albums: vec![Album {
                     source_directories: vec![],
+                    candidates: vec![],
                     path: "/假音乐库/夜曲".into(),
                     folder_name: "夜曲".into(),
                     discs: vec![],

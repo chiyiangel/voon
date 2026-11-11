@@ -21,6 +21,7 @@ pub struct AlbumDetail {
     state: Entity<AppState>,
     covers: Entity<CoverCache>,
     _subscriptions: Vec<Subscription>,
+    sources_open: bool,
 }
 
 impl AlbumDetail {
@@ -37,6 +38,7 @@ impl AlbumDetail {
             state,
             covers,
             _subscriptions: subscriptions,
+            sources_open: false,
         }
     }
 }
@@ -200,6 +202,33 @@ impl Render for AlbumDetail {
             Err(_) => tag_status = tag_status.child("无法读取本地标签状态，请重新打开专辑"),
         }
         body = body.child(tag_status);
+        body = body.child(
+            div()
+                .id("toggle-metadata-sources")
+                .cursor_pointer()
+                .px_4()
+                .py_2()
+                .text_color(rgb(theme.accent))
+                .child(if self.sources_open {
+                    "收起字段来源"
+                } else {
+                    "比较字段来源"
+                })
+                .on_click(cx.listener(|this, _, _, cx| {
+                    this.sources_open = !this.sources_open;
+                    cx.notify();
+                })),
+        );
+        if self.sources_open {
+            match self.state.read(cx).album_metadata_comparison() {
+                Ok(comparison) => {
+                    body = body.child(super::metadata_sources::render(&comparison, theme))
+                }
+                Err(_) => {
+                    body = body.child(div().p_4().child("无法读取本地字段来源，请重新打开专辑"))
+                }
+            }
+        }
         body = body.child(
             div()
                 .id("edit-album-information")

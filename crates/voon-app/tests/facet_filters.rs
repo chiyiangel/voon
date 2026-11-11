@@ -20,6 +20,7 @@ fn fixture() -> Index {
             let path = std::path::PathBuf::from(format!("/假库/{title}"));
             Album {
                 source_directories: vec![],
+                candidates: vec![],
                 path: path.clone(),
                 folder_name: title.into(),
                 metadata: AlbumMetadata {

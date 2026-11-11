@@ -11,6 +11,7 @@ use voon_core::{
 fn album(folder: &str, title: &str, artist: &str, composer: &str, catalog: &str) -> Album {
     Album {
         source_directories: vec![],
+        candidates: vec![],
         path: format!("/假音乐库/{folder}").into(),
         folder_name: folder.into(),
         metadata: AlbumMetadata {

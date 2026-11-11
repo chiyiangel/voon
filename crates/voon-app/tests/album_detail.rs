@@ -63,6 +63,7 @@ fn reopened_cue_detail_keeps_each_performer_and_describes_opening_the_whole_imag
 fn album(path: &str, title: &str) -> Album {
     Album {
         source_directories: vec![],
+        candidates: vec![],
         path: path.into(),
         folder_name: title.into(),
         cover: None,

@@ -11,6 +11,7 @@ use rusqlite::{Connection, params};
 
 use crate::model::*;
 use crate::scan::{FileStamp, ScanResult, TagReader};
+mod candidates;
 mod details;
 mod edits;
 mod structure;
@@ -161,6 +162,7 @@ INSERT INTO scan_baseline (root_id, path, signature) SELECT root_id, path, signa
     structure::PERSIST_ROOT_MIGRATION,
     covers::SOURCE_DIRECTORIES_MIGRATION,
     tag_cache::MIGRATION,
+    candidates::MIGRATION,
 ];
 
 /// A proposed pairing of a vanished album path with a new one.

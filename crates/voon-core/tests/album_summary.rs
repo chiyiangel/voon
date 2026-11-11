@@ -21,6 +21,7 @@ fn index_returns_album_card_summary_with_user_title_and_disc_and_track_counts() 
     };
     let album = Album {
         source_directories: vec![],
+        candidates: vec![],
         path: path.clone(),
         folder_name: "双碟".into(),
         discs: vec![

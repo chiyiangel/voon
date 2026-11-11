@@ -300,6 +300,8 @@ pub struct Album {
     pub discs: Vec<Disc>,
     pub cover: Option<Cover>,
     pub metadata: AlbumMetadata,
+    #[serde(default)]
+    pub candidates: Vec<crate::MetadataCandidate>,
     /// The innermost enclosing collection, if any.
     pub collection: Option<PathBuf>,
     /// Content signature: a hash of each audio file's path relative to the

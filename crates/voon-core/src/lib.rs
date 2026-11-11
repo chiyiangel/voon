@@ -6,9 +6,11 @@ pub mod cue;
 pub mod db;
 pub mod facets;
 pub mod folder_name;
+pub mod metadata_candidates;
 pub mod model;
 pub mod scan;
 pub mod tags;
 
+pub use metadata_candidates::{FieldComparison, MetadataCandidate, SourceStatus};
 pub use model::*;
 pub use scan::{ScanResult, scan_root, scan_root_with};
