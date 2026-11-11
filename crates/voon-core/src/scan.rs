@@ -719,7 +719,11 @@ impl Scanner<'_> {
                     out.push(Track {
                         number: Some(t.number),
                         title: t.title.clone().map(|v| Field::new(v, FieldSource::Cue)),
-                        artist: t.performer.clone().map(|v| Field::new(v, FieldSource::Cue)),
+                        artist: t
+                            .performer
+                            .clone()
+                            .or_else(|| sheet.performer.clone())
+                            .map(|v| Field::new(v, FieldSource::Cue)),
                         format,
                         source: TrackSource::Virtual {
                             image: image.clone(),
@@ -739,7 +743,11 @@ impl Scanner<'_> {
                     if let Some(t) = f.tracks.first() {
                         cue_titles.insert(
                             path.clone(),
-                            (t.title.clone(), t.performer.clone(), t.number),
+                            (
+                                t.title.clone(),
+                                t.performer.clone().or_else(|| sheet.performer.clone()),
+                                t.number,
+                            ),
                         );
                     }
                 }

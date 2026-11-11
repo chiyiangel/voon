@@ -222,3 +222,29 @@ fn querying_an_album_keeps_shift_jis_cue_titles() {
         Some(Field::new("第一楽章アレグロ".into(), FieldSource::Cue))
     );
 }
+
+#[test]
+fn cue_tracks_inherit_the_sheet_performer_and_keep_explicit_track_overrides() {
+    let library = tempfile::tempdir().unwrap();
+    let album = library.path().join("Album");
+    std::fs::create_dir(&album).unwrap();
+    std::fs::write(album.join("image.dff"), b"fixture").unwrap();
+    std::fs::write(album.join("program.cue"), "PERFORMER \"Whole disc performer\"\nTITLE \"Album\"\nFILE \"image.dff\" WAVE\n TRACK 01 AUDIO\n INDEX 01 00:00:00\n TRACK 02 AUDIO\n PERFORMER \"Track soloist\"\n INDEX 01 03:00:00\n").unwrap();
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(
+            library.path(),
+            &scan_root(library.path(), &mut voon_core::scan::DiskTags),
+        )
+        .unwrap();
+    let album = index.album(&album).unwrap().unwrap();
+    let tracks = &album.discs[0].tracks;
+    assert_eq!(
+        tracks[0].artist,
+        Some(Field::new("Whole disc performer".into(), FieldSource::Cue))
+    );
+    assert_eq!(
+        tracks[1].artist,
+        Some(Field::new("Track soloist".into(), FieldSource::Cue))
+    );
+}
