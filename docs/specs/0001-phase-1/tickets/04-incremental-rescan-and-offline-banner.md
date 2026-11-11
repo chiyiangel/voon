@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 04: 增量重扫与 NAS 离线横幅
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** 02 根目录与首次扫描；外部门槛：原型审核通过（PR #1 / https://voon-design-canvas.vercel.app）
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 手动重扫入口可用；重扫期间同样显示进度、可取消
 - [ ] 未变化的文件不会被重新读取（重扫后报告的磁盘读取数为 0）
@@ -20,3 +20,13 @@ status: ready-for-agent
 - [ ] macOS 由 Mobert 手动验证
 
 规格：[0001 第一期规格](../../0001-phase-1.md)
+
+## 实现与验证记录（2026-11-11）
+
+- 设置中的每个 Library root 提供增量重扫入口；扫描线程通过独立的本地 Index 连接使用 CachedTags，并加载该根目录的忽略规则。横幅报告真实音频标签读取数，重扫仍支持进度与取消。
+- 取消或扫描期间根目录不可用时只保存部分结果，保留未扫描的旧 Album，不用部分结果产生 Rename candidate。已有用户字段编辑继续从本地索引叠加。
+- 根目录可用性在后台检查，正常检查间隔为 5 秒；40ms UI 轮询不执行目录检查。离线横幅提供“重新连接”，恢复后自动消失，不自动重扫。
+- `cargo test -p voon-app --test rescan`：4 项通过，覆盖真实 worker 的读取数 2 → 0 → 1、取消重扫保留旧专辑且不误报改名、离线仍可查询与本地编辑并自动恢复、扫描中离线保留索引。前三项先观察到行为失败，再完成实现；扫描中离线的事件接口先观察到缺失接口的编译失败。
+- `cargo test -p voon-app --test library_scan`：3 项通过；`cargo check -p voon-app` 通过。
+- 总验收新增空挂载点保护：既有完整扫描非空、本次完整结果为空时保留索引与扫描基线，提示核对挂载；用户明确确认目录为空后才更新本地结果。扫描前后文件系统设备变化按中断处理。`rescan` 增至 5 项全部通过；`ignore_rules` 3 项回归通过。
+- Linux build / clippy / 完整测试、原生界面验收及 Mobert 的 macOS 手工验证仍待完成，暂不标记 `done`。这里的离线编辑验证使用既有 Index 公共编辑接口；编辑表单由后续工单实现。

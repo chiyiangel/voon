@@ -32,6 +32,8 @@ pub struct TagInfo {
 
 #[derive(Debug, thiserror::Error)]
 pub enum TagError {
+    #[error("没有内嵌封面")]
+    MissingPicture,
     #[error("tags for {0} are not supported yet")]
     Unsupported(&'static str),
     #[error("reading tags: {0}")]
@@ -47,6 +49,77 @@ pub fn read(path: &Path, format: AudioFormat) -> Result<TagInfo, TagError> {
         AudioFormat::Dsf => read_dsf_header(path),
         AudioFormat::Dff => Err(TagError::Unsupported("DFF")),
         _ => read_lofty(path),
+    }
+}
+
+/// Read the automatically selected Cover without changing its image/audio file.
+/// The caller schedules this potentially slow NAS access away from the UI thread.
+pub fn read_cover(cover: &crate::Cover) -> Result<Vec<u8>, TagError> {
+    match &cover.source {
+        crate::CoverSource::File(path) => Ok(std::fs::read(path)?),
+        crate::CoverSource::Embedded(path) => {
+            let pictures = embedded_pictures(path)?;
+            let index = pictures.iter().position(|(front, _)| *front).unwrap_or(0);
+            pictures
+                .into_iter()
+                .nth(index)
+                .map(|(_, data)| data)
+                .ok_or(TagError::MissingPicture)
+        }
+        crate::CoverSource::EmbeddedPicture { path, index } => embedded_pictures(path)?
+            .into_iter()
+            .nth(*index as usize)
+            .map(|(_, data)| data)
+            .ok_or(TagError::MissingPicture),
+    }
+}
+
+pub fn embedded_cover_count(path: &Path) -> Result<usize, TagError> {
+    Ok(embedded_pictures(path)?.len())
+}
+
+fn embedded_pictures(path: &Path) -> Result<Vec<(bool, Vec<u8>)>, TagError> {
+    if path
+        .extension()
+        .and_then(|extension| extension.to_str())
+        .is_some_and(|extension| extension.eq_ignore_ascii_case("dsf"))
+    {
+        let mut file = File::open(path)?;
+        let mut header = [0; 28];
+        file.read_exact(&mut header)?;
+        if &header[..4] != b"DSD " {
+            return Err(TagError::MissingPicture);
+        }
+        let offset = u64::from_le_bytes(header[20..28].try_into().unwrap());
+        if offset == 0 {
+            return Ok(vec![]);
+        }
+        file.seek(SeekFrom::Start(offset))?;
+        let tag = id3::Tag::read_from2(file)?;
+        Ok(tag
+            .pictures()
+            .map(|picture| {
+                (
+                    picture.picture_type == id3::frame::PictureType::CoverFront,
+                    picture.data.clone(),
+                )
+            })
+            .collect())
+    } else {
+        let file = lofty::probe::Probe::open(path)?
+            .options(lofty::config::ParseOptions::new().read_properties(false))
+            .read()?;
+        Ok(file
+            .tags()
+            .iter()
+            .flat_map(|tag| tag.pictures())
+            .map(|picture| {
+                (
+                    picture.pic_type() == lofty::picture::PictureType::CoverFront,
+                    picture.data().to_vec(),
+                )
+            })
+            .collect())
     }
 }
 
@@ -149,6 +222,44 @@ pub(crate) fn parse_dsf_header(buf: &[u8]) -> Option<AudioProperties> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cover_bytes_are_read_from_a_directory_image_or_embedded_front_picture() {
+        use id3::TagLike;
+        let directory = tempfile::tempdir().unwrap();
+        let image = directory.path().join("cover.jpg");
+        std::fs::write(&image, [1, 2, 3, 4]).unwrap();
+        assert_eq!(
+            read_cover(&crate::Cover {
+                source: crate::CoverSource::File(image)
+            })
+            .unwrap(),
+            [1, 2, 3, 4]
+        );
+
+        let mut tag = id3::Tag::new();
+        tag.add_frame(id3::frame::Picture {
+            mime_type: "image/jpeg".into(),
+            picture_type: id3::frame::PictureType::Other,
+            description: "背面".into(),
+            data: vec![8, 9],
+        });
+        tag.add_frame(id3::frame::Picture {
+            mime_type: "image/jpeg".into(),
+            picture_type: id3::frame::PictureType::CoverFront,
+            description: "正面".into(),
+            data: vec![5, 6, 7],
+        });
+        let audio = directory.path().join("01.dsf");
+        std::fs::write(&audio, synth_dsf(Some(&tag))).unwrap();
+        assert_eq!(
+            read_cover(&crate::Cover {
+                source: crate::CoverSource::Embedded(audio)
+            })
+            .unwrap(),
+            [5, 6, 7]
+        );
+    }
 
     #[test]
     fn dsf_header() {

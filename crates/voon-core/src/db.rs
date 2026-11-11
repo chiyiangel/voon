@@ -12,6 +12,21 @@ use rusqlite::{Connection, OptionalExtension, params};
 use crate::model::*;
 use crate::scan::{FileStamp, ScanResult, TagReader};
 use crate::tags::TagInfo;
+mod details;
+mod edits;
+mod structure;
+pub use edits::EditError;
+pub use structure::{DiscRef, SplitMode, StructureOperation, TrackRef};
+mod collections;
+mod composers;
+mod covers;
+
+mod browse;
+mod ignore;
+mod organization;
+pub use organization::{ManualCollectionRow, UserTagRow};
+mod attention;
+pub use attention::AttentionItem;
 
 pub type Result<T> = rusqlite::Result<T>;
 
@@ -130,6 +145,21 @@ CREATE TABLE rename_candidate (
     PRIMARY KEY (old_path, new_path)
 );
 "#,
+    ignore::MIGRATION,
+    r#"
+CREATE TABLE scan_baseline (
+    root_id INTEGER NOT NULL REFERENCES library_root(id) ON DELETE CASCADE,
+    path TEXT NOT NULL,
+    signature TEXT NOT NULL,
+    PRIMARY KEY(root_id, path)
+);
+INSERT INTO scan_baseline (root_id, path, signature) SELECT root_id, path, signature FROM album;
+"#,
+    browse::MIGRATION,
+    covers::MIGRATION,
+    structure::MIGRATION,
+    structure::PERSIST_ROOT_MIGRATION,
+    covers::SOURCE_DIRECTORIES_MIGRATION,
 ];
 
 /// A proposed pairing of a vanished album path with a new one.
@@ -159,14 +189,39 @@ pub struct Index {
 pub struct AlbumRow {
     pub id: i64,
     pub path: PathBuf,
+    pub source_directories: Vec<PathBuf>,
     pub folder_name: String,
     pub collection: Option<PathBuf>,
     pub cover: Option<Cover>,
     pub metadata: AlbumMetadata,
     pub track_count: u32,
+    pub disc_count: u32,
+    pub added_order: i64,
+    pub facets: crate::facets::Facets,
 }
 
 impl AlbumRow {
+    /// Summary for an Album reported during a scan, before it has an Index id.
+    pub fn from_album(album: &Album) -> Self {
+        Self {
+            id: 0,
+            path: album.path.clone(),
+            source_directories: album
+                .physical_directories()
+                .into_iter()
+                .map(Path::to_path_buf)
+                .collect(),
+            folder_name: album.folder_name.clone(),
+            collection: album.collection.clone(),
+            cover: album.cover.clone(),
+            metadata: album.metadata.clone(),
+            track_count: album.tracks().count() as u32,
+            disc_count: album.discs.len() as u32,
+            added_order: 0,
+            facets: crate::facets::facets(album),
+        }
+    }
+
     pub fn display_title(&self) -> &str {
         self.metadata
             .title
@@ -200,6 +255,14 @@ impl Index {
     pub fn schema_version(&self) -> Result<u32> {
         self.conn
             .pragma_query_value(None, "user_version", |r| r.get(0))
+    }
+
+    /// The local database file, absent for an in-memory index.
+    pub fn database_path(&self) -> Option<&Path> {
+        self.conn
+            .path()
+            .filter(|path| !path.is_empty())
+            .map(Path::new)
     }
 
     fn migrate(&mut self) -> Result<()> {
@@ -237,111 +300,88 @@ impl Index {
         .collect()
     }
 
-    /// Replace everything scanned under `root` with `scan`. A cancelled scan
-    /// is stored as well; it simply holds fewer albums.
+    /// Whether the last complete physical scan found any Album in this root.
+    pub fn has_scanned_albums(&self, root: &Path) -> Result<bool> {
+        self.conn.query_row(
+            "SELECT EXISTS(SELECT 1 FROM scan_baseline s JOIN library_root r ON r.id = s.root_id WHERE r.path = ?1)",
+            [p(root)], |row| row.get(0),
+        )
+    }
+
+    /// Remove indexed results for a root, retaining path-keyed user edits,
+    /// tags and manual collection membership for a later re-addition.
+    pub fn remove_root(&mut self, root: &Path) -> Result<()> {
+        let tx = self.conn.transaction()?;
+        tx.execute(
+            "DELETE FROM rename_candidate WHERE new_path IN
+             (SELECT a.path FROM album a JOIN library_root r ON a.root_id = r.id WHERE r.path = ?1)",
+            [p(root)],
+        )?;
+        tx.execute("DELETE FROM library_root WHERE path = ?1", [p(root)])?;
+        structure::replay(&tx)?;
+        tx.commit()
+    }
+
+    /// Replace the completed physical scan under `root`. Call
+    /// `store_partial_scan` when traversal was cancelled or interrupted.
     pub fn store_scan(&mut self, root: &Path, scan: &ScanResult) -> Result<()> {
+        self.store_scan_result(root, scan, true)
+    }
+
+    /// Save completed portions of a cancelled scan without discarding folders
+    /// the scanner has not visited or inferring renames from incomplete input.
+    pub fn store_partial_scan(&mut self, root: &Path, scan: &ScanResult) -> Result<()> {
+        self.store_scan_result(root, scan, false)
+    }
+
+    fn store_scan_result(&mut self, root: &Path, scan: &ScanResult, complete: bool) -> Result<()> {
         let root_id = self.add_root(root)?;
         let tx = self.conn.transaction()?;
+        browse::record_album_added(&tx, root, &scan.albums)?;
         let before: Vec<(String, String)> = {
-            let mut st = tx.prepare("SELECT path, signature FROM album WHERE root_id = ?1")?;
+            let mut st =
+                tx.prepare("SELECT path, signature FROM scan_baseline WHERE root_id = ?1")?;
             st.query_map([root_id], |r| Ok((r.get(0)?, r.get(1)?)))?
                 .collect::<Result<_>>()?
         };
-        tx.execute("DELETE FROM album WHERE root_id = ?1", [root_id])?;
-        tx.execute("DELETE FROM collection WHERE root_id = ?1", [root_id])?;
-        tx.execute("DELETE FROM scan_issue WHERE root_id = ?1", [root_id])?;
+        if complete {
+            tx.execute("DELETE FROM album WHERE root_id = ?1", [root_id])?;
+            tx.execute("DELETE FROM collection WHERE root_id = ?1", [root_id])?;
+            tx.execute("DELETE FROM scan_issue WHERE root_id = ?1", [root_id])?;
+        }
         for c in &scan.collections {
             tx.execute(
-                "INSERT INTO collection (root_id, path, name, parent_path) VALUES (?1, ?2, ?3, ?4)",
+                "INSERT INTO collection (root_id, path, name, parent_path) VALUES (?1, ?2, ?3, ?4)
+                 ON CONFLICT(path) DO UPDATE SET name = excluded.name, parent_path = excluded.parent_path
+                 WHERE collection.root_id = excluded.root_id",
                 params![root_id, p(&c.path), c.name, c.parent.as_deref().map(p)],
             )?;
         }
-        for a in &scan.albums {
-            let (cover_path, embedded) = match &a.cover {
-                Some(Cover {
-                    source: CoverSource::File(f),
-                }) => (Some(p(f)), false),
-                Some(Cover {
-                    source: CoverSource::Embedded(f),
-                }) => (Some(p(f)), true),
-                None => (None, false),
-            };
-            tx.execute(
-                "INSERT INTO album (root_id, path, folder_name, collection_path, cover_path, cover_embedded, signature)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
-                params![
-                    root_id,
-                    p(&a.path),
-                    a.folder_name,
-                    a.collection.as_deref().map(p),
-                    cover_path,
-                    embedded,
-                    a.signature
-                ],
-            )?;
-            let album_id = tx.last_insert_rowid();
-            for (name, value, source) in a.metadata.entries() {
-                tx.execute(
-                    "INSERT INTO album_field (album_id, name, source, value) VALUES (?1, ?2, ?3, ?4)",
-                    params![album_id, name, source.as_str(), value],
-                )?;
-            }
-            for d in &a.discs {
-                tx.execute(
-                    "INSERT INTO disc (album_id, number, path) VALUES (?1, ?2, ?3)",
-                    params![album_id, d.number, p(&d.path)],
-                )?;
-                let disc_id = tx.last_insert_rowid();
-                for t in &d.tracks {
-                    let (cue, start, end) = match &t.source {
-                        TrackSource::File { .. } => (None, None, None),
-                        TrackSource::Virtual {
-                            cue, start, end, ..
-                        } => (Some(p(cue)), Some(*start), *end),
-                    };
-                    tx.execute(
-                        "INSERT INTO track (disc_id, number, title, title_source, artist, artist_source,
-                           format, path, cue_path, start_frames, end_frames, sample_rate, bit_depth,
-                           channels, duration_ms)
-                         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
-                        params![
-                            disc_id,
-                            t.number,
-                            t.title.as_ref().map(|f| &f.value),
-                            t.title.as_ref().map(|f| f.source.as_str()),
-                            t.artist.as_ref().map(|f| &f.value),
-                            t.artist.as_ref().map(|f| f.source.as_str()),
-                            t.format.label(),
-                            p(t.source.audio_path()),
-                            cue,
-                            start,
-                            end,
-                            t.properties.sample_rate,
-                            t.properties.bit_depth,
-                            t.properties.channels,
-                            t.properties.duration_ms.map(|d| d as i64),
-                        ],
-                    )?;
-                }
-            }
+        for album in &scan.albums {
+            details::store_album(&tx, root_id, album)?;
         }
         for issue in &scan.issues {
-            let detail = format!("{:?}", issue.kind);
-            let kind = detail
-                .split([' ', '{', '('])
-                .next()
-                .unwrap_or("")
-                .to_string();
+            let (kind, detail) = attention::describe(issue);
             tx.execute(
-                "INSERT INTO scan_issue (root_id, path, kind, detail) VALUES (?1, ?2, ?3, ?4)",
+                "INSERT INTO scan_issue (root_id, path, kind, detail)
+                 SELECT ?1, ?2, ?3, ?4 WHERE NOT EXISTS
+                 (SELECT 1 FROM scan_issue WHERE root_id = ?1 AND path = ?2 AND kind = ?3 AND detail = ?4)",
                 params![root_id, p(&issue.path), kind, detail],
             )?;
         }
-        record_rename_candidates(&tx, &before, &scan.albums)?;
-        tx.execute(
-            "UPDATE library_root SET last_scan = strftime('%s','now') WHERE id = ?1",
-            [root_id],
-        )?;
+        if complete {
+            record_rename_candidates(&tx, root_id, &before, &scan.albums)?;
+            tx.execute("DELETE FROM scan_baseline WHERE root_id = ?1", [root_id])?;
+            tx.execute(
+                "INSERT INTO scan_baseline (root_id, path, signature) SELECT root_id, path, signature FROM album WHERE root_id = ?1",
+                [root_id],
+            )?;
+            tx.execute(
+                "UPDATE library_root SET last_scan = strftime('%s','now') WHERE id = ?1",
+                [root_id],
+            )?;
+        }
+        structure::record_scan_and_replay(&tx, root_id, root, scan, complete)?;
         tx.commit()
     }
 
@@ -349,29 +389,38 @@ impl Index {
     pub fn albums(&self) -> Result<Vec<AlbumRow>> {
         let mut st = self.conn.prepare(
             "SELECT a.id, a.path, a.folder_name, a.collection_path, a.cover_path, a.cover_embedded,
-                    (SELECT COUNT(*) FROM track t JOIN disc d ON t.disc_id = d.id WHERE d.album_id = a.id)
+                    (SELECT COUNT(*) FROM track t JOIN disc d ON t.disc_id = d.id WHERE d.album_id = a.id),
+                    (SELECT COUNT(*) FROM disc d WHERE d.album_id = a.id), a.cover_picture_index, a.source_directories
              FROM album a ORDER BY a.folder_name",
         )?;
         let mut rows: Vec<AlbumRow> = st
             .query_map([], |r| {
                 let cover = r.get::<_, Option<String>>(4)?.map(|c| {
                     let c = PathBuf::from(c);
-                    Cover {
-                        source: if r.get::<_, bool>(5).unwrap_or(false) {
-                            CoverSource::Embedded(c)
-                        } else {
-                            CoverSource::File(c)
-                        },
-                    }
+                    covers::from_parts(
+                        c,
+                        r.get::<_, bool>(5).unwrap_or(false),
+                        r.get::<_, Option<u32>>(8).unwrap_or(None),
+                    )
                 });
+                let path = PathBuf::from(r.get::<_, String>(1)?);
+                let mut source_directories =
+                    details::read_source_directories(&r.get::<_, String>(9)?)?;
+                if source_directories.is_empty() {
+                    source_directories.push(path.clone());
+                }
                 Ok(AlbumRow {
                     id: r.get(0)?,
-                    path: PathBuf::from(r.get::<_, String>(1)?),
+                    path,
+                    source_directories,
                     folder_name: r.get(2)?,
                     collection: r.get::<_, Option<String>>(3)?.map(PathBuf::from),
                     cover,
                     metadata: AlbumMetadata::default(),
                     track_count: r.get(6)?,
+                    disc_count: r.get(7)?,
+                    added_order: 0,
+                    facets: crate::facets::Facets::default(),
                 })
             })?
             .collect::<Result<_>>()?;
@@ -403,6 +452,8 @@ impl Index {
                 row.metadata.apply(&name, &value, FieldSource::UserEdit);
             }
         }
+        self.populate_browse_fields(&mut rows)?;
+        self.apply_user_covers(&mut rows)?;
         rows.sort_by(|a, b| a.display_title().cmp(b.display_title()));
         Ok(rows)
     }
@@ -453,6 +504,15 @@ impl Index {
     pub fn confirm_rename(&mut self, old: &Path, new: &Path) -> Result<RenameMigration> {
         let (old, new) = (p(old), p(new));
         let tx = self.conn.transaction()?;
+        let exists: bool = tx.query_row(
+            "SELECT EXISTS(SELECT 1 FROM rename_candidate c JOIN album a ON a.path = c.new_path
+             WHERE c.old_path = ?1 AND c.new_path = ?2 AND c.signature = a.signature)",
+            params![old, new],
+            |row| row.get(0),
+        )?;
+        if !exists {
+            return Err(rusqlite::Error::QueryReturnedNoRows);
+        }
         let mut moved = RenameMigration::default();
         for (table, count) in [
             ("user_edit", &mut moved.edits),
@@ -468,10 +528,12 @@ impl Index {
                 [&old],
             )?;
         }
+        covers::migrate_user_cover(&tx, Path::new(&old), Path::new(&new))?;
         tx.execute(
             "DELETE FROM rename_candidate WHERE old_path = ?1 OR new_path = ?2",
             params![old, new],
         )?;
+        structure::confirm_rename(&tx, Path::new(&old), Path::new(&new))?;
         tx.commit()?;
         Ok(moved)
     }
@@ -504,6 +566,7 @@ impl Index {
     }
 
     pub fn add_user_tag(&self, album: &Path, tag: &str) -> Result<()> {
+        let tag = organization::valid_name(tag)?;
         self.conn
             .execute("INSERT OR IGNORE INTO user_tag (name) VALUES (?1)", [tag])?;
         self.conn.execute(
@@ -523,6 +586,7 @@ impl Index {
     }
 
     pub fn create_manual_collection(&self, name: &str) -> Result<i64> {
+        let name = organization::valid_name(name)?;
         self.conn.execute(
             "INSERT OR IGNORE INTO manual_collection (name) VALUES (?1)",
             [name],
@@ -545,7 +609,7 @@ impl Index {
 
     pub fn manual_collection_albums(&self, collection: i64) -> Result<Vec<PathBuf>> {
         let mut st = self.conn.prepare(
-            "SELECT album_path FROM manual_collection_album WHERE collection_id = ?1 ORDER BY position",
+            "SELECT album_path FROM manual_collection_album WHERE collection_id = ?1 ORDER BY position, album_path",
         )?;
         st.query_map([collection], |r| Ok(PathBuf::from(r.get::<_, String>(0)?)))?
             .collect()
@@ -628,6 +692,7 @@ impl Index {
 /// (duplicate rips) are not proposed. Stale candidates are pruned.
 fn record_rename_candidates(
     tx: &rusqlite::Transaction<'_>,
+    root_id: i64,
     before: &[(String, String)],
     after: &[Album],
 ) -> Result<()> {
@@ -673,11 +738,17 @@ fn record_rename_candidates(
             }
         }
     }
-    // A candidate is stale once its new path is gone or its old path is back.
+    // Only reconcile the root whose complete physical snapshot was replaced.
+    // Other roots may currently expose a user merge instead of physical rows.
     tx.execute(
         "DELETE FROM rename_candidate
-         WHERE new_path NOT IN (SELECT path FROM album) OR old_path IN (SELECT path FROM album)",
-        [],
+         WHERE (new_path IN (SELECT path FROM scan_baseline WHERE root_id = ?1)
+             OR new_path IN (SELECT path FROM album WHERE root_id = ?1)
+             OR old_path IN (SELECT path FROM album WHERE root_id = ?1))
+         AND (NOT EXISTS (SELECT 1 FROM album a WHERE a.path = rename_candidate.new_path
+                          AND a.signature = rename_candidate.signature)
+              OR old_path IN (SELECT path FROM album WHERE root_id = ?1))",
+        [root_id],
     )?;
     Ok(())
 }

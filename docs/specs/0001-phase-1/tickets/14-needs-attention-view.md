@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 14: 待处理视图
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** 06 专辑详情；外部门槛：原型审核通过（PR #1 / https://voon-design-canvas.vercel.app）
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 待处理入口显示问题总数
 - [ ] 每条显示中文原因和相关路径，覆盖上述全部问题类型
@@ -21,3 +21,9 @@ status: ready-for-agent
 - [ ] macOS 由 Mobert 手动验证
 
 规格：[0001 第一期规格](../../0001-phase-1.md)
+
+## 实现与验证记录（2026-11-11）
+
+- 总审查修复：手工补全标题后不再显示“标题仅来自目录名”，恢复自动值则重新显示；`attention` 公共接口回归 5 项通过（含结构专辑到真实来源的待处理关联）。
+
+已接入待处理计数、中文原因和相关路径、跳转专辑或散文件路径。core 假库验证全部七类问题和修复后清除；GPUI 验证计数和跳转。原生界面最终集成验收、Linux 和 Mobert 手工验证待办。

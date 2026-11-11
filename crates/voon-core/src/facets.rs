@@ -4,7 +4,7 @@
 use std::collections::BTreeSet;
 
 use crate::folder_name;
-use crate::model::{Album, AudioFormat};
+use crate::model::{Album, AlbumMetadata, AudioFormat};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub enum Encoding {
@@ -56,6 +56,23 @@ pub struct Facets {
     pub max_bit_depth: Option<u8>,
     pub decade: Option<u16>,
     pub language: Language,
+    /// Automatic genre is taken only from an embedded Metadata tag.
+    pub genre: Option<String>,
+}
+
+impl Default for Facets {
+    fn default() -> Self {
+        Self {
+            formats: BTreeSet::new(),
+            encoding: Encoding::Pcm,
+            resolution: Resolution::Unknown,
+            max_sample_rate: None,
+            max_bit_depth: None,
+            decade: None,
+            language: Language::Unknown,
+            genre: None,
+        }
+    }
 }
 
 /// Guess the language from the writing system of the text.
@@ -86,17 +103,30 @@ pub fn language_of(text: &str) -> Language {
 
 pub fn facets(album: &Album) -> Facets {
     let formats: BTreeSet<AudioFormat> = album.tracks().map(|t| t.format).collect();
-    let hints = folder_name::parse(&album.folder_name);
     let max_sample_rate = album
         .tracks()
         .filter_map(|t| t.properties.sample_rate)
-        .max()
-        .or(hints.sample_rate);
-    let max_bit_depth = album
-        .tracks()
-        .filter_map(|t| t.properties.bit_depth)
-        .max()
-        .or(hints.bit_depth);
+        .max();
+    let max_bit_depth = album.tracks().filter_map(|t| t.properties.bit_depth).max();
+    from_summary(
+        &album.folder_name,
+        &album.metadata,
+        formats,
+        max_sample_rate,
+        max_bit_depth,
+    )
+}
+
+pub(crate) fn from_summary(
+    folder_name: &str,
+    metadata: &AlbumMetadata,
+    formats: BTreeSet<AudioFormat>,
+    max_sample_rate: Option<u32>,
+    max_bit_depth: Option<u8>,
+) -> Facets {
+    let hints = folder_name::parse(folder_name);
+    let max_sample_rate = max_sample_rate.or(hints.sample_rate);
+    let max_bit_depth = max_bit_depth.or(hints.bit_depth);
     let dsd = formats.iter().any(|f| f.is_dsd()) || hints.dsd_rate.is_some();
     let encoding = if dsd { Encoding::Dsd } else { Encoding::Pcm };
     let resolution = if dsd {
@@ -113,9 +143,14 @@ pub fn facets(album: &Album) -> Facets {
             _ => Resolution::Cd,
         }
     };
-    let decade = album.metadata.year.as_ref().map(|y| y.value / 10 * 10);
-    let mut text = album.display_title().to_string();
-    if let Some(a) = &album.metadata.album_artist {
+    let decade = metadata.year.as_ref().map(|y| y.value / 10 * 10);
+    let mut text = metadata
+        .title
+        .as_ref()
+        .map(|field| field.value.as_str())
+        .unwrap_or(folder_name)
+        .to_string();
+    if let Some(a) = &metadata.album_artist {
         text.push(' ');
         text.push_str(&a.value);
     }
@@ -127,6 +162,13 @@ pub fn facets(album: &Album) -> Facets {
         max_bit_depth,
         decade,
         language: language_of(&text),
+        genre: metadata
+            .genre
+            .as_ref()
+            .filter(|field| field.source == crate::FieldSource::Tag)
+            .map(|field| field.value.trim())
+            .filter(|value| !value.is_empty())
+            .map(str::to_owned),
     }
 }
 

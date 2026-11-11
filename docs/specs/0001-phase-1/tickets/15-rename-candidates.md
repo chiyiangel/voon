@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 15: 改名候选确认与忽略
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** 14 待处理视图；外部门槛：原型审核通过（PR #1 / https://voon-design-canvas.vercel.app）
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 条目显示旧路径与新路径，以及"确认""忽略"按钮
 - [ ] 确认后新路径的 Album 显示原有的编辑、User tag 和 Manual collection 成员资格，条目消失
@@ -20,3 +20,9 @@ status: ready-for-agent
 - [ ] macOS 由 Mobert 手动验证
 
 规格：[0001 第一期规格](../../0001-phase-1.md)
+
+## 实现与验证记录（2026-11-11）
+
+- 总审查修复：候选目标内容在决定前变化时，完整重扫删除过期候选；确认事务再次核对目标签名，部分扫描也不能把旧数据迁入已变化的专辑。`rename_and_loose` 公共接口回归 6 项通过。
+
+已接入旧路径→新路径、确认与忽略；确认后刷新详情和待处理计数。新增过期候选拒绝迁移保护；取消重扫使用完整扫描基线，不污染后续改名识别。core 与 GPUI 定向测试通过，平台人工验收待办。

@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 06: 专辑详情
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** 03 专辑网格；外部门槛：原型审核通过（PR #1 / https://voon-design-canvas.vercel.app）
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 详情显示封面、专辑级字段与每个字段的 Field source 标记
 - [ ] 多碟 Album 按 Disc 分组；Virtual track 与普通 Track 可区分，并能看到整轨文件和 CUE
@@ -21,3 +21,11 @@ status: ready-for-agent
 - [ ] macOS 由 Mobert 手动验证
 
 规格：[0001 第一期规格](../../0001-phase-1.md)
+
+## 实现与验证记录（2026-11-11）
+
+- `Index::album(path)` 从本地索引返回完整 Album（用户编辑叠加、Disc、Track 与 Virtual track、音频属性与来源），不访问音乐库。
+- 右侧详情共享网格封面缓存，显示全部专辑级字段及其来源、Collection、分碟曲目、虚拟区间及 image/CUE 路径、音频属性和时长。首次扫描未完成时也可查看已发现专辑。
+- 附件图片列表在后台发现，包含 Album/Disc 和 Booklet 等附件目录，遵守内置与用户忽略规则；点击图片通过系统图片查看器打开。文件管理器显示操作也在后台执行，平台打开器可注入。
+- `cargo test -p voon-core --test album_detail`：2 项通过，覆盖 Philips Duo 两碟、GBK/Shift-JIS 曲名与来源、虚拟区间、音频属性及用户编辑。`cargo test -p voon-app --test album_detail`：3 项通过，覆盖选择切换、附件发现和注入系统操作、扫描中的详情。新增索引/状态接口先观察编译失败；扫描中查看先观察行为失败，再实现。
+- macOS `cargo check -p voon-app` 与 `cargo clippy -p voon-app --all-targets -- -D warnings` 通过。系统打开器仅通过注入验证了动作与路径；Linux 实际运行、原生界面与 Finder / 文件管理器人工验收仍待完成，暂不标记 `done`。

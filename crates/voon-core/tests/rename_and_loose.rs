@@ -168,6 +168,52 @@ fn dismissed_and_stale_candidates_go_away() {
 }
 
 #[test]
+fn candidate_expires_when_the_destination_content_changes_before_confirmation() {
+    let lib = library();
+    let root = lib.path();
+    let old = root.join("Other");
+    let new = root.join("Other 2");
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(root, &scan_root(root, &mut NoTags))
+        .unwrap();
+    index
+        .set_user_edit(&old, "title", "原专辑的整理结果")
+        .unwrap();
+    index.add_user_tag(&old, "原专辑标签").unwrap();
+
+    fs::rename(&old, &new).unwrap();
+    index
+        .store_scan(root, &scan_root(root, &mut NoTags))
+        .unwrap();
+    assert_eq!(index.rename_candidates().unwrap().len(), 1);
+
+    // The proposed destination is replaced before the user confirms it.
+    // Its path remains present, but its audio no longer has the same signature.
+    fs::write(
+        new.join("01.flac"),
+        b"a different album with a different size",
+    )
+    .unwrap();
+    index
+        .store_partial_scan(root, &scan_root(root, &mut NoTags))
+        .unwrap();
+    assert!(index.confirm_rename(&old, &new).is_err());
+    assert_eq!(index.user_tags(&old).unwrap(), ["原专辑标签"]);
+    index
+        .store_scan(root, &scan_root(root, &mut NoTags))
+        .unwrap();
+    let candidates = index.rename_candidates().unwrap();
+    let confirmation = index.confirm_rename(&old, &new);
+    assert!(
+        candidates.is_empty() && confirmation.is_err(),
+        "内容已变化的候选必须清除并拒绝迁移：candidates={candidates:?}, confirmation={confirmation:?}"
+    );
+    assert_eq!(index.user_tags(&old).unwrap(), ["原专辑标签"]);
+    assert!(index.user_tags(&new).unwrap().is_empty());
+}
+
+#[test]
 fn loose_root_audio_is_grouped_by_album_tags() {
     let dir = tempfile::tempdir().unwrap();
     let r = dir.path();

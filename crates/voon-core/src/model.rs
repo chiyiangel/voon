@@ -4,7 +4,9 @@ use std::path::PathBuf;
 
 /// Where a metadata value came from. Higher variants win: a user edit beats
 /// everything, then embedded tags, then the CUE sheet, then the folder name.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(
+    Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, serde::Serialize, serde::Deserialize,
+)]
 pub enum FieldSource {
     FolderName,
     Cue,
@@ -34,7 +36,7 @@ impl FieldSource {
 }
 
 /// A metadata value together with its provenance.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Field<T> {
     pub value: T,
     pub source: FieldSource,
@@ -57,7 +59,7 @@ pub fn merge_field<T>(current: &mut Option<Field<T>>, candidate: Option<Field<T>
 }
 
 /// The album-level fields that carry provenance.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct AlbumMetadata {
     pub title: Option<Field<String>>,
     pub album_artist: Option<Field<String>>,
@@ -131,7 +133,9 @@ impl AlbumMetadata {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(
+    Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, serde::Serialize, serde::Deserialize,
+)]
 pub enum AudioFormat {
     Flac,
     Ape,
@@ -209,15 +213,25 @@ pub struct Collection {
     pub parent: Option<PathBuf>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub enum CoverSource {
     /// An image file next to the audio.
     File(PathBuf),
     /// A picture embedded in this audio file's tags.
     Embedded(PathBuf),
+    /// A particular picture in the file's tag order (zero based).
+    EmbeddedPicture { path: PathBuf, index: u32 },
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+impl CoverSource {
+    pub fn path(&self) -> &std::path::Path {
+        match self {
+            Self::File(path) | Self::Embedded(path) | Self::EmbeddedPicture { path, .. } => path,
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct Cover {
     pub source: CoverSource,
 }
@@ -225,7 +239,7 @@ pub struct Cover {
 /// CUE time position, in CD frames (75 per second).
 pub type CueFrames = u32;
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum TrackSource {
     /// One audio file is one track.
     File { path: PathBuf },
@@ -249,7 +263,7 @@ impl TrackSource {
 }
 
 /// Technical properties read from the audio stream.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct AudioProperties {
     pub sample_rate: Option<u32>,
     pub bit_depth: Option<u8>,
@@ -257,7 +271,7 @@ pub struct AudioProperties {
     pub duration_ms: Option<u64>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Track {
     pub number: Option<u32>,
     pub title: Option<Field<String>>,
@@ -267,7 +281,7 @@ pub struct Track {
     pub properties: AudioProperties,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Disc {
     /// 1-based.
     pub number: u32,
@@ -275,9 +289,13 @@ pub struct Disc {
     pub tracks: Vec<Track>,
 }
 
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct Album {
     pub path: PathBuf,
+    /// Physical Album directories retained by local merges and splits.
+    /// Empty in older snapshots means the ordinary Album's own path.
+    #[serde(default)]
+    pub source_directories: Vec<PathBuf>,
     pub folder_name: String,
     pub discs: Vec<Disc>,
     pub cover: Option<Cover>,
@@ -315,6 +333,28 @@ pub fn content_signature(files: &mut [(String, u64)]) -> String {
 }
 
 impl Album {
+    pub fn physical_directories(&self) -> Vec<&std::path::Path> {
+        if !self.source_directories.is_empty() {
+            self.source_directories
+                .iter()
+                .map(PathBuf::as_path)
+                .collect()
+        } else if self
+            .path
+            .components()
+            .any(|part| part.as_os_str() == LOOSE_DIR)
+        {
+            // Legacy Loose audio snapshots already record the physical files.
+            self.tracks()
+                .filter_map(|track| track.source.audio_path().parent())
+                .collect::<std::collections::BTreeSet<_>>()
+                .into_iter()
+                .collect()
+        } else {
+            vec![self.path.as_path()]
+        }
+    }
+
     pub fn tracks(&self) -> impl Iterator<Item = &Track> {
         self.discs.iter().flat_map(|d| d.tracks.iter())
     }

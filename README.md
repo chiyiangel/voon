@@ -4,8 +4,10 @@ Voon organizes a music library on a NAS. It is a desktop app for macOS and
 Linux, written in Rust with [GPUI](https://www.gpui.rs). The interface is in
 Chinese.
 
-Status: early. `voon-core` (library model, scanner, index) works and is
-tested; `voon-app` is a minimal window while the layout is prototyped.
+Status: phase 1 is implemented; platform acceptance is pending. The native app
+includes library scanning, browsing, metadata editing and local organization.
+See the [ticket index](docs/specs/0001-phase-1/tickets/README.md) for verification
+evidence and the remaining platform acceptance checks.
 
 ## Phase 1 scope
 
@@ -91,14 +93,16 @@ folder name and CUE sheet in phase 1.
 
 | Platform | Status |
 |---|---|
-| macOS (Apple Silicon) | Primary target. Built and checked by hand. |
-| Linux (X11, Wayland) | Supported. Built, linted, tested and run on Debian 13 (X11). |
+| macOS (Apple Silicon) | Current implementation builds locally; agent window checks passed. Mobert's manual acceptance is pending. |
+| Linux (X11, Wayland) | Baseline was verified on Debian 13 (X11). The new phase 1 UI still needs Linux build and window acceptance; Wayland remains untested. |
 
 See [ADR 0003](docs/adr/0003-macos-and-linux.md).
 
 ### Default library root
 
-The app scans the first command-line argument, else `VOON_ROOT`, else:
+The first-launch screen suggests the first command-line argument, else
+`VOON_ROOT`, else the following path. Choose **开始扫描** to add it, or choose
+another folder. Previously added libraries reload from the local index:
 
 - macOS: `/Volumes/NAS1/Music`
 - Linux: `~/Music`
@@ -128,6 +132,29 @@ cargo run -p voon-app -- /path/to/music    # or set VOON_ROOT
 
 Run `cargo fmt --all` and `cargo clippy --workspace --all-targets -- -D warnings`
 before pushing. There is no hosted CI yet.
+
+### macOS application bundle
+
+On a Mac with full Xcode (including the Metal toolchain), run:
+
+```bash
+bash scripts/package-macos.sh          # release build
+bash scripts/package-macos.sh --debug  # faster local preview
+```
+
+The script creates `dist/Voon.app` with a generated icon. Copy it to
+Applications, open it, and optionally keep it in the Dock. The script does
+not add code signing or notarization. If macOS blocks your own local build,
+follow Apple's [instructions for opening an unnotarized app](https://support.apple.com/en-us/102445):
+after attempting to open it, use **System Settings → Privacy & Security →
+Open Anyway**, and confirm the application name. Do this only for a build
+you trust; the packaging script does not change macOS security settings.
+
+The index is stored at `~/Library/Application Support/Voon/library.sqlite3`
+on macOS and `$XDG_DATA_HOME/voon/library.sqlite3` (or
+`~/.local/share/voon/library.sqlite3`) on Linux. Removing a Library root
+hides its scan results and retains edits, tags and manual-collection
+membership for when the same path is added again.
 
 
 ## License

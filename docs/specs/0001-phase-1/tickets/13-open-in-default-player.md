@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 13: 用默认播放器打开
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** 06 专辑详情；外部门槛：原型审核通过（PR #1 / https://voon-design-canvas.vercel.app）
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] Album 与 Track 上都有"用默认播放器打开"
 - [ ] 在 Linux 上实际打开系统默认程序；macOS 由 Mobert 验证
@@ -19,3 +19,7 @@ status: ready-for-agent
 - [ ] macOS 由 Mobert 手动验证
 
 规格：[0001 第一期规格](../../0001-phase-1.md)
+
+## 实现与验证记录（2026-11-11）
+
+已接入专辑和逐曲目的默认播放器入口；Virtual track 打开整轨文件。GPUI 状态测试通过注入系统打开器验证实际传入路径，不启动播放器。Linux 实际播放器与 Mobert 手工验收待办。

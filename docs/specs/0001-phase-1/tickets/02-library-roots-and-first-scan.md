@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 02: 根目录与首次扫描
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** 01 应用骨架；外部门槛：原型审核通过（PR #1 / https://voon-design-canvas.vercel.app）
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 设置中可以添加多个 Library root，也可以移除；移除时弹出提示，说明用户编辑是否保留
 - [ ] 扫描在后台线程运行，扫描期间界面可操作；进度显示当前目录与已发现的 Album 数
@@ -22,3 +22,10 @@ status: ready-for-agent
 - [ ] macOS 由 Mobert 手动验证
 
 规格：[0001 第一期规格](../../0001-phase-1.md)
+
+## 实现与验证记录（2026-11-11）
+
+- 已接通本机 SQLite、根目录添加/移除确认、后台扫描事件、逐张呈现与取消后的部分结果保存。
+- 移除根目录保留字段编辑、User tag 和 Manual collection 成员关系，重新添加相同路径后恢复。
+- `library_roots` 公共接口测试 2 项通过；`library_scan` GPUI 状态层测试 3 项通过，包含防止音乐库覆盖本地索引的只读约束。新增接口已先观察失败再实现。
+- macOS `cargo check --workspace --locked --offline` 通过。Linux 验证、原生界面验收和 Mobert 手工验证仍待完成，暂不标记 `done`。

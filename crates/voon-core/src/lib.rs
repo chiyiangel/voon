@@ -1,6 +1,7 @@
 //! Voon's core: the music library model, the read-only scanner and the
 //! local index. Nothing here depends on the GUI.
 
+pub mod covers;
 pub mod cue;
 pub mod db;
 pub mod facets;

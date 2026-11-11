@@ -20,11 +20,37 @@ use crate::tags::TagInfo;
 
 pub const IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp", "bmp", "gif"];
 
+/// A strict child of this root, never the root itself or a traversal outside
+/// it. Absolute children from a folder picker become relative stored rules.
+pub(crate) fn relative_ignored_path(root: &Path, path: &Path) -> Option<PathBuf> {
+    use std::path::Component;
+    if path
+        .components()
+        .any(|part| matches!(part, Component::ParentDir))
+    {
+        return None;
+    }
+    let relative = if path.is_absolute() {
+        path.strip_prefix(root).ok()?
+    } else {
+        path
+    };
+    let normalized: PathBuf = relative
+        .components()
+        .filter(|part| !matches!(part, Component::CurDir))
+        .collect();
+    (!normalized.as_os_str().is_empty()
+        && normalized
+            .components()
+            .all(|part| matches!(part, Component::Normal(_))))
+    .then_some(normalized)
+}
+
 /// Size and modification time; a file whose stamp is unchanged is not re-read.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct FileStamp {
     pub size: u64,
-    /// Seconds since the Unix epoch.
+    /// Nanoseconds since the Unix epoch; preserves same-second file changes.
     pub mtime: i64,
 }
 
@@ -35,7 +61,7 @@ impl FileStamp {
             .modified()
             .ok()
             .and_then(|t| t.duration_since(UNIX_EPOCH).ok())
-            .map(|d| d.as_secs() as i64)
+            .map(|d| i64::try_from(d.as_nanos()).unwrap_or(i64::MAX))
             .unwrap_or(0);
         Some(Self {
             size: meta.len(),
@@ -121,10 +147,35 @@ pub fn scan_root_with(
     cancel: &AtomicBool,
     progress: &mut dyn FnMut(ScanEvent<'_>),
 ) -> ScanResult {
+    scan_root_with_options(root, tags, cancel, progress, &ScanOptions::default())
+}
+
+/// Additional rules for a single Library root. Paths identify entire
+/// subtrees; invalid paths and the root itself never match.
+#[derive(Clone, Debug, Default)]
+pub struct ScanOptions {
+    pub ignored_paths: Vec<PathBuf>,
+}
+
+/// Scan with user-selected subtrees excluded before folder classification,
+/// including Disc and artwork folders that are read without recursive visits.
+pub fn scan_root_with_options(
+    root: &Path,
+    tags: &mut dyn TagReader,
+    cancel: &AtomicBool,
+    progress: &mut dyn FnMut(ScanEvent<'_>),
+    options: &ScanOptions,
+) -> ScanResult {
     let mut scanner = Scanner {
         tags,
         cancel,
         progress,
+        ignored_paths: options
+            .ignored_paths
+            .iter()
+            .filter_map(|path| relative_ignored_path(root, path))
+            .map(|relative| root.join(relative))
+            .collect(),
         out: ScanResult::default(),
     };
     scanner.visit(root, None, true);
@@ -255,6 +306,7 @@ struct Scanner<'a> {
     tags: &'a mut dyn TagReader,
     cancel: &'a AtomicBool,
     progress: &'a mut dyn FnMut(ScanEvent<'_>),
+    ignored_paths: Vec<PathBuf>,
     out: ScanResult,
 }
 
@@ -266,12 +318,23 @@ enum Found {
 }
 
 impl Scanner<'_> {
+    fn list(&self, dir: &Path) -> std::io::Result<Listing> {
+        let mut listing = list(dir)?;
+        listing.subdirs.retain(|path| {
+            !self
+                .ignored_paths
+                .iter()
+                .any(|ignored| path.starts_with(ignored))
+        });
+        Ok(listing)
+    }
+
     fn visit(&mut self, dir: &Path, collection: Option<&Path>, is_root: bool) -> Found {
         if self.cancel.load(Ordering::Relaxed) {
             return Found::Nothing;
         }
         (self.progress)(ScanEvent::Directory(dir));
-        let listing = match list(dir) {
+        let listing = match self.list(dir) {
             Ok(l) => l,
             Err(e) => {
                 self.out.issues.push(ScanIssue {
@@ -296,7 +359,7 @@ impl Scanner<'_> {
             // In a library root, `CD1` is just a folder (an album of its own).
             if !is_root
                 && let Some(n) = disc_number(&name)
-                && let Ok(sl) = list(sub)
+                && let Ok(sl) = self.list(sub)
                 && !sl.audio.is_empty()
             {
                 disc_dirs.push((n, sub.clone(), sl));
@@ -396,6 +459,7 @@ impl Scanner<'_> {
         let hints = folder_name::parse(&folder_name);
         let mut album = Album {
             path: dir.to_path_buf(),
+            source_directories: vec![dir.to_path_buf()],
             folder_name,
             discs,
             cover: None,
@@ -670,6 +734,7 @@ impl Scanner<'_> {
                 .collect();
             let album = Album {
                 path,
+                source_directories: vec![root.to_path_buf()],
                 folder_name: title,
                 discs,
                 cover: infos
@@ -812,7 +877,32 @@ pub fn resolve_metadata(
     if let Some(s) = sheets.first() {
         merge_field(&mut m.title, f(s.title.clone(), Cue));
         merge_field(&mut m.album_artist, f(s.performer.clone(), Cue));
-        merge_field(&mut m.performers, f(s.performer.clone(), Cue));
+        let mut performers = Vec::new();
+        for sheet in sheets {
+            for track in sheet.files.iter().flat_map(|file| &file.tracks) {
+                if let Some(performer) = track
+                    .performer
+                    .as_deref()
+                    .or(sheet.performer.as_deref())
+                    .map(str::trim)
+                    .filter(|value| !value.is_empty())
+                    && !performers.contains(&performer)
+                {
+                    performers.push(performer);
+                }
+            }
+        }
+        merge_field(
+            &mut m.performers,
+            f(
+                if performers.is_empty() {
+                    s.performer.clone()
+                } else {
+                    Some(performers.join("; "))
+                },
+                Cue,
+            ),
+        );
         merge_field(
             &mut m.composer,
             f(s.composer.clone().or_else(|| s.songwriter.clone()), Cue),

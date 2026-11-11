@@ -1,0 +1,88 @@
+use gpui::{AppContext, TestAppContext};
+use std::fs;
+use voon_app::view_model::{AppState, Navigation};
+use voon_core::{
+    db::Index,
+    scan::{NoTags, scan_root},
+};
+
+#[gpui::test]
+fn attention_items_link_to_album_details_or_expose_the_ungrouped_file(cx: &mut TestAppContext) {
+    let library = tempfile::tempdir().unwrap();
+    fs::create_dir(library.path().join("专辑")).unwrap();
+    fs::write(library.path().join("专辑/01.flac"), b"fixture").unwrap();
+    fs::write(library.path().join("散音频.flac"), b"fixture").unwrap();
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
+        .unwrap();
+    let state = cx.new(|_| AppState::new(index, library.path().into()).unwrap());
+    let items = state.read_with(cx, |state, _| state.attention_items().to_vec());
+    assert_eq!(items.len(), 2);
+    state.update(cx, |state, cx| {
+        state.navigate(Navigation::NeedsAttention, cx)
+    });
+    let album = items
+        .iter()
+        .find(|item| item.kind == "TitleFromFolderOnly")
+        .unwrap();
+    state.update(cx, |state, cx| {
+        state.open_attention(&album.path, &album.kind, cx)
+    });
+    state.read_with(cx, |state, _| {
+        assert_eq!(
+            state.album_detail().unwrap().path,
+            library.path().join("专辑")
+        )
+    });
+    let loose = items
+        .iter()
+        .find(|item| item.kind == "LooseUntagged")
+        .unwrap();
+    state.update(cx, |state, cx| {
+        state.open_attention(&loose.path, &loose.kind, cx)
+    });
+    state.read_with(cx, |state, _| {
+        assert!(state.selected_album().is_none());
+        assert_eq!(state.attention_path(), Some(loose.path.as_path()));
+    });
+}
+
+#[gpui::test]
+fn confirming_a_rename_removes_the_candidate_and_refreshes_the_new_album(cx: &mut TestAppContext) {
+    let library = tempfile::tempdir().unwrap();
+    let old = library.path().join("旧路径");
+    let new = library.path().join("新路径");
+    fs::create_dir(&old).unwrap();
+    fs::write(old.join("01.flac"), b"fixture").unwrap();
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
+        .unwrap();
+    index.set_user_edit(&old, "title", "整理后的标题").unwrap();
+    fs::rename(&old, &new).unwrap();
+    index
+        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
+        .unwrap();
+    let state = cx.new(|_| AppState::new(index, library.path().into()).unwrap());
+    let before = state.read_with(cx, |state, _| state.attention_items().len());
+    state.update(cx, |state, cx| {
+        state.confirm_rename(&old, &new, cx).unwrap()
+    });
+    state.read_with(cx, |state, _| {
+        assert!(state.attention_items().len() < before);
+        // Migrating a completed title resolves both the rename candidate and
+        // the destination's folder-only title warning.
+        assert!(
+            !state
+                .attention_items()
+                .iter()
+                .any(|item| matches!(item.kind.as_str(), "PossibleRename" | "TitleFromFolderOnly"))
+        );
+        assert_eq!(state.album_detail().unwrap().path, new);
+        assert_eq!(
+            state.album_detail().unwrap().display_title(),
+            "整理后的标题"
+        );
+    });
+}
