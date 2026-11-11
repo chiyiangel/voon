@@ -36,9 +36,14 @@ pub(crate) fn for_album(album: &crate::Album) -> Vec<MetadataCandidate> {
     let mut candidates: Vec<MetadataCandidate> = vec![];
     for original in &album.candidates {
         let mut candidate = original.clone();
-        candidate
-            .tracks
-            .retain(|source| album.tracks().any(|track| track.source == *source));
+        candidate.tracks.clear();
+        for scope in &original.tracks {
+            for track in album.tracks() {
+                if let Some(intersection) = intersect_scope(scope, &track.source) {
+                    append_scope(&mut candidate.tracks, intersection);
+                }
+            }
+        }
         if candidate.tracks.is_empty() {
             continue;
         }
@@ -51,13 +56,98 @@ pub(crate) fn for_album(album: &crate::Album) -> Vec<MetadataCandidate> {
                 && previous.status == candidate.status
         }) {
             for track in candidate.tracks {
-                if !previous.tracks.contains(&track) {
-                    previous.tracks.push(track);
-                }
+                append_scope(&mut previous.tracks, track);
             }
         } else {
             candidates.push(candidate);
         }
     }
     candidates
+}
+
+fn intersect_scope(source: &TrackSource, displayed: &TrackSource) -> Option<TrackSource> {
+    if source.audio_path() != displayed.audio_path() {
+        return None;
+    }
+    match (source, displayed) {
+        (TrackSource::File { .. }, _) => Some(displayed.clone()),
+        (_, TrackSource::File { .. }) => Some(source.clone()),
+        (
+            TrackSource::Virtual {
+                image,
+                cue,
+                start,
+                end,
+            },
+            TrackSource::Virtual {
+                start: other_start,
+                end: other_end,
+                ..
+            },
+        ) => {
+            let start = (*start).max(*other_start);
+            let end = match (end, other_end) {
+                (Some(left), Some(right)) => Some((*left).min(*right)),
+                (left, right) => left.or(*right),
+            };
+            if end.is_some_and(|end| end <= start) {
+                return None;
+            }
+            Some(TrackSource::Virtual {
+                image: image.clone(),
+                cue: cue.clone(),
+                start,
+                end,
+            })
+        }
+    }
+}
+
+fn append_scope(scopes: &mut Vec<TrackSource>, mut scope: TrackSource) {
+    while let Some((position, merged)) = scopes
+        .iter()
+        .enumerate()
+        .find_map(|(position, old)| merge_spans(old, &scope).map(|merged| (position, merged)))
+    {
+        scopes.remove(position);
+        scope = merged;
+    }
+    if !scopes.contains(&scope) {
+        scopes.push(scope);
+    }
+}
+
+fn merge_spans(left: &TrackSource, right: &TrackSource) -> Option<TrackSource> {
+    let (
+        TrackSource::Virtual {
+            image,
+            cue,
+            start,
+            end,
+        },
+        TrackSource::Virtual {
+            image: other_image,
+            cue: other_cue,
+            start: other_start,
+            end: other_end,
+        },
+    ) = (left, right)
+    else {
+        return None;
+    };
+    if image != other_image
+        || cue != other_cue
+        || (*start).max(*other_start) > end.unwrap_or(u32::MAX).min(other_end.unwrap_or(u32::MAX))
+    {
+        return None;
+    }
+    Some(TrackSource::Virtual {
+        image: image.clone(),
+        cue: cue.clone(),
+        start: (*start).min(*other_start),
+        end: match (end, other_end) {
+            (Some(left), Some(right)) => Some((*left).max(*right)),
+            _ => None,
+        },
+    })
 }

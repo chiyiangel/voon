@@ -66,14 +66,26 @@ pub(super) fn collect(
     );
     for observation in sheets {
         let sheet = &observation.sheet;
+        let scopes: Vec<_> = sheet
+            .files
+            .iter()
+            .enumerate()
+            .flat_map(|(file_index, file)| {
+                file.tracks
+                    .iter()
+                    .enumerate()
+                    .map(move |(track_index, track)| {
+                        (
+                            cue_scope(observation, file_index, track_index),
+                            track.performer.clone().or_else(|| sheet.performer.clone()),
+                        )
+                    })
+            })
+            .collect();
         let source = CandidateSource {
             source: FieldSource::Cue,
             path: &observation.path,
-            tracks: tracks
-                .iter()
-                .filter(|track| observation.audio_paths.contains(track.audio_path()))
-                .cloned()
-                .collect(),
+            tracks: scopes.iter().map(|(scope, _)| scope.clone()).collect(),
             observed_at: observation.observed_at,
             status: SourceStatus::Current,
         };
@@ -98,37 +110,12 @@ pub(super) fn collect(
                 ("catalog_number", sheet.catalog.clone()),
             ],
         );
-        for (file, audio) in sheet.files.iter().zip(&observation.audio_paths) {
-            for cue_track in &file.tracks {
-                let scope = source
-                    .tracks
-                    .iter()
-                    .filter(|track| {
-                        track.audio_path() == audio
-                            && match track {
-                                TrackSource::Virtual { start, .. } => {
-                                    *start == cue_track.start.unwrap_or(0)
-                                }
-                                TrackSource::File { .. } => true,
-                            }
-                    })
-                    .cloned()
-                    .collect();
-                CandidateSource {
-                    tracks: scope,
-                    ..source.clone()
-                }
-                .append(
-                    &mut candidates,
-                    [(
-                        "performers",
-                        cue_track
-                            .performer
-                            .clone()
-                            .or_else(|| sheet.performer.clone()),
-                    )],
-                );
+        for (scope, performer) in scopes {
+            CandidateSource {
+                tracks: vec![scope],
+                ..source.clone()
             }
+            .append(&mut candidates, [("performers", performer)]);
         }
     }
     for (path, observation) in observations {
@@ -179,4 +166,22 @@ pub(super) fn collect(
         );
     }
     candidates
+}
+
+// A source sheet retains its own ranges even when another sheet defines displayed Tracks.
+fn cue_scope(observation: &ObservedCue, file_index: usize, track_index: usize) -> TrackSource {
+    let audio = &observation.audio_paths[file_index];
+    if observation.sheet.files.len() == 1 {
+        let tracks = &observation.sheet.files[file_index].tracks;
+        TrackSource::Virtual {
+            image: audio.clone(),
+            cue: observation.path.clone(),
+            start: tracks[track_index].start.unwrap_or(0),
+            end: tracks.get(track_index + 1).and_then(|track| track.start),
+        }
+    } else {
+        TrackSource::File {
+            path: audio.clone(),
+        }
+    }
 }

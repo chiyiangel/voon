@@ -390,3 +390,92 @@ fn alternate_cue_sources_remain_comparable_without_changing_the_first_sheet_winn
             .any(|candidate| candidate.value == "Alternate")
     );
 }
+
+#[test]
+fn alternate_cue_performers_keep_their_own_boundaries_and_follow_logical_splits() {
+    let library = tempfile::tempdir().unwrap();
+    let album = library.path().join("Album");
+    std::fs::create_dir(&album).unwrap();
+    std::fs::write(album.join("image.dff"), b"fixture").unwrap();
+    for (file, split, first, second) in [
+        ("a.cue", "03:00:00", "Primary first", "Primary second"),
+        ("b.cue", "04:00:00", "Alternate first", "Alternate second"),
+    ] {
+        std::fs::write(album.join(file), format!("TITLE \"{file}\"\nFILE \"image.dff\" WAVE\n TRACK 01 AUDIO\n PERFORMER \"{first}\"\n INDEX 01 00:00:00\n TRACK 02 AUDIO\n PERFORMER \"{second}\"\n INDEX 01 {split}\n")).unwrap();
+    }
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(
+            library.path(),
+            &scan_root(library.path(), &mut voon_core::scan::NoTags),
+        )
+        .unwrap();
+    let fields = index.metadata_comparison(&album).unwrap();
+    let performers = fields
+        .iter()
+        .find(|field| field.name == "performers")
+        .unwrap();
+    assert_eq!(
+        performers.automatic.as_ref().unwrap().value,
+        "Primary first; Primary second"
+    );
+    let alternate = performers
+        .candidates
+        .iter()
+        .find(|candidate| candidate.value == "Alternate second")
+        .unwrap();
+    assert!(
+        matches!(&alternate.tracks[..], [voon_core::TrackSource::Virtual { cue, start: 18_000, end: None, .. }] if cue == &album.join("b.cue"))
+    );
+    let first = performers
+        .candidates
+        .iter()
+        .find(|candidate| candidate.value == "Alternate first")
+        .unwrap();
+    assert!(matches!(
+        &first.tracks[..],
+        [voon_core::TrackSource::Virtual {
+            start: 0,
+            end: Some(18_000),
+            ..
+        }]
+    ));
+    let parts = index
+        .split_album(
+            &album,
+            voon_core::db::SplitMode::SelectedTracks(vec![voon_core::db::TrackRef {
+                disc: 0,
+                track: 0,
+            }]),
+        )
+        .unwrap();
+    let early = parts
+        .iter()
+        .find(|part| {
+            let album = index.album(part).unwrap().unwrap();
+            matches!(
+                album.tracks().next().unwrap().source,
+                voon_core::TrackSource::Virtual { start: 0, .. }
+            )
+        })
+        .unwrap();
+    let fields = index.metadata_comparison(early).unwrap();
+    let performers = fields
+        .iter()
+        .find(|field| field.name == "performers")
+        .unwrap();
+    assert!(
+        !performers
+            .candidates
+            .iter()
+            .any(|candidate| candidate.value == "Alternate second")
+    );
+    let first = performers
+        .candidates
+        .iter()
+        .find(|candidate| candidate.value == "Alternate first")
+        .unwrap();
+    assert!(
+        matches!(&first.tracks[..], [voon_core::TrackSource::Virtual { cue, start: 0, end: Some(13_500), .. }] if cue == &album.join("b.cue"))
+    );
+}
