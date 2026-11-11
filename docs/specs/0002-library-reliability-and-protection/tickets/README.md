@@ -15,11 +15,11 @@ status: in-progress
 | [03](03-cue-duration-and-performers.md) | CUE 时长与曲目演奏者完整呈现 | — | in-progress |
 | [04](04-persistent-cover-thumbnails.md) | 当前 Cover 持久化与离线重开 | — | done |
 | [05](05-new-index-and-version-guard.md) | 新建索引与资料库版本保护 | — | in-progress |
-| [06](06-scan-interruption-and-organization.md) | 取消离线与结构整理保持一致 | [01](01-preserve-complete-albums.md) | in-progress |
-| [07](07-retry-and-force-reread.md) | 重试失败项与强制重读标签 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | ready-for-agent |
+| [06](06-scan-interruption-and-organization.md) | 取消离线与结构整理保持一致 | [01](01-preserve-complete-albums.md) | done |
+| [07](07-retry-and-force-reread.md) | 重试失败项与强制重读标签 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | in-progress |
 | [08](08-title-and-year-candidates.md) | 标题与年份的完整来源比较 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | done |
 | [09](09-all-field-candidates.md) | 全部现有字段的候选与编辑一致性 | [08](08-title-and-year-candidates.md) | done |
-| [10](10-library-cover-prefetch.md) | 全库封面预缓存与失败重试 | [04](04-persistent-cover-thumbnails.md) | ready-for-agent |
+| [10](10-library-cover-prefetch.md) | 全库封面预缓存与失败重试 | [04](04-persistent-cover-thumbnails.md) | done |
 | [11](11-end-to-end-acceptance.md) | 故障交错与真实样本联验 | [03](03-cue-duration-and-performers.md)、[05](05-new-index-and-version-guard.md)、[06](06-scan-interruption-and-organization.md)、[07](07-retry-and-force-reread.md)、[09](09-all-field-candidates.md)、[10](10-library-cover-prefetch.md) | ready-for-agent |
 
 ## 当前可开工前沿

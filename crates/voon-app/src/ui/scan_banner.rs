@@ -140,6 +140,39 @@ pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
         }
         banner = banner.child(row);
     }
+    let progress = snapshot.cover_cache_progress();
+    if progress.total > 0 {
+        let mut row = div()
+            .flex()
+            .items_center()
+            .justify_between()
+            .gap_3()
+            .px_4()
+            .py_2()
+            .bg(rgb(0xf4f4f6))
+            .child(format!(
+                "封面缓存 · 已就绪 {}/{} · 未缓存 {} · 处理中 {} · 失败 {} · 无封面 {}",
+                progress.ready,
+                progress.total - progress.no_cover,
+                progress.pending,
+                progress.loading,
+                progress.failed,
+                progress.no_cover
+            ));
+        if progress.failed > 0 {
+            let retry = state.clone();
+            row = row.child(
+                div()
+                    .id("retry-failed-covers")
+                    .cursor_pointer()
+                    .child("重试失败封面")
+                    .on_click(move |_, _, cx| {
+                        retry.update(cx, |state, cx| state.retry_failed_covers(cx))
+                    }),
+            );
+        }
+        banner = banner.child(row);
+    }
     if let Some(error) = snapshot.error() {
         banner = banner.child(
             div()

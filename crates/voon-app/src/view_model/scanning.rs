@@ -295,6 +295,7 @@ impl AppState {
     /// Drain only a bounded batch so a fast scan cannot starve UI input.
     pub fn poll_scan(&mut self, cx: &mut Context<Self>) {
         self.poll_root_availability(cx);
+        self.prefetch_covers(cx);
         self.poll_detail(cx);
         self.poll_cover_picker(cx);
         for _ in 0..64 {

@@ -290,6 +290,7 @@ impl AppState {
         }
         self.refresh_selected_album(cx)?;
         self.refresh_covers();
+        self.prefetch_covers(cx);
         cx.notify();
         Ok(())
     }

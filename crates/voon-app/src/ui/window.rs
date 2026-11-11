@@ -22,6 +22,7 @@ pub struct VoonWindow {
 
 impl VoonWindow {
     pub fn new(state: Entity<AppState>, cx: &mut Context<Self>) -> Self {
+        state.update(cx, |state, cx| state.prefetch_covers(cx));
         let subscription = cx.observe(&state, |_, _, cx| cx.notify());
         let grid = cx.new(|cx| super::album_grid::AlbumGrid::new(state.clone(), cx));
         let covers = grid.read(cx).cover_cache();

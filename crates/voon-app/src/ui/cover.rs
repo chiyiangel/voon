@@ -5,6 +5,7 @@ use crate::view_model::grid::CoverStatus;
 
 pub fn render(status: Option<CoverStatus>, edge: f32, selected: bool, theme: Theme) -> AnyElement {
     let placeholder = match &status {
+        Some(CoverStatus::Pending) => "尚未缓存封面",
         Some(CoverStatus::Loading) => "正在缓存封面",
         Some(CoverStatus::Unavailable) => "封面不可用",
         _ => "无封面",

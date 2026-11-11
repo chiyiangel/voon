@@ -58,6 +58,7 @@ impl AppState {
 
 #[derive(Clone)]
 pub enum CoverStatus {
+    Pending,
     Loading,
     Ready(Arc<RenderImage>),
     Unavailable,
@@ -70,8 +71,8 @@ struct CachedCover {
     started: bool,
 }
 
-/// A bounded thumbnail cache. Only requested (visible) covers are queued; up to
-/// four background reads/decode jobs run together, away from GPUI rendering.
+/// A bounded set of requested images shared by browsing views. A linked cache
+/// delegates loading and persistent assets to the AppState library queue.
 #[derive(Default)]
 pub struct CoverCache {
     entries: HashMap<Cover, CachedCover>,
@@ -81,7 +82,6 @@ pub struct CoverCache {
     revision: u64,
     _state_subscription: Option<Subscription>,
     state: Option<Entity<AppState>>,
-    linked_statuses: HashMap<Cover, CoverStatus>,
 }
 
 impl CoverCache {
@@ -90,14 +90,25 @@ impl CoverCache {
     pub fn new(state: &Entity<AppState>, cx: &mut Context<Self>) -> Self {
         let revision = state.read(cx).cover_revision();
         let subscription = cx.observe(state, |this, state, cx| {
-            this.linked_statuses = state.read(cx).thumbnail_statuses();
-            let revision = state.read(cx).cover_revision();
+            let state = state.read(cx);
+            let revision = state.cover_revision();
             if this.revision != revision {
                 this.revision = revision;
                 this.entries.clear();
                 this.queue.clear();
                 // In-flight jobs still occupy their slots until completion.
                 // Their revision/identity prevents them populating new entries.
+            } else {
+                // Prefetch may cover thousands of Albums. Mirror only the
+                // bounded set this consumer has actually requested.
+                this.entries.retain(|cover, entry| {
+                    if let Some(status) = state.cover_thumbnail(cover) {
+                        entry.status = status;
+                        true
+                    } else {
+                        false
+                    }
+                });
             }
             cx.notify();
         });
@@ -110,35 +121,34 @@ impl CoverCache {
     }
 
     pub fn status(&self, cover: &Cover) -> Option<CoverStatus> {
-        if self.state.is_some() {
-            return self.linked_statuses.get(cover).cloned();
-        }
         self.entries.get(cover).map(|entry| entry.status.clone())
     }
 
     pub fn request(&mut self, cover: Cover, cx: &mut Context<Self>) -> CoverStatus {
+        self.clock += 1;
         if let Some(state) = &self.state {
             let status = state.update(cx, |state, cx| {
                 state.request_cover_thumbnail(cover.clone(), cx)
             });
-            self.linked_statuses.insert(cover, status.clone());
+            if !self.entries.contains_key(&cover) {
+                self.make_room();
+            }
+            self.entries.insert(
+                cover,
+                CachedCover {
+                    identity: self.clock,
+                    status: status.clone(),
+                    used: self.clock,
+                    started: false,
+                },
+            );
             return status;
         }
-        self.clock += 1;
         if let Some(entry) = self.entries.get_mut(&cover) {
             entry.used = self.clock;
             return entry.status.clone();
         }
-        if self.entries.len() >= 256
-            && let Some(oldest) = self
-                .entries
-                .iter()
-                .min_by_key(|(_, entry)| entry.used)
-                .map(|(key, _)| key.clone())
-        {
-            self.entries.remove(&oldest);
-            self.queue.retain(|queued| queued != &oldest);
-        }
+        self.make_room();
         self.entries.insert(
             cover.clone(),
             CachedCover {
@@ -151,6 +161,19 @@ impl CoverCache {
         self.queue.push_back(cover);
         self.start_next(cx);
         CoverStatus::Loading
+    }
+
+    fn make_room(&mut self) {
+        if self.entries.len() >= 256
+            && let Some(oldest) = self
+                .entries
+                .iter()
+                .min_by_key(|(_, entry)| entry.used)
+                .map(|(key, _)| key.clone())
+        {
+            self.entries.remove(&oldest);
+            self.queue.retain(|queued| queued != &oldest);
+        }
     }
 
     fn start_next(&mut self, cx: &mut Context<Self>) {

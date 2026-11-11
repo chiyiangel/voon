@@ -6,7 +6,7 @@ use gpui::{AppContext, Context, RenderImage};
 use std::{
     collections::{HashMap, HashSet, VecDeque},
     fs,
-    io::{Cursor, Write},
+    io::{Cursor, Read, Write},
     path::{Path, PathBuf},
     sync::{
         Arc, Mutex,
@@ -18,13 +18,26 @@ use voon_core::Cover;
 
 const MEMORY_CAPACITY: usize = 256;
 const CONCURRENCY: usize = 4;
+const MAX_IMAGE_BYTES: usize = 64 * 1024 * 1024;
 static TEMP_ID: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ThumbnailState {
+    NoCover,
+    Pending,
     Loading,
     Ready,
     Failed(String),
+}
+
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct CoverProgress {
+    pub total: usize,
+    pub no_cover: usize,
+    pub pending: usize,
+    pub loading: usize,
+    pub ready: usize,
+    pub failed: usize,
 }
 
 struct Entry {
@@ -34,6 +47,7 @@ struct Entry {
     path: Option<PathBuf>,
     image: Option<Arc<RenderImage>>,
     started: bool,
+    queued: bool,
 }
 
 pub(super) struct CoverThumbnails {
@@ -45,6 +59,7 @@ pub(super) struct CoverThumbnails {
     // Invalidation and the two atomic publication renames share this gate.
     // Slow reads/decoding/writes never hold it.
     generation: Arc<Mutex<u64>>,
+    prefetch_needed: bool,
 }
 
 impl CoverThumbnails {
@@ -60,6 +75,7 @@ impl CoverThumbnails {
             active: HashSet::new(),
             clock: 0,
             generation: Arc::new(Mutex::new(0)),
+            prefetch_needed: true,
         }
     }
 
@@ -67,6 +83,7 @@ impl CoverThumbnails {
         *self.generation.lock().unwrap() += 1;
         self.entries.clear();
         self.queue.clear();
+        self.prefetch_needed = true;
     }
 }
 
@@ -77,6 +94,81 @@ impl Drop for CoverThumbnails {
 }
 
 impl AppState {
+    /// Retry current failed Covers without changing scan state or accepted data.
+    pub fn retry_failed_covers(&mut self, cx: &mut Context<Self>) {
+        let failed: HashSet<_> = self
+            .albums
+            .iter()
+            .filter_map(|album| album.cover.as_ref())
+            .filter(|cover| {
+                matches!(
+                    self.cover_thumbnail_state(cover),
+                    Some(ThumbnailState::Failed(_))
+                )
+            })
+            .cloned()
+            .collect();
+        for cover in failed {
+            self.thumbnails.entries.remove(&cover);
+            self.request_cover_thumbnail(cover, cx);
+        }
+        cx.notify();
+    }
+
+    pub fn album_cover_state(&self, album: &Path) -> Option<ThumbnailState> {
+        let album = self.albums.iter().find(|row| row.path == album)?;
+        Some(match &album.cover {
+            None => ThumbnailState::NoCover,
+            Some(cover) => self
+                .cover_thumbnail_state(cover)
+                .cloned()
+                .unwrap_or(ThumbnailState::Pending),
+        })
+    }
+
+    /// Per-Album asset state, independent of scanning and decoded-image residency.
+    pub fn cover_cache_progress(&self) -> CoverProgress {
+        let mut progress = CoverProgress {
+            total: self.albums.len(),
+            ..CoverProgress::default()
+        };
+        for album in &self.albums {
+            match album
+                .cover
+                .as_ref()
+                .and_then(|cover| self.cover_thumbnail_state(cover))
+            {
+                _ if album.cover.is_none() => progress.no_cover += 1,
+                None | Some(ThumbnailState::Pending) => progress.pending += 1,
+                Some(ThumbnailState::Loading) => progress.loading += 1,
+                Some(ThumbnailState::Ready) => progress.ready += 1,
+                Some(ThumbnailState::Failed(_)) => progress.failed += 1,
+                Some(ThumbnailState::NoCover) => progress.no_cover += 1,
+            }
+        }
+        progress
+    }
+
+    /// Called when the application attaches to a loaded Index and after an
+    /// accepted library reload. It never depends on the current viewport.
+    pub fn prefetch_covers(&mut self, cx: &mut Context<Self>) {
+        if !self.thumbnails.prefetch_needed {
+            return;
+        }
+        self.thumbnails.prefetch_needed = false;
+        let covers: Vec<_> = self
+            .albums
+            .iter()
+            .filter_map(|album| album.cover.clone())
+            .collect();
+        for cover in covers {
+            if !self.thumbnails.entries.contains_key(&cover) {
+                self.request_cover_thumbnail(cover, cx);
+            }
+        }
+        cx.notify();
+    }
+
     pub fn cover_thumbnail_directory(&self) -> Option<&Path> {
         self.thumbnails.directory.as_deref()
     }
@@ -93,22 +185,13 @@ impl AppState {
         let entry = self.thumbnails.entries.get(cover)?;
         Some(if let Some(image) = &entry.image {
             CoverStatus::Ready(image.clone())
+        } else if matches!(entry.state, ThumbnailState::Pending) {
+            CoverStatus::Pending
         } else if matches!(entry.state, ThumbnailState::Failed(_)) {
             CoverStatus::Unavailable
         } else {
             CoverStatus::Loading
         })
-    }
-
-    pub(super) fn thumbnail_statuses(&self) -> HashMap<Cover, CoverStatus> {
-        self.thumbnails
-            .entries
-            .keys()
-            .filter_map(|cover| {
-                self.cover_thumbnail(cover)
-                    .map(|status| (cover.clone(), status))
-            })
-            .collect()
     }
 
     pub fn request_cover_thumbnail(&mut self, cover: Cover, cx: &mut Context<Self>) -> CoverStatus {
@@ -118,28 +201,37 @@ impl AppState {
             entry.used = clock;
             if entry.image.is_some()
                 || entry.started
+                || entry.queued
                 || matches!(entry.state, ThumbnailState::Failed(_))
             {
                 return self.cover_thumbnail(&cover).unwrap();
             }
-            if matches!(entry.state, ThumbnailState::Loading) {
-                return CoverStatus::Loading;
+            if matches!(
+                entry.state,
+                ThumbnailState::Pending | ThumbnailState::Loading
+            ) {
+                return self.cover_thumbnail(&cover).unwrap();
             }
+            // A decoded-image miss does not invalidate a durable Ready asset.
+            entry.identity = clock;
+            entry.queued = true;
+        } else {
+            self.thumbnails.entries.insert(
+                cover.clone(),
+                Entry {
+                    identity: clock,
+                    used: clock,
+                    state: ThumbnailState::Pending,
+                    path: None,
+                    image: None,
+                    started: false,
+                    queued: true,
+                },
+            );
         }
-        self.thumbnails.entries.insert(
-            cover.clone(),
-            Entry {
-                identity: clock,
-                used: clock,
-                state: ThumbnailState::Loading,
-                path: None,
-                image: None,
-                started: false,
-            },
-        );
-        self.thumbnails.queue.push_back(cover);
+        self.thumbnails.queue.push_back(cover.clone());
         self.start_cover_thumbnails(cx);
-        CoverStatus::Loading
+        self.cover_thumbnail(&cover).unwrap()
     }
 
     fn start_cover_thumbnails(&mut self, cx: &mut Context<Self>) {
@@ -154,6 +246,10 @@ impl AppState {
                 continue;
             }
             entry.started = true;
+            entry.queued = false;
+            if !matches!(entry.state, ThumbnailState::Ready) {
+                entry.state = ThumbnailState::Loading;
+            }
             let identity = entry.identity;
             self.thumbnails.active.insert(identity);
             let generation = self.thumbnails.generation.clone();
@@ -178,7 +274,10 @@ impl AppState {
                                 entry.image = Some(image);
                                 entry.state = ThumbnailState::Ready;
                             }
-                            Err(error) => entry.state = ThumbnailState::Failed(error),
+                            Err(error) => {
+                                entry.path = None;
+                                entry.state = ThumbnailState::Failed(error);
+                            }
                         }
                         while this
                             .thumbnails
@@ -232,18 +331,31 @@ fn digest(bytes: &[u8]) -> String {
 }
 
 fn decode(bytes: &[u8]) -> Result<image::DynamicImage, String> {
-    if bytes.len() > 64 * 1024 * 1024 {
+    if bytes.len() > MAX_IMAGE_BYTES {
         return Err("封面图片超过本地缩略图读取上限".into());
     }
     let mut reader = image::ImageReader::new(Cursor::new(bytes))
         .with_guessed_format()
         .map_err(|error| format!("无法识别封面图片：{error}"))?;
     let mut limits = image::Limits::default();
-    limits.max_alloc = Some(64 * 1024 * 1024);
+    limits.max_alloc = Some(MAX_IMAGE_BYTES as u64);
     reader.limits(limits);
     reader
         .decode()
         .map_err(|error| format!("无法解码封面图片：{error}"))
+}
+
+fn read_bounded(path: &Path, limit: usize) -> std::io::Result<Vec<u8>> {
+    let file = fs::File::open(path)?;
+    if file.metadata()?.len() > limit as u64 {
+        return Err(std::io::Error::other("封面文件超过本地读取上限"));
+    }
+    let mut bytes = Vec::new();
+    file.take(limit as u64 + 1).read_to_end(&mut bytes)?;
+    if bytes.len() > limit {
+        return Err(std::io::Error::other("封面文件在读取时超过本地上限"));
+    }
+    Ok(bytes)
 }
 
 fn rendered(decoded: image::DynamicImage) -> Arc<RenderImage> {
@@ -261,7 +373,8 @@ fn cached(
     source_stamp: Option<&str>,
 ) -> Result<(PathBuf, image::DynamicImage), String> {
     let record: serde_json::Value = serde_json::from_slice(
-        &fs::read(directory.join(format!("{key}.json"))).map_err(|error| error.to_string())?,
+        &read_bounded(&directory.join(format!("{key}.json")), 64 * 1024)
+            .map_err(|error| error.to_string())?,
     )
     .map_err(|error| error.to_string())?;
     if record["cover"] != serde_json::to_value(cover).unwrap()
@@ -276,7 +389,8 @@ fn cached(
         })
         .ok_or("本地封面关联损坏")?;
     let path = directory.join(filename);
-    let bytes = fs::read(&path).map_err(|error| format!("无法读取本地封面：{error}"))?;
+    let bytes = read_bounded(&path, MAX_IMAGE_BYTES)
+        .map_err(|error| format!("无法读取本地封面：{error}"))?;
     if filename != format!("{key}-{}.png", digest(&bytes)) {
         return Err("本地封面内容损坏，请在来源恢复后重试".into());
     }
@@ -297,8 +411,13 @@ fn load(
     {
         return Ok((Some(path), rendered(decoded)));
     }
-    let bytes = voon_core::tags::read_cover(cover)
-        .map_err(|error| format!("无法读取封面 {}：{error}", cover.source.path().display()))?;
+    let bytes = match &cover.source {
+        voon_core::CoverSource::File(path) => {
+            read_bounded(path, MAX_IMAGE_BYTES).map_err(|error| error.to_string())
+        }
+        _ => voon_core::tags::read_cover(cover).map_err(|error| error.to_string()),
+    }
+    .map_err(|error| format!("无法读取封面 {}：{error}", cover.source.path().display()))?;
     let decoded = decode(&bytes)
         .map_err(|error| format!("{error}\n{}", cover.source.path().display()))?
         .thumbnail(256, 256);
