@@ -17,6 +17,72 @@ impl TagReader for Reader {
 }
 
 #[test]
+fn a_repaired_dsf_with_the_same_stamp_is_retried_after_a_header_parse_failure() {
+    let library = tempfile::tempdir().unwrap();
+    let album = library.path().join("DSF");
+    std::fs::create_dir(&album).unwrap();
+    let audio = album.join("01.dsf");
+    std::fs::write(&audio, [0u8; 80]).unwrap();
+    let stamp = FileStamp::of(&audio).unwrap();
+    let modified = std::fs::metadata(&audio).unwrap().modified().unwrap();
+    let mut index = Index::open_in_memory().unwrap();
+    let scan = {
+        let mut tags = CachedTags::new(&index, voon_core::scan::DiskTags);
+        let scan = scan_root(library.path(), &mut tags);
+        assert_eq!(tags.reads, 1);
+        scan
+    };
+    index.store_scan(library.path(), &scan).unwrap();
+    assert!(matches!(
+        index.tag_observation(&audio).unwrap().unwrap().result,
+        TagReadResult::ParseFailure(_)
+    ));
+
+    let mut repaired = [0u8; 80];
+    repaired[..4].copy_from_slice(b"DSD ");
+    repaired[4..12].copy_from_slice(&28u64.to_le_bytes());
+    repaired[12..20].copy_from_slice(&80u64.to_le_bytes());
+    repaired[28..32].copy_from_slice(b"fmt ");
+    repaired[32..40].copy_from_slice(&52u64.to_le_bytes());
+    repaired[52..56].copy_from_slice(&2u32.to_le_bytes());
+    repaired[56..60].copy_from_slice(&2_822_400u32.to_le_bytes());
+    repaired[60..64].copy_from_slice(&1u32.to_le_bytes());
+    repaired[64..72].copy_from_slice(&8_467_200u64.to_le_bytes());
+    std::fs::write(&audio, repaired).unwrap();
+    std::fs::OpenOptions::new()
+        .write(true)
+        .open(&audio)
+        .unwrap()
+        .set_times(std::fs::FileTimes::new().set_modified(modified))
+        .unwrap();
+    assert_eq!(FileStamp::of(&audio), Some(stamp));
+
+    let scan = {
+        let mut tags = CachedTags::new(&index, voon_core::scan::DiskTags);
+        let scan = scan_root(library.path(), &mut tags);
+        assert_eq!(tags.reads, 1, "普通重扫应重试同 stamp 的 DSF 解析失败");
+        scan
+    };
+    index.store_scan(library.path(), &scan).unwrap();
+    assert!(matches!(
+        index.tag_observation(&audio).unwrap().unwrap().result,
+        TagReadResult::NoTags(_)
+    ));
+    assert_eq!(
+        index.album(&album).unwrap().unwrap().discs[0].tracks[0].properties,
+        voon_core::AudioProperties {
+            sample_rate: Some(2_822_400),
+            bit_depth: Some(1),
+            channels: Some(2),
+            duration_ms: Some(3_000),
+        }
+    );
+    let mut tags = CachedTags::new(&index, voon_core::scan::DiskTags);
+    scan_root(library.path(), &mut tags);
+    assert_eq!(tags.reads, 0, "成功无标签的 DSF 应继续复用缓存");
+}
+
+#[test]
 fn forcing_selected_audio_rereads_it_without_changing_other_successful_observations() {
     let library = tempfile::tempdir().unwrap();
     let selected = library.path().join("甲");

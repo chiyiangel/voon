@@ -233,6 +233,8 @@ pub fn observe(path: &Path, format: AudioFormat) -> TagObservation {
 pub enum TagError {
     #[error("没有内嵌封面")]
     MissingPicture,
+    #[error("DSF 文件头无效：缺少 DSD 或 fmt 标识")]
+    InvalidDsfHeader,
     #[error("tags for {0} are not supported yet")]
     Unsupported(&'static str),
     #[error("reading tags: {0}")]
@@ -364,7 +366,7 @@ fn read_dsf_header(path: &Path) -> Result<TagInfo, TagError> {
     let mut buf = [0u8; 28 + 52];
     file.read_exact(&mut buf)?;
     let mut info = TagInfo {
-        properties: parse_dsf_header(&buf).unwrap_or_default(),
+        properties: parse_dsf_header(&buf).ok_or(TagError::InvalidDsfHeader)?,
         ..Default::default()
     };
     let metadata = u64::from_le_bytes(buf[20..28].try_into().unwrap());
