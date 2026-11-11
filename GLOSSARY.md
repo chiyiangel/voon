@@ -50,5 +50,18 @@ sample rate and bit depth, DSD or PCM, language, decade.
 user edit, a Metadata tag, a CUE sheet, or the folder name. When sources
 disagree the stronger one wins, in that order; a user edit always wins.
 
+**Loose audio** — Audio files directly in a Library root rather than in an
+album folder. Voon groups them into Albums by their album and album artist
+Metadata tags; files without an album tag need attention.
+
+**Content signature** — A fingerprint of an Album's audio files (their paths
+within the album folder and their sizes) that does not change when the album
+folder is renamed or moved.
+
+**Rename candidate** — A pairing, proposed after a rescan, of an album path
+that disappeared with a new album path that has the same Content signature.
+When the user confirms it, their edits, User tags and Manual collection
+membership move to the new path.
+
 **Needs attention** (待处理) — An Album Voon could not resolve with
 confidence, listed with the reason, for the user to fix.

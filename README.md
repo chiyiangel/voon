@@ -14,7 +14,11 @@ tested; `voon-app` is a minimal window while the layout is prototyped.
   ([ADR 0001](docs/adr/0001-read-only-phase-1.md)).
 - **Albums, Discs and Collections.** `CD1`, `CD 02`, `Disc 2` subfolders are
   Discs of one Album. Folders that only hold albums (a box-set series, a
-  performer folder) are Collections.
+  performer folder) are Collections. An album folder that contains another
+  album folder keeps both albums and lists the outer one in 待处理.
+- **Loose audio in a library root** is grouped into albums by its album and
+  album artist tags; files without an album tag are listed in 待处理 instead
+  of forming an album.
 - **Whole-disc images.** A CUE sheet plus one image file becomes Virtual
   tracks; files are never split
   ([ADR 0002](docs/adr/0002-virtual-cue-tracks.md)). CUE sheets in UTF-8,
@@ -24,7 +28,8 @@ tested; `voon-app` is a minimal window while the layout is prototyped.
   format, sample rate/bit depth, DSD rate, catalog number and edition (e.g.
   `(1988) [24-96] [438317-2] [台湾首版]`).
 - **Classical music:** album-level composer, performers, conductor and
-  orchestra; browse by composer.
+  orchestra; browse by composer. Orchestra is set by user edits only in
+  phase 1 (no common tag carries it).
 - **Classification:** automatic facets (format, sample rate/bit depth, DSD vs
   PCM, language, decade), user tags and manual collections. Genre comes from
   tags only.
@@ -34,6 +39,11 @@ tested; `voon-app` is a minimal window while the layout is prototyped.
 - **Local index:** SQLite on the Mac, so browsing works with the NAS
   unmounted. Rescans re-read only files whose size or modification time
   changed. Several library roots.
+- **Renamed or moved folders:** user edits, user tags and manual collection
+  membership are keyed by album path. When a rescan finds an album path gone
+  and a new one with the same content (relative file paths and sizes), it
+  lists the pair in 待处理 as a possible rename; confirming moves the user's
+  data to the new path ([ADR 0004](docs/adr/0004-rename-candidates.md)).
 - **Background scanning:** the first scan runs in the background, shows
   albums as they are found, and can be cancelled.
 - **Needs attention (待处理):** albums that could not be recognised or have
@@ -41,13 +51,17 @@ tested; `voon-app` is a minimal window while the layout is prototyped.
 - **Editing:** album-level fields, merging and splitting albums, choosing the
   cover.
 - **No playback.** At most "open in the default player".
+- **macOS packaging:** at the end of phase 1, a `.app` bundle with an icon.
+  No code signing or notarization (personal use).
 
 Formats: FLAC, APE, WavPack, WAV, AIFF, DSF, DFF, MP3, M4A/ALAC, AAC, Ogg
-Vorbis, Opus.
+Vorbis, Opus. Tags are read from all of them except DFF, which relies on the
+folder name and CUE sheet in phase 1.
 
 ## Phase 2
 
-- Online lookup (MusicBrainz, Discogs).
+- Online lookup (MusicBrainz, Discogs), including filling in the orchestra.
+- DFF tags and stream properties.
 - Work-level grouping for classical music (one work, many recordings).
 - Smart collections.
 - Write operations, each previewed, confirmed and undoable, off by default:
@@ -55,10 +69,11 @@ Vorbis, Opus.
 
 ## Known gaps
 
-- DSF: stream properties are read from the header; the ID3v2 tag inside is
-  not read yet. DFF: no tags or properties yet. Both are recognised as DSD
-  from the extension and folder name.
-- Orchestra has no common tag key, so it is only set by user edits for now.
+- DFF: no tags or stream properties yet (phase 2); recognised as DSD from
+  the extension and folder name.
+- Rename detection works within one library root and needs the audio files
+  unchanged; an album moved to another root, or re-encoded, is not paired.
+  Identical copies (same files, same sizes) are never paired automatically.
 - CUE encoding detection can still misjudge very short legacy sheets.
 - `libc` is held below 0.2.190 because GPUI's `xattr 0.2` dependency does
   not build on Linux with newer versions (see `crates/voon-app/Cargo.toml`).
