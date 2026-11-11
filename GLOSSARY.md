@@ -13,8 +13,23 @@ not itself an Album. Collections can contain Collections.
 **Manual collection** — A list of albums the user puts together by hand,
 independent of where the albums sit on disk.
 
-**Album** — One release: the unit the user browses and edits. An Album has
-one or more Discs.
+**Album** — One specific release: the unit the user browses and edits, with
+one or more Discs. A first issue and a later remaster are separate Albums.
+
+**Version group**:
+A set of related Albums representing different releases or editions of the
+same album, each retaining its own Discs and Tracks.
+_Avoid_: Merged Album
+
+**Copy**:
+A separately stored instance of the same Album file set, such as the same
+files on a NAS and on a Mac.
+_Avoid_: Album version
+
+**Library backup**:
+A restorable copy of the library's known Albums and personal organization at
+a particular time, including cached Covers. It excludes the music files.
+_Avoid_: Music backup, Album export
 
 **Disc** — One physical or logical disc of an Album. A subfolder such as
 `CD1`, `CD 02` or `Disc 2` is a Disc of the Album above it, not an Album of

@@ -1,0 +1,2738 @@
+{
+  "schema": "voon.roon-library-evidence-summary.v1",
+  "date": "2026-11-11",
+  "kind": "analyst-selected projection of REA Evidence",
+  "raw_bundle_path": "/private/tmp/voon-roon-analysis/rea-evidence.json",
+  "limits": [
+    "This is a readable projection, not a canonical REA Evidence bundle. Authenticate parent records using the raw exported bundle.",
+    "Static members, CIL calls and UI literals do not prove end-to-end runtime behavior.",
+    "All metadata tokens are scoped to the recorded artifact SHA-256 and MVID.",
+    "No Roon application was launched, and no music library was imported."
+  ],
+  "input": {
+    "path": "/Users/liujun/Downloads/Roon.dmg",
+    "sha256": "84f0fcd86d648f13f6767cb9742269763bd38699881c30141a248cb1ee2b3297"
+  },
+  "source_layers": [
+    {
+      "evidence_id": "ev_a7656498aac6b5bf0b36ac49c3ed121a7b25445f6599d6684008d5b3aca839dd",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_LocalValue",
+          "token": "0x060018be",
+          "row_offset": 208598,
+          "return_type": "var:0",
+          "body_status": "present",
+          "il_sha256": "6eafc98f9b8ddee9988de5ce6a2db5094b2ebfb93dcec4ae97b25b702afac930"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_MetadataValue",
+          "token": "0x060018c0",
+          "row_offset": 208630,
+          "return_type": "var:0",
+          "body_status": "present",
+          "il_sha256": "558cbe8ddcf449dc482c5efaff69effebadf58c6c75450c25df817cef2352110"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_BaseValue",
+          "token": "0x060018c2",
+          "row_offset": 208662,
+          "return_type": "var:0",
+          "body_status": "present",
+          "il_sha256": "5700bd2274d8e4d88915fb8c19eb60aed736259a545b1b0a798c55aaa85e403e"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_BasePreferLocalValue",
+          "token": "0x060018c4",
+          "row_offset": 208694,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "1625c4c0ade50127eefec5623abe6bf0f53e4f745ce4a44ec56950ee68269e94"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_PreferLocalValue",
+          "token": "0x060018c6",
+          "row_offset": 208726,
+          "return_type": "valuetype:85<bool>",
+          "body_status": "present",
+          "il_sha256": "a35ad3aaf73d49f924a4e341bed13f08eaa2115c4b65f8090b69be8f6b556087"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_EditValue",
+          "token": "0x060018c8",
+          "row_offset": 208758,
+          "return_type": "var:0",
+          "body_status": "present",
+          "il_sha256": "95b444148a3f8891099ce0dd3521d4165e8e8f36b633366e7086e72cb5a75a04"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_Value",
+          "token": "0x060018ca",
+          "row_offset": 208790,
+          "return_type": "var:0",
+          "body_status": "present",
+          "il_sha256": "4d91b9eb34d8a5422f54eef42708d246e081b89d50b826e6c61b08636731f500"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_HasLocalLayer",
+          "token": "0x060018cc",
+          "row_offset": 208822,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "107821b7ad1a743c707fff3ed32ba16a1551af2449e118d7e983406cb9362c05"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_HasMetadataLayer",
+          "token": "0x060018ce",
+          "row_offset": 208854,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "3fda8df05bcdeab660e2bffacaa73e7a7ba736d0d49387ff8561944027c1a665"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditRequiredRefInfo`1",
+          "name": "get_HasEditLayer",
+          "token": "0x060018d0",
+          "row_offset": 208886,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "5bcaf84cea1e8044f4c8679c6ba18de5de1e7ec8d2f6bb6ecfb67831eb5e8abb"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_3ffe04942606fab5558ead0cad1484635c751606842f83d5d67160f2cdc3128b",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_LocalValues",
+          "token": "0x06001891",
+          "row_offset": 207878,
+          "return_type": "class:117<var:0>",
+          "body_status": "present",
+          "il_sha256": "8924578e5cd43afbb9c00805730eba592ac832020a8eb2df9095af54824a5406"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_MetadataValues",
+          "token": "0x06001893",
+          "row_offset": 207910,
+          "return_type": "class:117<var:0>",
+          "body_status": "present",
+          "il_sha256": "c21330cbbdceb01748c1f1002c87072db3d156036ff976b9455d8873d9149210"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_BaseValues",
+          "token": "0x06001895",
+          "row_offset": 207942,
+          "return_type": "class:117<var:0>",
+          "body_status": "present",
+          "il_sha256": "30e0381299a9f37787daa9058778ed6fc978163a40b26a088c5c55121515c251"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_ClearBaseValues",
+          "token": "0x06001897",
+          "row_offset": 207974,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "5bc2bd13fb345e6102c5f00fa9fcc0ab2be76e0f33fa512ddafa4513e6ad00c8"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_BasePreferLocalValues",
+          "token": "0x06001899",
+          "row_offset": 208006,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "cb276ba7b8a6052c6e49223754a16a0537cfb52a0e753a85662999cfa9ae5351"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_PreferLocalValues",
+          "token": "0x0600189b",
+          "row_offset": 208038,
+          "return_type": "valuetype:85<bool>",
+          "body_status": "present",
+          "il_sha256": "7bdde673286af0c62d31617a1a52c59978e740cc08a3d9e8c8cb55d4bb367655"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_AddValues",
+          "token": "0x0600189d",
+          "row_offset": 208070,
+          "return_type": "class:117<var:0>",
+          "body_status": "present",
+          "il_sha256": "b1ec47207a149cdc64c552f6dd06e4e79e614821f43f8f83c8adc3823514a094"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_RemoveValues",
+          "token": "0x0600189f",
+          "row_offset": 208102,
+          "return_type": "class:117<var:0>",
+          "body_status": "present",
+          "il_sha256": "53a44ef760bce4508e8cd1abf2b8a9596178a49833567b2eec809da71c192154"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_Values",
+          "token": "0x060018a1",
+          "row_offset": 208134,
+          "return_type": "class:117<var:0>",
+          "body_status": "present",
+          "il_sha256": "2f1fb6755036872e5d9c2687d18e3a6d5c8e537b9b9a5ce503820f9d09ebf41f"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_HasLocalLayer",
+          "token": "0x060018a3",
+          "row_offset": 208166,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "d11d18c34eec2dab2fec08a8972e02720363159a869fa0848390203bd004ca19"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_HasMetadataLayer",
+          "token": "0x060018a5",
+          "row_offset": 208198,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "f1e2e4671ee205a800b9ff022fe9761d05e1c2598424a2a93d34fb3746c55891"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.EditListInfo`1",
+          "name": "get_HasEditLayer",
+          "token": "0x060018a7",
+          "row_offset": 208230,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "ccae86f9a89c7946eb9a76f9e445330bb09471c7729e04d49e124796885fcf43"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_14b90ea6e540c9e5d2ac36a591f21b4c44c35f9e9f338c17fd5322b491c5c08c",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalTitle",
+          "token": "0x06000ee5",
+          "row_offset": 168262,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "6eb6005af51c5cf4339a8ec07ffb0180b5fdb554fe012be602c43459975e6030"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalOriginalReleaseDate",
+          "token": "0x06000ee7",
+          "row_offset": 168294,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "ebb2593d3c48cab7d3aacec30e4bd8431ceb2bc8f3370b7cda1f47137e5a792d"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalReleaseDate",
+          "token": "0x06000ee9",
+          "row_offset": 168326,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "60abf2940bf7ceaecdcb2adc4c2ff21991e4f5430b57913778f71e240598e990"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalIsCompilation",
+          "token": "0x06000eeb",
+          "row_offset": 168358,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "e5cf923264f1d07ed8d7b4102d6265df8feff77fe03c3efaa9aab7e3b9be2f5e"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalLabels",
+          "token": "0x06000eed",
+          "row_offset": 168390,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "443953d37bdc91d91028b832ee723834fb2e3e8922f8c42ef6fe0d9fd3a15ebf"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalMainImage",
+          "token": "0x06000eef",
+          "row_offset": 168422,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "1055dad71ea3403dd24d9e78d236ee014801c74ef734f7a8ef2a93b0fc0b1b75"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalProductCode",
+          "token": "0x06000ef1",
+          "row_offset": 168454,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "4566d6a2153bad9392c1ef9e117781ec66d068be7af6d1fb5d9439b56c9360ec"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalCatalogNumber",
+          "token": "0x06000ef3",
+          "row_offset": 168486,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "27620857e758fdb38981d8cb5461a505ae0858e5a24b47d478e08272f0ce1ffc"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalCountry",
+          "token": "0x06000ef5",
+          "row_offset": 168518,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "95d7ca7297767ade0efbe3cc581c1b9a3e8f7f79de97451016f96e798ac95d3d"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalPerformedBy",
+          "token": "0x06000ef7",
+          "row_offset": 168550,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "269a5f4ee572c2c6d9fa28972c064a424283b73aa51dc6f3cba8ff0aee90200d"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumPreferLocalPerformanceGrouping",
+          "token": "0x06000ef9",
+          "row_offset": 168582,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "1b0b4d36f263d18863ffbf0f4a4ffb1c9902e12fc85cbe97cc60817c7fa94144"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_DiscPreferLocalTitle",
+          "token": "0x06000efb",
+          "row_offset": 168614,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "3e0e3eee913c2795b39a7ee47bdda7bc323d09c20ccba015a8b6c90fcc1f6c5f"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_DiscPreferLocalReleaseDate",
+          "token": "0x06000efd",
+          "row_offset": 168646,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "8ed2c639e958846675ddfea3d465421126dd07d75d0acc1760990e0ea216c167"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_DiscPreferLocalImage",
+          "token": "0x06000eff",
+          "row_offset": 168678,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "d93d746f7d1abe40976deee84d918129e1a5b415a71083eba72d8a80fb2f7223"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalTitle",
+          "token": "0x06000f01",
+          "row_offset": 168710,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "1b4d30365361e330454b3619debde95ff5697017ccc032a2aa24a8c28fe32ab8"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalIsLive",
+          "token": "0x06000f03",
+          "row_offset": 168742,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "e80d913541c02178e9e03d3aea3890a8c9efe95317a31b13bf5c1dec515a7f11"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalLyrics",
+          "token": "0x06000f05",
+          "row_offset": 168774,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "743e39f248087ecfab5ea16b156b86252811cf62268543fb682432b3fcec1200"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalLRC",
+          "token": "0x06000f07",
+          "row_offset": 168806,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "b590fa525a4270f9147e115670a06a666fb86d7e0895854212cd949d1671bd65"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalTrackNumber",
+          "token": "0x06000f09",
+          "row_offset": 168838,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "a3bf61f47f891b2c9236cb16863848444913f8a5fc1a0b3626e10440539ad0c3"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalMediaNumber",
+          "token": "0x06000f0b",
+          "row_offset": 168870,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "eddb4861606ccacf8b317c92add1f09451ac87fcc404ac725d1a40054a44f9ab"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalPerformanceLocation",
+          "token": "0x06000f0d",
+          "row_offset": 168902,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "974998aecc00289d87d32340f162b75671220e71796903fcd966244675884012"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalPerformanceStartDate",
+          "token": "0x06000f0f",
+          "row_offset": 168934,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "dcc63b557a55bd1e85551679e490cda6716b9b9d1dd75d2c951451eb35d47cc4"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalPerformanceEndDate",
+          "token": "0x06000f11",
+          "row_offset": 168966,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "770e03e8d8a91fd0b1d80b0b329b0ae213fd69a467d2b62c1465ce5d9311c778"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalMainPerformerCredits",
+          "token": "0x06000f13",
+          "row_offset": 168998,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "c5b3e77630a53a2dfbd9e0ccb880da8aa7e714a3d8e6547dff5e4b5011b59f41"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalComposerCredits",
+          "token": "0x06000f15",
+          "row_offset": 169030,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "60129a24cd822f4a9f5c7ee353d00d2192219a01211e19abd4e522462b07db34"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalProductionCredits",
+          "token": "0x06000f17",
+          "row_offset": 169062,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "18850f5dfac9bbe023f92169439e010f492d80559f43b9da8f45a89b7efedbef"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalPerformerCredits",
+          "token": "0x06000f19",
+          "row_offset": 169094,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "4a70b4a697de6dc48270c351013dc6eff757b721d0943d3d4dafbda16a4e1555"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalEnsembleCredits",
+          "token": "0x06000f1b",
+          "row_offset": 169126,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "288841b9224ff3e697d91cd295e8a6f2747cda011261c4d49cf31b29b9171f16"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_TrackPreferLocalConductorCredits",
+          "token": "0x06000f1d",
+          "row_offset": 169158,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "55f6f2edd8ec11ee83e28b7148f01808bcd2e46f2125b8ef54a41e165f1a8a30"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumVersionSupportsParens",
+          "token": "0x06000f27",
+          "row_offset": 169318,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "e0b91c86cc71f2a5d2ca42374d38cdadf50d08cc1b10d4bff8807f7fce95a0f3"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumVersionSupportsBrackets",
+          "token": "0x06000f29",
+          "row_offset": 169350,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "c35dac622925b0868d5091ae87c154fe4f2b0e250a91111a2c2ed4a45f52105c"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumVersionSupportsBraces",
+          "token": "0x06000f2b",
+          "row_offset": 169382,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "a08a3dc17e74f5145c7250d3c3d5997ecda70269885b73136d942c41c9566cb3"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumVersionSupportsAngles",
+          "token": "0x06000f2d",
+          "row_offset": 169414,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "0b7b8623df8241934aa3f07829d35ba5e4a856ac587ba9051fe12504622479de"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumVersionExtractFromAlbumTitleTag",
+          "token": "0x06000f2f",
+          "row_offset": 169446,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "3509da69a04979549efd9b231fcf5600b281e4d5737e74544f39f3cf67865102"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumVersionExtractFromVersionTag",
+          "token": "0x06000f31",
+          "row_offset": 169478,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "098cd8d236fb3886dc837f112e3a97c26dfefc7239870efd2a6d8998ef0241c7"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_AlbumVersionExtractFromPaths",
+          "token": "0x06000f33",
+          "row_offset": 169510,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "3a9d316931fbd1c28942ffee36d6de4ce4aa536d145346ca77589271b7fc258a"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_ArtistTagDelimiters",
+          "token": "0x06000f35",
+          "row_offset": 169542,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "7340cdcf1ea7ea0a7457de6b1d8707c48726e146da601b4613078799a78f43df"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibrarySettingsInfo",
+          "name": "get_GenreTagDelimiters",
+          "token": "0x06000f37",
+          "row_offset": 169574,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "f76422f6c2453f886271b88efdd2b6a87073b51b5dbdc988644b14a446c0a7b3"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "versions": [
+    {
+      "evidence_id": "ev_daeebca7932978fa23faf74a657692413ca478dfd466265063de5cb1c17e2a5a",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumEditInfo",
+          "name": "get_MetadataAlbumId",
+          "token": "0x06001781",
+          "row_offset": 203526,
+          "return_type": "class:2308<i8>",
+          "body_status": "present",
+          "il_sha256": "0c1eaed37012e7fb36194214bb93da4749c81f61caebac10b85c186fe55f4077"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumEditInfo",
+          "name": "get_Version",
+          "token": "0x060017ad",
+          "row_offset": 204230,
+          "return_type": "class:2312<string>",
+          "body_status": "present",
+          "il_sha256": "e46dbc6f912b6b230c2af78ac55cdb935dc6dbfe30a2adf2960ed1f14f6841d1"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumEditInfo",
+          "name": "get_DuplicateOf",
+          "token": "0x060017af",
+          "row_offset": 204262,
+          "return_type": "class:2312<class:1548>",
+          "body_status": "present",
+          "il_sha256": "9d3195b58081749b392e4ceef1323a6fca18c45bc5fa69c7ee093a602a81026c"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumEditInfo",
+          "name": "get_CatalogNumber",
+          "token": "0x060017b3",
+          "row_offset": 204326,
+          "return_type": "class:2312<string>",
+          "body_status": "present",
+          "il_sha256": "4c567137dbb522bd65d4bfb2b59f5539a9494db61b067a2c529e8ca55e792441"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumEditInfo",
+          "name": "get_Discs",
+          "token": "0x060017b9",
+          "row_offset": 204422,
+          "return_type": "class:117<class:2236>",
+          "body_status": "present",
+          "il_sha256": "64aa7bdde6bb8c2545b011709e16439f3201c5638528329fe4c4b2f75f7f8355"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_a190c85b1ceef54e488e1c7c5bf48e6ef5446e25adeb1c6b8e18b3cb51dfa6eb",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.Library",
+          "name": "FindImportDuplicates",
+          "token": "0x06000c1e",
+          "row_offset": 156886,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Library",
+          "name": "GetAlternateAlbumVersions",
+          "token": "0x06000c57",
+          "row_offset": 157798,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Library",
+          "name": "ReIdentify",
+          "token": "0x06000c5b",
+          "row_offset": 157862,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Library",
+          "name": "ReIdentify",
+          "token": "0x06000c5c",
+          "row_offset": 157878,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Library",
+          "name": "GetAlbumEditInfo",
+          "token": "0x06000d0d",
+          "row_offset": 160710,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Library",
+          "name": "GetAlbumEditInfo",
+          "token": "0x06000d17",
+          "row_offset": 160870,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Library",
+          "name": "GetMultiAlbumEditInfo",
+          "token": "0x06000d18",
+          "row_offset": 160886,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "classical": [
+    {
+      "evidence_id": "ev_1d751888388038baf1910f72f067cbbfc82fda757f4f6b5a3deb7f7547703d2d",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.WorkLite",
+          "name": "get_RoonWorkId",
+          "token": "0x06001208",
+          "row_offset": 181110,
+          "return_type": "valuetype:85<i8>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.WorkLite",
+          "name": "get_Composers",
+          "token": "0x06001209",
+          "row_offset": 181126,
+          "return_type": "class:20<class:1616>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.WorkLite",
+          "name": "get_Title",
+          "token": "0x0600120a",
+          "row_offset": 181142,
+          "return_type": "string",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.WorkLite",
+          "name": "get_Instrumentation",
+          "token": "0x06001212",
+          "row_offset": 181270,
+          "return_type": "class:1592",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.WorkLite",
+          "name": "get_Form",
+          "token": "0x06001213",
+          "row_offset": 181286,
+          "return_type": "string",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.WorkLite",
+          "name": "get_PerformanceCount",
+          "token": "0x06001214",
+          "row_offset": 181302,
+          "return_type": "valuetype:85<i4>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.WorkLite",
+          "name": "get_CatalogNumbers",
+          "token": "0x0600121c",
+          "row_offset": 181430,
+          "return_type": "class:20<class:1604>",
+          "body_status": "absent",
+          "il_sha256": null
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_bea06d9c0b038fd406293acb23022d4d39c8ffc07d22b42bda832141e4225747",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.TrackLite",
+          "name": "get_Credits",
+          "token": "0x060011e1",
+          "row_offset": 180486,
+          "return_type": "class:20<class:1788>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.TrackLite",
+          "name": "get_IsAvailable",
+          "token": "0x060011e8",
+          "row_offset": 180598,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.TrackLite",
+          "name": "get_IsDeleted",
+          "token": "0x060011ec",
+          "row_offset": 180662,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.TrackLite",
+          "name": "get_RecordingId",
+          "token": "0x060011f7",
+          "row_offset": 180838,
+          "return_type": "valuetype:85<i8>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.TrackLite",
+          "name": "get_SectionName",
+          "token": "0x060011fd",
+          "row_offset": 180934,
+          "return_type": "string",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.TrackLite",
+          "name": "get_PartName",
+          "token": "0x060011fe",
+          "row_offset": 180950,
+          "return_type": "string",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.TrackLite",
+          "name": "get_Performance",
+          "token": "0x060011ff",
+          "row_offset": 180966,
+          "return_type": "class:1608",
+          "body_status": "absent",
+          "il_sha256": null
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_0948fc20ac8609a77d8b27133f712a6d698165c9364a67cc037c09deb27571f7",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_Work",
+          "token": "0x06001238",
+          "row_offset": 181878,
+          "return_type": "class:1588",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_LengthSeconds",
+          "token": "0x06001239",
+          "row_offset": 181894,
+          "return_type": "valuetype:85<i4>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_IsExportSupported",
+          "token": "0x0600123a",
+          "row_offset": 181910,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_TrackCount",
+          "token": "0x0600123b",
+          "row_offset": 181926,
+          "return_type": "i4",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_IsHidden",
+          "token": "0x0600123c",
+          "row_offset": 181942,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_IsComplete",
+          "token": "0x0600123d",
+          "row_offset": 181958,
+          "return_type": "valuetype:85<bool>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_IsPick",
+          "token": "0x0600123e",
+          "row_offset": 181974,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_Location",
+          "token": "0x0600123f",
+          "row_offset": 181990,
+          "return_type": "string",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_StartDate",
+          "token": "0x06001240",
+          "row_offset": 182006,
+          "return_type": "class:293",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_EndDate",
+          "token": "0x06001241",
+          "row_offset": 182022,
+          "return_type": "class:293",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PerformanceLite",
+          "name": "get_Credits",
+          "token": "0x06001242",
+          "row_offset": 182038,
+          "return_type": "class:20<class:1788>",
+          "body_status": "absent",
+          "il_sha256": null
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "evidence_id": "ev_a07c5e97b581577ac48ff042ca494aa6667f3df337be7ee62c812a918a96bbf4",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_RequireQualities",
+          "token": "0x06002005",
+          "row_offset": 238406,
+          "return_type": "class:117<string>",
+          "body_status": "present",
+          "il_sha256": "c696845602c8c36e87807c0dc53fd85b5618efa85da4096820bfc3d57f51b350"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ExcludeQualities",
+          "token": "0x06002007",
+          "row_offset": 238438,
+          "return_type": "class:117<string>",
+          "body_status": "present",
+          "il_sha256": "e9fb43e99f8253360646dd7e58cf6974c119c0db36ff7208f610fc9a12febf5a"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_RequireSources",
+          "token": "0x0600200d",
+          "row_offset": 238534,
+          "return_type": "class:117<valuetype:1556>",
+          "body_status": "present",
+          "il_sha256": "489d39b9f11610c167756c4890ac7d0418bee2215e9f74a6100e95ff9d98f45a"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ExcludeSources",
+          "token": "0x0600200f",
+          "row_offset": 238566,
+          "return_type": "class:117<valuetype:1556>",
+          "body_status": "present",
+          "il_sha256": "806466dc8fbd1bb27851756a5479b26c0422ddfe3370eca6f9c1e8280a223c2b"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ComposersMode",
+          "token": "0x0600201d",
+          "row_offset": 238790,
+          "return_type": "valuetype:2376",
+          "body_status": "present",
+          "il_sha256": "bbb75dec078c9fbb3a3d5992fda7e113d2326c0fde4077e9e782e547fdb26d36"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_RequireComposers",
+          "token": "0x0600201f",
+          "row_offset": 238822,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "f13044d4b8bde61d7dd3684d30f59428533d6bb946edb8d241e091027dd03cec"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ExcludeComposers",
+          "token": "0x06002021",
+          "row_offset": 238854,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "fc5a9cdabf08f89dff6219861439c35e864758920c4166ff63c31cca3a87da50"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ConductorsMode",
+          "token": "0x06002023",
+          "row_offset": 238886,
+          "return_type": "valuetype:2376",
+          "body_status": "present",
+          "il_sha256": "9db7a496d32aba55b7f21f929f8e8fda6da62fe467c5109802265f42599bda8e"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_RequireConductors",
+          "token": "0x06002025",
+          "row_offset": 238918,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "12671940a066215ae27100aca606f9e9aac0e8055908454911c845dff1c6546b"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ExcludeConductors",
+          "token": "0x06002027",
+          "row_offset": 238950,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "6bc8884541dc9fb1d4dd18778cba7893bcd7f85b49abc5af9cfbf918adaa3aed"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_EnsemblesMode",
+          "token": "0x0600202f",
+          "row_offset": 239078,
+          "return_type": "valuetype:2376",
+          "body_status": "present",
+          "il_sha256": "b86928ad0b5f5f271d61d12dae8c3d3437a31fef91ee04af03893471f280c044"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_RequireEnsembles",
+          "token": "0x06002031",
+          "row_offset": 239110,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "1d7d03456c9a57ffc027196b521d490441050d04353a3edfc7089e9992a7d8be"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ExcludeEnsembles",
+          "token": "0x06002033",
+          "row_offset": 239142,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "7e570a94468794d29217cae272834905b26c155d7c0c051802c8e0e8df5cb9bf"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_PerformersMode",
+          "token": "0x06002035",
+          "row_offset": 239174,
+          "return_type": "valuetype:2376",
+          "body_status": "present",
+          "il_sha256": "1b145d715aae80b9f20e2c493b9a3884dd729c83c1a54c5c61470576321aaa36"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_RequirePerformers",
+          "token": "0x06002037",
+          "row_offset": 239206,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "5ede28ce3cfab8ffeb3d0150a2102bf74d2f353ad58b157ad88101ba4e1627c2"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumBrowserFilter",
+          "name": "get_ExcludePerformers",
+          "token": "0x06002039",
+          "row_offset": 239238,
+          "return_type": "class:117<class:1616>",
+          "body_status": "present",
+          "il_sha256": "97258b240ed0adc82b70c2a7ea4e9ba17e9c035393c3a35b8481e124751ba830"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_5e0c63ed4586961194432017fc835f0145014fb6ad71945a2bf9dff0229e7e63",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireLocations",
+          "token": "0x060019cb",
+          "row_offset": 212902,
+          "return_type": "class:117<class:284>",
+          "body_status": "present",
+          "il_sha256": "4ab1bdbbf062760b3ba6c4db6797b03ec55214a41e9750a0cd48a90748fc2615"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeLocations",
+          "token": "0x060019cd",
+          "row_offset": 212934,
+          "return_type": "class:117<class:284>",
+          "body_status": "present",
+          "il_sha256": "9a2599d2b6b7d4d6698076af8bfa7602f93ec1ab305728744179d10c49ffe9eb"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireFileFormats",
+          "token": "0x06001a17",
+          "row_offset": 214118,
+          "return_type": "class:117<valuetype:1528>",
+          "body_status": "present",
+          "il_sha256": "dea24da488d23ed205f2ed4139d5ec7332c9ddbaebac8b0c888499cec2e814ec"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeFileFormats",
+          "token": "0x06001a19",
+          "row_offset": 214150,
+          "return_type": "class:117<valuetype:1528>",
+          "body_status": "present",
+          "il_sha256": "f094d07c0e0e02922dd40c0b09a5b440f11a1fbab16389b597fed81c82743dcd"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireMultipleFileFormats",
+          "token": "0x06001a1b",
+          "row_offset": 214182,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "aa93af5c48f3cbbdef5e7b243cfd8ed21d37adf9ea80501176cb7b44fa94794b"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeMultipleFileFormats",
+          "token": "0x06001a1d",
+          "row_offset": 214214,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "5e3390e3ddac08aba7b8182e73fc82c27d983af3e9cf0f2ad4fd62300656ac25"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireHasMainImage",
+          "token": "0x06001a43",
+          "row_offset": 214822,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "cd1c6937ca1040ca56827e27379b9f43d5d2775354d21fbe41b94c3412b5e112"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeHasMainImage",
+          "token": "0x06001a45",
+          "row_offset": 214854,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "4584377c02ebb4ba5d195dbcf4d086e2910fb6953bec04c0146f80c27ec14133"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireIsIdentified",
+          "token": "0x06001a47",
+          "row_offset": 214886,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "47be9d2e2eb67630ad05456ac52af40d234373a80c8a86854ee9cf458a1dbe2a"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeIsIdentified",
+          "token": "0x06001a49",
+          "row_offset": 214918,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "0e943c2d9b0b780a2c9acf9be4074f493d2aa940fec65490868f8a19eaec0aba"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireHasCorruptTracks",
+          "token": "0x06001a4b",
+          "row_offset": 214950,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "c1caf3c56d4b219344b397596c5fa724e1354bbaec12005426e9e6a604c3504b"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeHasCorruptTracks",
+          "token": "0x06001a4d",
+          "row_offset": 214982,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "f30b59451bebf4563dc97ead47af14ede7d533f841a634bcf5d9518cf84b0f2d"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireImportedInLastNDays",
+          "token": "0x06001a5f",
+          "row_offset": 215270,
+          "return_type": "valuetype:85<i4>",
+          "body_status": "present",
+          "il_sha256": "dcbe3661886adb205469ce164b5c6208f8717e9f1b253c4c6302a748ed53e7e2"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeImportedInLastNDays",
+          "token": "0x06001a61",
+          "row_offset": 215302,
+          "return_type": "valuetype:85<i4>",
+          "body_status": "present",
+          "il_sha256": "f54caaba0fbda5ffe2dc84dad619f67940648e96198d5ebe9b7c1e99a8886d21"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireDuplicates",
+          "token": "0x06001a87",
+          "row_offset": 215910,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "960314742521df87fb926b199b2b329d689da273c1c52203d8fab2bfd28ca1fe"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireHasLinerNotes",
+          "token": "0x06001a99",
+          "row_offset": 216198,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "1ce3f3bbdf79823a76dd7edbb9bf002a08016df7a426bd741472b795e9a8b5ec"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeHasLinerNotes",
+          "token": "0x06001a9b",
+          "row_offset": 216230,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "59804cab95d926c9c2e67c466ef7c671e1913b17f87b808b8ecd196c8f9f9b2a"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_RequireHasPdf",
+          "token": "0x06001a9d",
+          "row_offset": 216262,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "7d424f2e4a8da5325c413a297bbfd1b28a947d50594c972b35b2da02b08ed64e"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.AlbumQueryCriteria",
+          "name": "get_ExcludeHasPdf",
+          "token": "0x06001a9f",
+          "row_offset": 216294,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "f023da5c42e7658b75715dc3a0fa492db94d0d7bb14527f2d9c0e23ff50feae6"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_208ceb926009cb3e18af85e64d95aa75387cb3be17571b2398f6a674bbed6bac",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.SmartTagCriteria",
+          "name": "get_AlbumCriteria",
+          "token": "0x0600161e",
+          "row_offset": 197846,
+          "return_type": "class:2384",
+          "body_status": "present",
+          "il_sha256": "4ffdd3bc0e0585e780bb4f58efbf918cc500a61edbab4b22b380695bc87ab922"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.SmartTagCriteria",
+          "name": "get_TrackCriteria",
+          "token": "0x06001620",
+          "row_offset": 197878,
+          "return_type": "class:2512",
+          "body_status": "present",
+          "il_sha256": "d54fcbefcdbfc9302d4be13e0647f6a17393fb4b356c8393baaf6e7b4588eef3"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.SmartTagCriteria",
+          "name": "get_PerformerCriteria",
+          "token": "0x06001622",
+          "row_offset": 197910,
+          "return_type": "class:2496",
+          "body_status": "present",
+          "il_sha256": "fa2f1b32d3c63ddebac55cfcf8708be678d77d09e96be859b374878d39288e85"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.SmartTagCriteria",
+          "name": "get_WorkCriteria",
+          "token": "0x06001624",
+          "row_offset": 197942,
+          "return_type": "class:2528",
+          "body_status": "present",
+          "il_sha256": "864ac69d0f8441dbe4d349dd5448dc4d6fa0a9ecbd6f4c60e32849b04beae742"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.SmartTagCriteria",
+          "name": "get_ComposerCriteria",
+          "token": "0x06001626",
+          "row_offset": 197974,
+          "return_type": "class:2496",
+          "body_status": "present",
+          "il_sha256": "b88f3b8f14401e5efb278ed8bc25324c4e41a6fdb2a47855ec16b3d68fbbad95"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "storage": [
+    {
+      "evidence_id": "ev_2e5594d70fdac54bbeefd3485233010eaf90359ba2e8fea5d3d33d88fdc5c356",
+      "parent_evidence_id": "ev_8c7deb2d14d741d563d05d55546cedb89b170cd23461020b1f45fb5c4d3791c8",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/RoonServer.app/Contents/MonoBundle/Roon.Storage.Directory.dll",
+        "sha256": "b5f2b2b17b6f69ca549539707cc35103c34e4f104f71c97d03cdf6c0172ef38b"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "b5f2b2b17b6f69ca549539707cc35103c34e4f104f71c97d03cdf6c0172ef38b",
+        "requires_mvid": "5a266354-4f53-413a-87e7-ec0fa7257cab"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "get_UniqueId",
+          "token": "0x06000045",
+          "row_offset": 46946,
+          "return_type": "valuetype:125",
+          "body_status": "present",
+          "il_sha256": "0c66e4c570014b98afab25aa5940394dd787e269bdd76e6c7abb0ca3d40d9fba"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "get_SupportsRealTimeWatching",
+          "token": "0x06000058",
+          "row_offset": 47212,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "3e652f9ec0ddcdd64c52c9cba261a1f70bba3ffa41ff4296d6eba45e6514b378"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "ForceScan",
+          "token": "0x0600005c",
+          "row_offset": 47268,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "371b958da05dfe35bc2e70d1728f34d87df7251861d9f6ca6cbf0ed4ca0f7c5a"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "ForceScan",
+          "token": "0x0600005d",
+          "row_offset": 47282,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "276f77c5279cf65e64c928c3703455b56a8e369d6120d86edcb499f520f86352"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "BeginChangeDetection",
+          "token": "0x0600005e",
+          "row_offset": 47296,
+          "return_type": "class:317",
+          "body_status": "present",
+          "il_sha256": "971ba24168668caac90265f35181cca1a04821c3848f86e72ac4249702e4638b"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_QueueScanRetry",
+          "token": "0x0600006e",
+          "row_offset": 47520,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "3ed127d677c1826cf6ec17b5ce5e2091452adeb4a338efccde60d8c5f0e25c10"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_RetryScanDirectory",
+          "token": "0x0600006f",
+          "row_offset": 47534,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "42dcc6f533163e926164ef8959973f3aefae64cf1f33eb4239c647aeb30cdd9e"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_LogScanFailure",
+          "token": "0x06000070",
+          "row_offset": 47548,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "5a84e36fe88241e12b34d3f8311ba145612d55734c8440230b60118a2eaead98"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_ScanTree",
+          "token": "0x06000072",
+          "row_offset": 47576,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "3f014105f2a52974cbe6ada40c0d9a8318f52855056a2d849b8a289ac6cd5851"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_ScanDirectory",
+          "token": "0x06000074",
+          "row_offset": 47604,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "001a3f04210c7035d285c10b251fea2545ad904eff55c135a2c2ccf75c73b75c"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_GetSkippedMediaFile",
+          "token": "0x06000088",
+          "row_offset": 47884,
+          "return_type": "class:341",
+          "body_status": "present",
+          "il_sha256": "ebed3ab66c435a45aa0181fa7bcbc7b220f892d67432cae701e367c437d17216"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_GetSkippedMediaFile",
+          "token": "0x06000089",
+          "row_offset": 47898,
+          "return_type": "class:341",
+          "body_status": "present",
+          "il_sha256": "8664b29bd3dcdbd8489522f9748a1b1664091a825af36a0771c1aa8bcb46f856"
+        },
+        {
+          "declaring_type": "Roon.Storage.DirectoryStorage",
+          "name": "_LockPermanentFileKey",
+          "token": "0x060000ad",
+          "row_offset": 48402,
+          "return_type": "valuetype:121",
+          "body_status": "present",
+          "il_sha256": "bf3f01daa0691b297c9e4830c936b088d10cf0527ac42897dd95d38252ea8bc4"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_c176edb21087520a752377ee88be9aedae1bdac60351bc642989e59780f9f54a",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.StorageConfig",
+          "name": "get_Location",
+          "token": "0x0600034a",
+          "row_offset": 120726,
+          "return_type": "class:2736",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.StorageConfig",
+          "name": "get_IgnorePatterns",
+          "token": "0x0600034b",
+          "row_offset": 120742,
+          "return_type": "class:117<string>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.StorageConfig",
+          "name": "get_IgnoreItunes",
+          "token": "0x0600034c",
+          "row_offset": 120758,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.StorageConfig",
+          "name": "get_IgnorePlaylists",
+          "token": "0x0600034d",
+          "row_offset": 120774,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.StorageConfig",
+          "name": "get_RescanDelay",
+          "token": "0x0600034e",
+          "row_offset": 120790,
+          "return_type": "i4",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.StorageConfig",
+          "name": "get_RespectBgWorkSchedule",
+          "token": "0x0600034f",
+          "row_offset": 120806,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "maintenance": [
+    {
+      "evidence_id": "ev_901a44c3f68fbd9642889602a78191881b3d21808eefe89683b5b881536b263e",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenanceInfo",
+          "name": "get_AvailableTrackCount",
+          "token": "0x06000fd9",
+          "row_offset": 172166,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "3264bce3a720eb728d24789e754d77c0fb829ddc9421a8c2f655bf541e16cf10"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenanceInfo",
+          "name": "get_TotalTrackCount",
+          "token": "0x06000fdb",
+          "row_offset": 172198,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "c83507c4c04e85df7b5df190cf26846c31b0ba2032f1fc4b648b6a62a9e7dfae"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenanceInfo",
+          "name": "get_DeletedTrackCount",
+          "token": "0x06000fdd",
+          "row_offset": 172230,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "d986d26d300ceded1b1353bd805404d2e2470eae78d30958665e684c67c411c5"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenanceInfo",
+          "name": "get_UnconfiguredStorageTrackCount",
+          "token": "0x06000fdf",
+          "row_offset": 172262,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "f722ffdf17765b627819a70ebed50d3ad06ccb82f5178a9f8f2eb2a67ce46d19"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenanceInfo",
+          "name": "get_DisabledStorageTrackCount",
+          "token": "0x06000fe1",
+          "row_offset": 172294,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "082ca30306168e775e83e04f64fa908d5dfcd719369797c29aca19624dfb7356"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_7830c7151a70af0c90bd1d609854723157435c50af7c0d41d97971d5714a5454",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenance",
+          "name": "get_CleanUpDeletedTracks",
+          "token": "0x06000fe4",
+          "row_offset": 172342,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "3b5d74f08fc100ce24d02636a2b47d98b7219081a6d74cfc6fa3725ef6d81683"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenance",
+          "name": "get_CleanUpUnconfiguredStorageTracks",
+          "token": "0x06000fe6",
+          "row_offset": 172374,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "17e510a2eb3363f0fd2f4cf7e6ce6bd8b05b00ff0ee13c7d1d52d63862802f2a"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.LibraryMaintenance",
+          "name": "get_CleanUpDisabledStorageTracks",
+          "token": "0x06000fe8",
+          "row_offset": 172406,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "8b59eb7ff1a0b244600caf09995064a59e8dbc41cb9e9bdeb3ec2e469cb62e7f"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "backups": [
+    {
+      "evidence_id": "ev_42664fe85c2fbd3427cf3a16d4bc07ef45f564c4cf58ccdd135d027cf0bdf50a",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "get_AutomaticBackups",
+          "token": "0x0600060d",
+          "row_offset": 132038,
+          "return_type": "class:20<class:588>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "get_ImmediateBackup",
+          "token": "0x0600060e",
+          "row_offset": 132054,
+          "return_type": "class:592",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "get_RestoreProgress",
+          "token": "0x0600060f",
+          "row_offset": 132070,
+          "return_type": "class:584",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "get_IsRestoreBackup2Supported",
+          "token": "0x06000610",
+          "row_offset": 132086,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "AddAutomaticBackupDestination",
+          "token": "0x06000611",
+          "row_offset": 132102,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "RemoveAutomaticBackupDestination",
+          "token": "0x06000612",
+          "row_offset": 132118,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "EditAutomaticBackupDestination",
+          "token": "0x06000613",
+          "row_offset": 132134,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "StartAutomaticBackupNow",
+          "token": "0x06000614",
+          "row_offset": 132150,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "StartImmediateBackupNow",
+          "token": "0x06000615",
+          "row_offset": 132166,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "GetRestoreItems",
+          "token": "0x06000616",
+          "row_offset": 132182,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "RestoreBackup",
+          "token": "0x06000617",
+          "row_offset": 132198,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "RestoreBackup2",
+          "token": "0x06000618",
+          "row_offset": 132214,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "ClearRestoreProgress",
+          "token": "0x06000619",
+          "row_offset": 132230,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.Backups",
+          "name": "RemoveBackup",
+          "token": "0x0600061a",
+          "row_offset": 132246,
+          "return_type": "void",
+          "body_status": "absent",
+          "il_sha256": null
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    },
+    {
+      "evidence_id": "ev_362e14fe39a68ebce251a21d53f9ab0df05190a77369f083f7bf9eff5e00ece8",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_ProgressState",
+          "token": "0x0600063e",
+          "row_offset": 132822,
+          "return_type": "string",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_ProgressPercent",
+          "token": "0x0600063f",
+          "row_offset": 132838,
+          "return_type": "valuetype:85<i4>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_LastSuccessfulBackupTime",
+          "token": "0x06000640",
+          "row_offset": 132854,
+          "return_type": "valuetype:85<valuetype:241>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_LastSuccessfulAutoBackupTime",
+          "token": "0x06000641",
+          "row_offset": 132870,
+          "return_type": "valuetype:85<valuetype:241>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_LastFailedBackupTime",
+          "token": "0x06000642",
+          "row_offset": 132886,
+          "return_type": "valuetype:85<valuetype:241>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_LastSuccessfulBackupTimeUtc",
+          "token": "0x06000643",
+          "row_offset": 132902,
+          "return_type": "valuetype:85<valuetype:241>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_LastSuccessfulAutoBackupTimeUtc",
+          "token": "0x06000644",
+          "row_offset": 132918,
+          "return_type": "valuetype:85<valuetype:241>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_LastFailedBackupTimeUtc",
+          "token": "0x06000645",
+          "row_offset": 132934,
+          "return_type": "valuetype:85<valuetype:241>",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_LastFailedBackupError",
+          "token": "0x06000646",
+          "row_offset": 132950,
+          "return_type": "string",
+          "body_status": "absent",
+          "il_sha256": null
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.BackupStatus",
+          "name": "get_RetentionStalled",
+          "token": "0x06000647",
+          "row_offset": 132966,
+          "return_type": "bool",
+          "body_status": "absent",
+          "il_sha256": null
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "identity": [
+    {
+      "evidence_id": "ev_13d6b622598e6808ee650aff1072c7e082fab65cd1499687c4a7ba25aee74dd9",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.PersistentAlbumId",
+          "name": "get_BrokerId",
+          "token": "0x06000d6b",
+          "row_offset": 162214,
+          "return_type": "valuetype:85<valuetype:105>",
+          "body_status": "present",
+          "il_sha256": "04c8c9a01d7256509d948ef21d9133abf2b8eb6e8d3048e45217b42670ff95c4"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PersistentAlbumId",
+          "name": "get_LibraryAlbumId",
+          "token": "0x06000d6d",
+          "row_offset": 162246,
+          "return_type": "valuetype:85<valuetype:161>",
+          "body_status": "present",
+          "il_sha256": "8b3b93413e74ed8dffd576c427a2464d92c1613850da5ed2999ca52ed209eb34"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PersistentAlbumId",
+          "name": "get_ExternalAlbumIds",
+          "token": "0x06000d6f",
+          "row_offset": 162278,
+          "return_type": "class:117<valuetype:161>",
+          "body_status": "present",
+          "il_sha256": "2cc0a4bf0d32b1bc1b1457bf3921ea453bae4d009e5184a6e3527a32d55299f5"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PersistentAlbumId",
+          "name": "WriteTo",
+          "token": "0x06000d71",
+          "row_offset": 162310,
+          "return_type": "void",
+          "body_status": "present",
+          "il_sha256": "52ed3763a050a4bd9f19027a99908fbb8b3063991c022ff7710cd40fa1727990"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PersistentAlbumId",
+          "name": "ToBinary",
+          "token": "0x06000d73",
+          "row_offset": 162342,
+          "return_type": "u1[]",
+          "body_status": "present",
+          "il_sha256": "a5cd07750ae69cb73446ad82b0f9a9891de53fb4dfc114f0f36ab3a770e037db"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.PersistentAlbumId",
+          "name": "FromBinary",
+          "token": "0x06000d74",
+          "row_offset": 162358,
+          "return_type": "class:1160",
+          "body_status": "present",
+          "il_sha256": "95525c8af51810d1953496a84b21c7ff381da7dee3d868cfd1f01f0f63b45955"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "box_sets": [
+    {
+      "evidence_id": "ev_2f9e8895d14e6a1d7a3ab7e785d3d6623b0e78b21e6d1642447a90d0e3bfb02d",
+      "parent_evidence_id": "ev_4c47c8924070d7058f5039f9013bbf7e57f1e2265e88730a8e77cc29516b8a47",
+      "artifact": {
+        "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/MonoBundle/Roon.Broker.Api.dll",
+        "sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15"
+      },
+      "identity_scope": {
+        "token_identity": "build-local",
+        "requires_artifact_sha256": "64ed26e288a94f5f8a6df3df2fd56d0a707dc198a74fb1c42f4141b766cabf15",
+        "requires_mvid": "a3c8ef27-4564-4103-a60d-28effcfa17ce"
+      },
+      "source_metadata_status": "complete",
+      "source_coverage": {
+        "state": "complete",
+        "issues": []
+      },
+      "methods": [
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_MediaNumber",
+          "token": "0x060017bc",
+          "row_offset": 204470,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "2e35752fa0554347a018b949abc6dfb8f355d0c9ea4296d85697eb0e0b522b49"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_TrackCount",
+          "token": "0x060017be",
+          "row_offset": 204502,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "f34e4d879a1269ce36e1bb1fb48f3819c70af40e6ff2fcd13270b11c62092f3f"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_Title",
+          "token": "0x060017c0",
+          "row_offset": 204534,
+          "return_type": "class:2312<string>",
+          "body_status": "present",
+          "il_sha256": "4b487518b760d7c3298e34643bb0fafb41390ae29b07092ad9f76e25888471e4"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_ReleaseDate",
+          "token": "0x060017c2",
+          "row_offset": 204566,
+          "return_type": "class:2312<class:293>",
+          "body_status": "present",
+          "il_sha256": "2e0db1be9e761a432a3ad628d2d6b63127ad33d69592f2bdd937444c417d06ad"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_MemberAlbumId",
+          "token": "0x060017c4",
+          "row_offset": 204598,
+          "return_type": "valuetype:85<i8>",
+          "body_status": "present",
+          "il_sha256": "a092b512c0faa3b5d91a24a56449d6f34a3d2ffa3aed77595a0b474c9e628c7b"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_LinkSource",
+          "token": "0x060017c6",
+          "row_offset": 204630,
+          "return_type": "valuetype:85<valuetype:1544>",
+          "body_status": "present",
+          "il_sha256": "00a0d62dba3da3458251e5c1b243bc55a1e3df1cc8e1075d2ab6884f4bd9b1cf"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_HasLinkEdit",
+          "token": "0x060017c8",
+          "row_offset": 204662,
+          "return_type": "bool",
+          "body_status": "present",
+          "il_sha256": "aae9cc285d2f871835f2bf499a8551ca5066ca0f0ec3f5fd9b45dfc515d55514"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_Artwork",
+          "token": "0x060017ca",
+          "row_offset": 204694,
+          "return_type": "class:2312<class:316>",
+          "body_status": "present",
+          "il_sha256": "2fa92e2e894cea205485ff818bde2f6ce32d46a1c78bb84c4cb401ff6b9faa32"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_LengthSeconds",
+          "token": "0x060017cc",
+          "row_offset": 204726,
+          "return_type": "i4",
+          "body_status": "present",
+          "il_sha256": "1c987a4de289a3baf66634fc89c1be952711b8cfd3f5fffc146a3e55b7c1c452"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_Image",
+          "token": "0x060017ce",
+          "row_offset": 204758,
+          "return_type": "class:316",
+          "body_status": "present",
+          "il_sha256": "519f7138a92e9cf7f796a7472edf70bfbc2ede5be2325469273940e027dc5183"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_MemberAlbumTitle",
+          "token": "0x060017d0",
+          "row_offset": 204790,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "13123be9c05cead1e2ffe50b39bbeef73755a46b0850693edbcd000a500f2616"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_MemberAlbumArtist",
+          "token": "0x060017d2",
+          "row_offset": 204822,
+          "return_type": "string",
+          "body_status": "present",
+          "il_sha256": "f4be61b2a550e5ecd4459a89aa4a31c44e3c66a2588f38dfb9e7c5d4aeb8d8f2"
+        },
+        {
+          "declaring_type": "Roon.Broker.Api.DiscEditInfo",
+          "name": "get_MemberAlbumYear",
+          "token": "0x060017d4",
+          "row_offset": 204854,
+          "return_type": "valuetype:85<i4>",
+          "body_status": "present",
+          "il_sha256": "d78d8d8aee2ba85cf9301869ee915f380427c9d45ebe4991bb4dc0a93e096e8f"
+        }
+      ],
+      "limitations": [
+        "CIL instruction anchors are decoded from file-backed method bodies only; no target assembly is loaded or executed.",
+        "Exported types are reported from ExportedType rows as declared; forwarded types are not resolved in their implementing assemblies.",
+        "Member signatures decode ECMA-335 primitive, class, valuetype, generic instantiation, generic variable, pointer, byref, single-dimension and general array, function pointer including VARARG sentinels, custom modifier, and typed reference forms; class and valuetype operands keep their encoded TypeDefOrRefOrSpec values.",
+        "Metadata tokens are build-local coordinates and are only meaningful with the reported artifact SHA-256 and MVID.",
+        "User strings are the #US literals loaded by ldstr in the inspected method bodies, with their own coverage; instruction anchors and normalized CIL digests keep their build-local tokens."
+      ]
+    }
+  ],
+  "storage_calls": {
+    "evidence_id": "ev_b2b4838cefe1f5b906a4e0e475563bf8dd99f0defc806c7dcd8b9edce25730ae",
+    "parent_evidence_id": "ev_8c7deb2d14d741d563d05d55546cedb89b170cd23461020b1f45fb5c4d3791c8",
+    "artifact": {
+      "path": "/private/tmp/voon-roon-analysis/mount/Roon.app/Contents/RoonServer.app/Contents/MonoBundle/Roon.Storage.Directory.dll",
+      "sha256": "b5f2b2b17b6f69ca549539707cc35103c34e4f104f71c97d03cdf6c0172ef38b"
+    },
+    "identity_scope": {
+      "token_identity": "build-local",
+      "requires_artifact_sha256": "b5f2b2b17b6f69ca549539707cc35103c34e4f104f71c97d03cdf6c0172ef38b",
+      "requires_mvid": "5a266354-4f53-413a-87e7-ec0fa7257cab"
+    },
+    "calls": [
+      {
+        "caller_token": "0x0600006f",
+        "il_offset": 249,
+        "target_identity_sha256": "220455e529baddfadbd58d6be509c0ea5969b52b015d47a363557a86a73eda38",
+        "caller": "Roon.Storage.DirectoryStorage._RetryScanDirectory",
+        "opcode": "call",
+        "target_token": "0x06000072",
+        "target_kind": "method-def",
+        "target_name": "_ScanTree",
+        "target_declaring_type": "Roon.Storage.DirectoryStorage"
+      },
+      {
+        "caller_token": "0x06000072",
+        "il_offset": 13,
+        "target_identity_sha256": "f4aa58898de0a60c5c308d720d1981b15ce1d9a131ed02d5b8b0b44122373190",
+        "caller": "Roon.Storage.DirectoryStorage._ScanTree",
+        "opcode": "call",
+        "target_token": "0x06000074",
+        "target_kind": "method-def",
+        "target_name": "_ScanDirectory",
+        "target_declaring_type": "Roon.Storage.DirectoryStorage"
+      },
+      {
+        "caller_token": "0x06000074",
+        "il_offset": 386,
+        "target_identity_sha256": "6b3097e42f9544b0b358767b8074496cf7e9e34a92f6b47aa178d82b91851561",
+        "caller": "Roon.Storage.DirectoryStorage._ScanDirectory",
+        "opcode": "call",
+        "target_token": "0x06000070",
+        "target_kind": "method-def",
+        "target_name": "_LogScanFailure",
+        "target_declaring_type": "Roon.Storage.DirectoryStorage"
+      },
+      {
+        "caller_token": "0x06000074",
+        "il_offset": 397,
+        "target_identity_sha256": "e8276356f312c17a905d3ad1b4583c2d80da02ba03279cacd131b3b06047e106",
+        "caller": "Roon.Storage.DirectoryStorage._ScanDirectory",
+        "opcode": "call",
+        "target_token": "0x0600006e",
+        "target_kind": "method-def",
+        "target_name": "_QueueScanRetry",
+        "target_declaring_type": "Roon.Storage.DirectoryStorage"
+      },
+      {
+        "caller_token": "0x06000074",
+        "il_offset": 3447,
+        "target_identity_sha256": "f4aa58898de0a60c5c308d720d1981b15ce1d9a131ed02d5b8b0b44122373190",
+        "caller": "Roon.Storage.DirectoryStorage._ScanDirectory",
+        "opcode": "call",
+        "target_token": "0x06000074",
+        "target_kind": "method-def",
+        "target_name": "_ScanDirectory",
+        "target_declaring_type": "Roon.Storage.DirectoryStorage"
+      },
+      {
+        "caller_token": "0x06000074",
+        "il_offset": 3484,
+        "target_identity_sha256": "6b3097e42f9544b0b358767b8074496cf7e9e34a92f6b47aa178d82b91851561",
+        "caller": "Roon.Storage.DirectoryStorage._ScanDirectory",
+        "opcode": "call",
+        "target_token": "0x06000070",
+        "target_kind": "method-def",
+        "target_name": "_LogScanFailure",
+        "target_declaring_type": "Roon.Storage.DirectoryStorage"
+      },
+      {
+        "caller_token": "0x06000074",
+        "il_offset": 3496,
+        "target_identity_sha256": "e8276356f312c17a905d3ad1b4583c2d80da02ba03279cacd131b3b06047e106",
+        "caller": "Roon.Storage.DirectoryStorage._ScanDirectory",
+        "opcode": "call",
+        "target_token": "0x0600006e",
+        "target_kind": "method-def",
+        "target_name": "_QueueScanRetry",
+        "target_declaring_type": "Roon.Storage.DirectoryStorage"
+      }
+    ]
+  },
+  "inspection_limitations": {
+    "core_member_attempt": {
+      "state": "partial",
+      "issues": [
+        {
+          "code": "resource-limit",
+          "scope": "metadata.representation",
+          "offset": 4862774,
+          "detail": "Managed metadata exceeds the 67108864 byte representation budget"
+        }
+      ]
+    },
+    "core_selection": {
+      "type_names": [
+        "Roon.Broker.Core.Library",
+        "Roon.Broker.Core.Album",
+        "Roon.Broker.Core.Storage",
+        "Roon.Broker.Core.LibraryAlbum"
+      ],
+      "unmatched_type_names": [
+        "Roon.Broker.Core.Library",
+        "Roon.Broker.Core.Album",
+        "Roon.Broker.Core.Storage",
+        "Roon.Broker.Core.LibraryAlbum"
+      ]
+    },
+    "metadata_user_strings": {
+      "state": "partial",
+      "issues": [
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x70008755",
+          "offset": 164808,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x7000a19d",
+          "offset": 171532,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x7000a265",
+          "offset": 171740,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x7000e899",
+          "offset": 189712,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x7000fb41",
+          "offset": 194486,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x70012a9b",
+          "offset": 206618,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x70012d4d",
+          "offset": 207304,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x70012d65",
+          "offset": 207340,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x7001322d",
+          "offset": 208550,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x70013ff3",
+          "offset": 212076,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        },
+        {
+          "code": "invalid-string",
+          "scope": "metadata.#US:0x70014757",
+          "offset": 213962,
+          "detail": "User string terminal flag 1 differs from ECMA-335 II.24.2.4 value 0; readable UTF-16 is preserved and runtime acceptance is not assessed"
+        }
+      ]
+    }
+  },
+  "package_observations": {
+    "kind": "supplemental-read-only-package-observations",
+    "method": "Python standard-library sha256 and gzip decompression; not REA canonical Evidence; no app execution",
+    "package_root": "Roon.app/Contents",
+    "files": [
+      {
+        "package_relative_path": "Resources/VERSION",
+        "bytes": 49,
+        "sha256": "e51de367a5973c903225382fc0e3a6dc54893fed79d9092eaf12a38c3e5ec7ef",
+        "text": "207401719\n2.74 (build 1719) production\nproduction"
+      },
+      {
+        "package_relative_path": "Info.plist",
+        "bytes": 4068,
+        "sha256": "57fa5ee1b3baf0436de9c3233c1aabdd07bc3174b44ccdd37110d85b82bb03b6"
+      },
+      {
+        "package_relative_path": "Resources/ui.brooxgz",
+        "bytes": 5988837,
+        "sha256": "910886499244d774651858d5f9b20c46add85b4a1908798bec04a1301754d446"
+      },
+      {
+        "package_relative_path": "Resources/known_composers.json",
+        "bytes": 1061519,
+        "sha256": "ad006b9b090441cd5c2775f800bd2453db50285c3a1a463c233622eb13e99452"
+      },
+      {
+        "package_relative_path": "Resources/credit_roles.json",
+        "bytes": 407714,
+        "sha256": "6b40875598c5a7afca6d8e29dc90fc659799a4f492d0d533cea68de3111bade3"
+      },
+      {
+        "package_relative_path": "Resources/search_classicalness_glossary.json",
+        "bytes": 21544,
+        "sha256": "e3b3a7f8b50ce2de35f80bf73845f71c2b1fb38a53a74c3bbe961ffd1d72a0ab"
+      }
+    ],
+    "decoded_ui": {
+      "format_header": "BROO",
+      "bytes": 20315401,
+      "sha256": "e2b92b4c14735210a634636e72f72337e174e3ff83e43c9abf2f21412ca817b1",
+      "observed_literal_matches": [
+        {
+          "text": "settings_storage_force_rescan",
+          "decoded_byte_offset": 4198303,
+          "present": true
+        },
+        {
+          "text": "Clean up library",
+          "decoded_byte_offset": 5764411,
+          "present": true
+        },
+        {
+          "text": "Skipped files",
+          "decoded_byte_offset": 6333895,
+          "present": true
+        },
+        {
+          "text": "Metadata preferences for albums",
+          "decoded_byte_offset": 6652433,
+          "present": true
+        },
+        {
+          "text": "Metadata preferences for discs",
+          "decoded_byte_offset": 6664488,
+          "present": true
+        },
+        {
+          "text": "Metadata preferences for tracks",
+          "decoded_byte_offset": 6668595,
+          "present": true
+        },
+        {
+          "text": "Prefer file",
+          "decoded_byte_offset": 6652762,
+          "present": true
+        },
+        {
+          "text": "get_bookmarks",
+          "decoded_byte_offset": 30706,
+          "present": true
+        },
+        {
+          "text": "dialog_add_bookmark",
+          "decoded_byte_offset": 3210,
+          "present": true
+        },
+        {
+          "text": "Group alternate versions",
+          "decoded_byte_offset": 17931940,
+          "present": true
+        },
+        {
+          "text": "Make primary version",
+          "decoded_byte_offset": -1,
+          "present": false
+        },
+        {
+          "text": "Identify album",
+          "decoded_byte_offset": 17923816,
+          "present": true
+        }
+      ]
+    },
+    "limitations": [
+      "A matching UI literal does not prove screen reachability, handler execution, or feature correctness.",
+      "Missing selected text does not establish feature absence."
+    ]
+  },
+  "raw_bundle_sha256": "bf5292f5b9e4850350fe59bb7e334fee55cea55610651a6f5f736044caf39232",
+  "raw_bundle_bytes": 34691372,
+  "voon_diagnostics": {
+    "baseline_commit": "2f847c3b8208db9bffe8cdab7ed109529e00d6e8",
+    "scope": "Fake libraries and in-memory SQLite only. No GUI, actual SMB fault, actual audio decoding, real NAS or user database.",
+    "exit_code": 0,
+    "files": {
+      "Cargo.toml": {
+        "sha256": "b985825ff9d28ef602da37dcfc096f3ea36374da91e8c2916fe61e908c0ea545",
+        "text": "[package]\nname = \"voon-library-diagnostics\"\nversion = \"0.0.0\"\nedition = \"2024\"\npublish = false\n\n[dependencies]\nvoon-core = { path = \"/Users/liujun/Private/Code/github/voon/crates/voon-core\" }\n"
+      },
+      "src/main.rs": {
+        "sha256": "ae0e106bf025c3ce99e9ae0b8832386ccd708cf88fb532fc2328e45210177177",
+        "text": "use std::error::Error;\nuse std::fs;\nuse std::os::unix::fs::{MetadataExt, PermissionsExt};\nuse std::path::{Path, PathBuf};\nuse std::sync::Arc;\nuse std::sync::atomic::{AtomicUsize, Ordering};\nuse std::time::{SystemTime, UNIX_EPOCH};\n\nuse voon_core::db::{CachedTags, Index};\nuse voon_core::scan::{DiskTags, FileStamp, IssueKind, NoTags, TagReader, scan_root};\nuse voon_core::tags::TagInfo;\nuse voon_core::{Album, AudioFormat};\n\ntype DiagnosticResult<T> = Result<T, Box<dyn Error>>;\n\nstruct RestorePermissions {\n    path: PathBuf,\n    original: fs::Permissions,\n    restored: bool,\n}\n\nimpl RestorePermissions {\n    fn block(path: &Path) -> DiagnosticResult<Self> {\n        let original = fs::metadata(path)?.permissions();\n        fs::set_permissions(path, fs::Permissions::from_mode(0o000))?;\n        Ok(Self {\n            path: path.to_path_buf(),\n            original,\n            restored: false,\n        })\n    }\n\n    fn restore(&mut self) -> DiagnosticResult<()> {\n        fs::set_permissions(&self.path, self.original.clone())?;\n        self.restored = true;\n        Ok(())\n    }\n}\n\nimpl Drop for RestorePermissions {\n    fn drop(&mut self) {\n        if !self.restored {\n            if let Err(error) = fs::set_permissions(&self.path, self.original.clone()) {\n                eprintln!(\"PERMISSION RESTORE FAILED: {}: {error}\", self.path.display());\n            }\n        }\n    }\n}\n\nfn write_audio(root: &Path, relative: &str) -> DiagnosticResult<PathBuf> {\n    let path = root.join(relative);\n    fs::create_dir_all(path.parent().ok_or(\"audio path has no parent\")?)?;\n    fs::write(&path, b\"synthetic audio placeholder\")?;\n    Ok(path)\n}\n\nfn display_album(album: &Album) {\n    println!(\"album_path={}\", album.path.display());\n    println!(\"album_metadata={:?}\", album.metadata.entries());\n    for (position, track) in album.tracks().enumerate() {\n        println!(\n            \"track[{position}]: title={:?}, artist={:?}, duration_ms={:?}, source={:?}\",\n            track.title, track.artist, track.properties.duration_ms, track.source\n        );\n    }\n}\n\nfn experiment_partial_directory_failure(run: &Path) -> DiagnosticResult<()> {\n    println!(\"EXPERIMENT 1: unreadable child directory and completed-scan storage\");\n    let root = run.join(\"unreadable-child/Music\");\n    write_audio(&root, \"A/01.flac\")?;\n    write_audio(&root, \"B/01.flac\")?;\n    let mut index = Index::open_in_memory()?;\n    let first = scan_root(&root, &mut NoTags);\n    let first_store = index.store_scan(&root, &first);\n    println!(\"initial_store_result={first_store:?}\");\n    first_store?;\n    println!(\"initial_album_count={}\", index.albums()?.len());\n    println!(\"initial_issues={:?}\", first.issues);\n\n    let album_a = root.join(\"A\");\n    let mut permissions = RestorePermissions::block(&album_a)?;\n    let probe = fs::read_dir(&album_a);\n    match probe {\n        Ok(_) => {\n            println!(\"permission_probe=READABLE; experiment cannot establish precondition\");\n            permissions.restore()?;\n            return Err(\"chmod 000 did not prevent directory listing\".into());\n        }\n        Err(error) => println!(\"permission_probe_error={error:?}\"),\n    }\n\n    let device_before = root.metadata().ok().map(|metadata| metadata.dev());\n    let scan = scan_root(&root, &mut NoTags);\n    let device_after = root.metadata().ok().map(|metadata| metadata.dev());\n    // The current DiskScanner checks only root-level Unreadable issues.\n    // This mirrors its branch decision; no GPUI window is exercised here.\n    let unavailable = !root.is_dir()\n        || device_before != device_after\n        || scan.issues.iter().any(|issue| {\n            issue.path == root && matches!(issue.kind, IssueKind::Unreadable { .. })\n        });\n    println!(\"root_is_directory={}\", root.is_dir());\n    println!(\"device_before={device_before:?}; device_after={device_after:?}\");\n    println!(\"rescan_album_count={}; cancelled={}\", scan.albums.len(), scan.cancelled);\n    println!(\"rescan_issues={:?}\", scan.issues);\n    println!(\"mirrored_app_unavailable={unavailable}\");\n    let store_result = if unavailable || scan.cancelled {\n        println!(\"mirrored_app_storage_branch=store_partial_scan\");\n        index.store_partial_scan(&root, &scan)\n    } else {\n        println!(\"mirrored_app_storage_branch=store_scan (B keeps result nonempty)\");\n        index.store_scan(&root, &scan)\n    };\n    println!(\"rescan_store_result={store_result:?}\");\n    store_result?;\n    let after = index.albums()?;\n    println!(\"indexed_album_count_after={}\", after.len());\n    println!(\"indexed_album_paths_after={:?}\", after.iter().map(|album| &album.path).collect::<Vec<_>>());\n    println!(\"album_A_still_indexed={}\", index.album(&album_a)?.is_some());\n\n    permissions.restore()?;\n    println!(\"restored_A_permissions={:o}\", fs::metadata(&album_a)?.permissions().mode() & 0o777);\n    println!(\"restored_A_directory_readable={}\", fs::read_dir(&album_a).is_ok());\n    println!(\"scope=core scan + mirrored current application completion branch; no GUI automation\");\n    Ok(())\n}\n\nstruct InjectedTags {\n    calls: Arc<AtomicUsize>,\n    result: Option<TagInfo>,\n}\n\nimpl TagReader for InjectedTags {\n    fn read(&mut self, _: &Path, _: AudioFormat, _: FileStamp) -> Option<TagInfo> {\n        self.calls.fetch_add(1, Ordering::SeqCst);\n        self.result.clone()\n    }\n}\n\nfn successful_tags(calls: Arc<AtomicUsize>) -> InjectedTags {\n    InjectedTags {\n        calls,\n        result: Some(TagInfo {\n            title: Some(\"Recovered Track\".into()),\n            album: Some(\"Recovered Album\".into()),\n            album_artist: Some(\"Recovered Album Artist\".into()),\n            ..TagInfo::default()\n        }),\n    }\n}\n\nfn experiment_negative_tag_cache(run: &Path) -> DiagnosticResult<()> {\n    println!(\"EXPERIMENT 2: same-stamp negative tag cache with injected recovery\");\n    let root = run.join(\"negative-cache/Music\");\n    let audio = write_audio(&root, \"Album/01.flac\")?;\n    let mut index = Index::open_in_memory()?;\n    let before_stamp = FileStamp::of(&audio).ok_or(\"missing initial file stamp\")?;\n    let first_calls = Arc::new(AtomicUsize::new(0));\n    let first_scan = {\n        let first_reader = InjectedTags { calls: first_calls.clone(), result: None };\n        let mut cached = CachedTags::new(&index, first_reader);\n        let scan = scan_root(&root, &mut cached);\n        println!(\"first_cached_disk_reads={}; first_underlying_calls={}\", cached.reads, first_calls.load(Ordering::SeqCst));\n        scan\n    };\n    index.store_scan(&root, &first_scan)?;\n    println!(\"first_scan_cancelled={}; first_scan_issues={:?}\", first_scan.cancelled, first_scan.issues);\n    display_album(&first_scan.albums[0]);\n\n    let second_calls = Arc::new(AtomicUsize::new(0));\n    let second_scan = {\n        let mut cached = CachedTags::new(&index, successful_tags(second_calls.clone()));\n        let scan = scan_root(&root, &mut cached);\n        println!(\"second_cached_disk_reads={}; second_underlying_calls={}\", cached.reads, second_calls.load(Ordering::SeqCst));\n        scan\n    };\n    index.store_scan(&root, &second_scan)?;\n    let after_stamp = FileStamp::of(&audio).ok_or(\"missing subsequent file stamp\")?;\n    println!(\"before_stamp={before_stamp:?}; after_stamp={after_stamp:?}; unchanged={}\", before_stamp == after_stamp);\n    println!(\"second_scan_cancelled={}; second_scan_issues={:?}\", second_scan.cancelled, second_scan.issues);\n    display_album(&second_scan.albums[0]);\n    println!(\"indexed_after_second_metadata={:?}\", index.albums()?[0].metadata.entries());\n\n    let control_calls = Arc::new(AtomicUsize::new(0));\n    let control_scan = scan_root(&root, &mut successful_tags(control_calls.clone()));\n    println!(\"uncached_control_underlying_calls={}\", control_calls.load(Ordering::SeqCst));\n    display_album(&control_scan.albums[0]);\n    println!(\"scope=TagReader seam fault injection; no real SMB fault was induced\");\n    Ok(())\n}\n\nfn experiment_dff_cue(run: &Path) -> DiagnosticResult<()> {\n    println!(\"EXPERIMENT 3: DFF + two-track CUE timing and artist\");\n    let root = run.join(\"dff-cue/Music\");\n    let audio = write_audio(&root, \"DFF Album/image.dff\")?;\n    let album_path = audio.parent().ok_or(\"DFF album has no parent\")?;\n    fs::write(album_path.join(\"album.cue\"), r#\"PERFORMER \"Album Performer\"\nTITLE \"DFF CUE Diagnostic\"\nFILE \"image.dff\" WAVE\n  TRACK 01 AUDIO\n    TITLE \"First Track\"\n    PERFORMER \"First Artist\"\n    INDEX 01 00:00:00\n  TRACK 02 AUDIO\n    TITLE \"Second Track\"\n    PERFORMER \"Second Artist\"\n    INDEX 01 03:00:00\n\"#)?;\n    for (label, tags) in [(\"NoTags\", &mut NoTags as &mut dyn TagReader), (\"DiskTags\", &mut DiskTags as &mut dyn TagReader)] {\n        let scan = scan_root(&root, tags);\n        println!(\"reader={label}; album_count={}; cancelled={}; issues={:?}\", scan.albums.len(), scan.cancelled, scan.issues);\n        display_album(&scan.albums[0]);\n        let mut index = Index::open_in_memory()?;\n        index.store_scan(&root, &scan)?;\n        println!(\"reader={label}; indexed round trip:\");\n        display_album(&index.album(album_path)?.ok_or(\"DFF album missing from index\")?);\n    }\n    println!(\"expected_first_duration_from_CUE_only_ms=180000\");\n    println!(\"scope=core scanner and local in-memory index; UI artist rendering not exercised\");\n    Ok(())\n}\n\nfn main() -> DiagnosticResult<()> {\n    let run_id = SystemTime::now().duration_since(UNIX_EPOCH)?.as_nanos();\n    let run = PathBuf::from(\"/private/tmp/voon-roon-analysis/repro/fixtures\").join(run_id.to_string());\n    fs::create_dir_all(&run)?;\n    println!(\"diagnostic_fixture_root={}\", run.display());\n    println!(\"All databases are in memory; only synthetic fixture files are used.\");\n    experiment_partial_directory_failure(&run)?;\n    experiment_negative_tag_cache(&run)?;\n    experiment_dff_cue(&run)?;\n    println!(\"DIAGNOSTICS COMPLETED\");\n    Ok(())\n}\n"
+      },
+      "RUN_COMMAND.txt": {
+        "sha256": "7279a4a43c267127ac068930c0f733bec6275a645edfc0847ead7872fb1b87f0",
+        "text": "Seed the standalone crate with the repository lockfile (only the temporary copy is updated):\n\ncp /Users/liujun/Private/Code/github/voon/Cargo.lock /private/tmp/voon-roon-analysis/repro/Cargo.lock\n\nRun the diagnostic executable entirely offline, reusing the repository's existing target cache:\n\nCARGO_TARGET_DIR=/Users/liujun/Private/Code/github/voon/target cargo run --manifest-path /private/tmp/voon-roon-analysis/repro/Cargo.toml --offline > /private/tmp/voon-roon-analysis/repro/stdout.txt 2> /private/tmp/voon-roon-analysis/repro/stderr.txt\n\nThe program uses in-memory SQLite databases, creates uniquely named fake music libraries under this repro directory, and restores the directory permission changed by experiment 1.\n"
+      },
+      "stdout.txt": {
+        "sha256": "98f2678bdd40c371f66ab067abf4870f2dba38ed003b30de9389be150f062f0f",
+        "text": "diagnostic_fixture_root=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000\nAll databases are in memory; only synthetic fixture files are used.\nEXPERIMENT 1: unreadable child directory and completed-scan storage\ninitial_store_result=Ok(())\ninitial_album_count=2\ninitial_issues=[ScanIssue { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/unreadable-child/Music/A\", kind: TitleFromFolderOnly }, ScanIssue { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/unreadable-child/Music/B\", kind: TitleFromFolderOnly }]\npermission_probe_error=Os { code: 13, kind: PermissionDenied, message: \"Permission denied\" }\nroot_is_directory=true\ndevice_before=Some(16777229); device_after=Some(16777229)\nrescan_album_count=1; cancelled=false\nrescan_issues=[ScanIssue { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/unreadable-child/Music/A\", kind: Unreadable { error: \"Permission denied (os error 13)\" } }, ScanIssue { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/unreadable-child/Music/B\", kind: TitleFromFolderOnly }]\nmirrored_app_unavailable=false\nmirrored_app_storage_branch=store_scan (B keeps result nonempty)\nrescan_store_result=Ok(())\nindexed_album_count_after=1\nindexed_album_paths_after=[\"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/unreadable-child/Music/B\"]\nalbum_A_still_indexed=false\nrestored_A_permissions=755\nrestored_A_directory_readable=true\nscope=core scan + mirrored current application completion branch; no GUI automation\nEXPERIMENT 2: same-stamp negative tag cache with injected recovery\nfirst_cached_disk_reads=1; first_underlying_calls=1\nfirst_scan_cancelled=false; first_scan_issues=[ScanIssue { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album\", kind: TitleFromFolderOnly }]\nalbum_path=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album\nalbum_metadata=[(\"title\", \"Album\", FolderName)]\ntrack[0]: title=None, artist=None, duration_ms=None, source=File { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album/01.flac\" }\nsecond_cached_disk_reads=0; second_underlying_calls=0\nbefore_stamp=FileStamp { size: 27, mtime: 1794392638238293538 }; after_stamp=FileStamp { size: 27, mtime: 1794392638238293538 }; unchanged=true\nsecond_scan_cancelled=false; second_scan_issues=[ScanIssue { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album\", kind: TitleFromFolderOnly }]\nalbum_path=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album\nalbum_metadata=[(\"title\", \"Album\", FolderName)]\ntrack[0]: title=None, artist=None, duration_ms=None, source=File { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album/01.flac\" }\nindexed_after_second_metadata=[(\"title\", \"Album\", FolderName)]\nuncached_control_underlying_calls=1\nalbum_path=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album\nalbum_metadata=[(\"title\", \"Recovered Album\", Tag), (\"album_artist\", \"Recovered Album Artist\", Tag)]\ntrack[0]: title=Some(Field { value: \"Recovered Track\", source: Tag }), artist=None, duration_ms=None, source=File { path: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/negative-cache/Music/Album/01.flac\" }\nscope=TagReader seam fault injection; no real SMB fault was induced\nEXPERIMENT 3: DFF + two-track CUE timing and artist\nreader=NoTags; album_count=1; cancelled=false; issues=[]\nalbum_path=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album\nalbum_metadata=[(\"title\", \"DFF CUE Diagnostic\", Cue), (\"album_artist\", \"Album Performer\", Cue), (\"performers\", \"First Artist; Second Artist\", Cue)]\ntrack[0]: title=Some(Field { value: \"First Track\", source: Cue }), artist=Some(Field { value: \"First Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 0, end: Some(13500) }\ntrack[1]: title=Some(Field { value: \"Second Track\", source: Cue }), artist=Some(Field { value: \"Second Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 13500, end: None }\nreader=NoTags; indexed round trip:\nalbum_path=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album\nalbum_metadata=[(\"title\", \"DFF CUE Diagnostic\", Cue), (\"album_artist\", \"Album Performer\", Cue), (\"performers\", \"First Artist; Second Artist\", Cue)]\ntrack[0]: title=Some(Field { value: \"First Track\", source: Cue }), artist=Some(Field { value: \"First Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 0, end: Some(13500) }\ntrack[1]: title=Some(Field { value: \"Second Track\", source: Cue }), artist=Some(Field { value: \"Second Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 13500, end: None }\nreader=DiskTags; album_count=1; cancelled=false; issues=[]\nalbum_path=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album\nalbum_metadata=[(\"title\", \"DFF CUE Diagnostic\", Cue), (\"album_artist\", \"Album Performer\", Cue), (\"performers\", \"First Artist; Second Artist\", Cue)]\ntrack[0]: title=Some(Field { value: \"First Track\", source: Cue }), artist=Some(Field { value: \"First Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 0, end: Some(13500) }\ntrack[1]: title=Some(Field { value: \"Second Track\", source: Cue }), artist=Some(Field { value: \"Second Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 13500, end: None }\nreader=DiskTags; indexed round trip:\nalbum_path=/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album\nalbum_metadata=[(\"title\", \"DFF CUE Diagnostic\", Cue), (\"album_artist\", \"Album Performer\", Cue), (\"performers\", \"First Artist; Second Artist\", Cue)]\ntrack[0]: title=Some(Field { value: \"First Track\", source: Cue }), artist=Some(Field { value: \"First Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 0, end: Some(13500) }\ntrack[1]: title=Some(Field { value: \"Second Track\", source: Cue }), artist=Some(Field { value: \"Second Artist\", source: Cue }), duration_ms=None, source=Virtual { image: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/image.dff\", cue: \"/private/tmp/voon-roon-analysis/repro/fixtures/1794392638214546000/dff-cue/Music/DFF Album/album.cue\", start: 13500, end: None }\nexpected_first_duration_from_CUE_only_ms=180000\nscope=core scanner and local in-memory index; UI artist rendering not exercised\nDIAGNOSTICS COMPLETED\n"
+      },
+      "stderr.txt": {
+        "sha256": "962b357a7f22388539dea43720a4988cb256360408a5218490dd0e1bd4109f69",
+        "text": "   Compiling bitflags v2.13.2\n   Compiling id3 v1.17.3\n   Compiling rusqlite v0.42.0\n   Compiling voon-core v0.1.0 (/Users/liujun/Private/Code/github/voon/crates/voon-core)\n   Compiling voon-library-diagnostics v0.0.0 (/private/tmp/voon-roon-analysis/repro)\n    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.92s\n     Running `/Users/liujun/Private/Code/github/voon/target/debug/voon-library-diagnostics`\n"
+      }
+    }
+  }
+}

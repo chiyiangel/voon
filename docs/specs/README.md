@@ -35,3 +35,13 @@ whose blockers are all `done` (and whose external gates, if any, are met).
 
 Change the status by editing the front matter in the same commit as the
 work it describes.
+
+## Current specifications
+
+| Spec | Scope | Tracking |
+|---|---|---|
+| [0001 Phase 1](0001-phase-1.md) | Initial desktop library features | See the [ticket index](0001-phase-1/tickets/README.md) for implementation and platform acceptance. |
+| [0002 Library reliability and offline browsing](0002-library-reliability-and-protection.md) | Scan integrity, tag recovery, metadata candidates, CUE details, persistent covers and database version checks | ready-for-agent · [11 tickets](0002-library-reliability-and-protection/tickets/README.md) |
+
+Spec 0002 starts with a fresh index. Backups, restore and legacy-library
+migration are outside its implementation scope.
