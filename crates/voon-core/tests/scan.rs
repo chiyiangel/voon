@@ -306,7 +306,10 @@ fn progress_and_cancel() {
 fn index_round_trip_user_edits_and_incremental_tags() {
     let lib = library();
     let mut index = Index::open_in_memory().unwrap();
-    assert_eq!(index.schema_version().unwrap(), 1);
+    assert_eq!(
+        index.schema_version().unwrap(),
+        voon_core::db::SCHEMA_VERSION
+    );
 
     let mut reader = CachedTags::new(&index, DiskTags);
     let scan = scan_root(lib.path(), &mut reader);
@@ -363,6 +366,9 @@ fn index_on_disk_reopens() {
         .add_root(Path::new("/Volumes/NAS1/Music"))
         .unwrap();
     let index = Index::open(&db).unwrap();
-    assert_eq!(index.schema_version().unwrap(), 1);
+    assert_eq!(
+        index.schema_version().unwrap(),
+        voon_core::db::SCHEMA_VERSION
+    );
     assert_eq!(index.roots().unwrap().len(), 1);
 }

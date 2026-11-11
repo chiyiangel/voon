@@ -57,6 +57,9 @@ pub enum IssueKind {
     Unreadable { error: String },
     /// No title from tags or CUE; only the folder name is known.
     TitleFromFolderOnly,
+    /// An audio file directly in a library root has no album tag, so it
+    /// cannot be grouped into an album.
+    LooseUntagged { file: PathBuf },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -290,7 +293,9 @@ impl Scanner<'_> {
                 attachment_dirs.push(sub.clone());
                 continue;
             }
-            if let Some(n) = disc_number(&name)
+            // In a library root, `CD1` is just a folder (an album of its own).
+            if !is_root
+                && let Some(n) = disc_number(&name)
                 && let Ok(sl) = list(sub)
                 && !sl.audio.is_empty()
             {
@@ -321,11 +326,9 @@ impl Scanner<'_> {
             return Found::Albums(found);
         }
 
-        // Loose audio directly in the root becomes an album named after the root.
-        if is_album && is_root {
-            let album = self.build_album(dir, &listing, disc_dirs, &attachment_dirs, None);
-            (self.progress)(ScanEvent::Album(&album));
-            self.out.albums.push(album);
+        // Loose audio directly in the root is grouped by its album tags.
+        if is_root && !listing.audio.is_empty() {
+            self.loose_root_albums(dir, &listing.audio);
         }
 
         // Not an album: maybe a Collection of albums.
@@ -398,6 +401,7 @@ impl Scanner<'_> {
             cover: None,
             metadata: AlbumMetadata::default(),
             collection: collection.map(Path::to_path_buf),
+            signature: String::new(),
         };
         let tag_infos = self.read_tags(&mut album);
         album.metadata = resolve_metadata(&hints, &sheets, &tag_infos);
@@ -544,14 +548,19 @@ impl Scanner<'_> {
 
     /// Read tags once per audio file, fill track fields and properties, and
     /// return the per-file tag info for album-level resolution.
+    /// Also sets the album's content signature.
     fn read_tags(&mut self, album: &mut Album) -> Vec<(PathBuf, TagInfo)> {
         let mut seen: BTreeMap<PathBuf, Option<TagInfo>> = BTreeMap::new();
+        let mut sizes: Vec<(String, u64)> = Vec::new();
+        let base = album.path.clone();
         for disc in &mut album.discs {
             for track in &mut disc.tracks {
                 let path = track.source.audio_path().clone();
                 let info = seen.entry(path.clone()).or_insert_with(|| {
                     let stamp = FileStamp::of(&path)?;
                     self.out.stamps.push((path.clone(), stamp));
+                    let rel = path.strip_prefix(&base).unwrap_or(&path);
+                    sizes.push((rel.to_string_lossy().into_owned(), stamp.size));
                     self.tags.read(&path, track.format, stamp)
                 });
                 let Some(info) = info else { continue };
@@ -583,9 +592,99 @@ impl Scanner<'_> {
             }
             disc.tracks.sort_by_key(|t| t.number.unwrap_or(u32::MAX));
         }
+        album.signature = content_signature(&mut sizes);
         seen.into_iter()
             .filter_map(|(p, t)| t.map(|t| (p, t)))
             .collect()
+    }
+}
+
+impl Scanner<'_> {
+    /// Audio files directly in a library root: one album per (album artist,
+    /// album) tag pair; files without an album tag become issues.
+    fn loose_root_albums(&mut self, root: &Path, audio: &[(PathBuf, AudioFormat)]) {
+        type Group = Vec<(PathBuf, AudioFormat, FileStamp, TagInfo)>;
+        let mut groups: BTreeMap<(String, String), Group> = BTreeMap::new();
+        for (path, format) in audio {
+            if self.cancel.load(Ordering::Relaxed) {
+                return;
+            }
+            let Some(stamp) = FileStamp::of(path) else {
+                continue;
+            };
+            self.out.stamps.push((path.clone(), stamp));
+            let info = self.tags.read(path, *format, stamp);
+            match info {
+                Some(info) if info.album.is_some() => {
+                    let key = (
+                        info.album_artist.clone().unwrap_or_default(),
+                        info.album.clone().unwrap_or_default(),
+                    );
+                    groups
+                        .entry(key)
+                        .or_default()
+                        .push((path.clone(), *format, stamp, info));
+                }
+                _ => self.out.issues.push(ScanIssue {
+                    path: root.to_path_buf(),
+                    kind: IssueKind::LooseUntagged { file: path.clone() },
+                }),
+            }
+        }
+        for ((artist, title), files) in groups {
+            let safe = |s: &str| s.replace(['/', '\\'], "_");
+            let artist_dir = if artist.is_empty() {
+                "_".to_string()
+            } else {
+                safe(&artist)
+            };
+            let path = root.join(LOOSE_DIR).join(artist_dir).join(safe(&title));
+            let mut discs: BTreeMap<u32, Vec<Track>> = BTreeMap::new();
+            let mut sizes = Vec::new();
+            let mut infos = Vec::new();
+            for (file, format, stamp, info) in files {
+                sizes.push((name_of(&file), stamp.size));
+                discs
+                    .entry(info.disc.unwrap_or(1))
+                    .or_default()
+                    .push(Track {
+                        number: info.track,
+                        title: info.title.clone().map(|v| Field::new(v, FieldSource::Tag)),
+                        artist: info.artist.clone().map(|v| Field::new(v, FieldSource::Tag)),
+                        format,
+                        source: TrackSource::File { path: file.clone() },
+                        properties: info.properties.clone(),
+                    });
+                infos.push((file, info));
+            }
+            let discs = discs
+                .into_iter()
+                .map(|(number, mut tracks)| {
+                    tracks.sort_by_key(|t| t.number.unwrap_or(u32::MAX));
+                    Disc {
+                        number,
+                        path: root.to_path_buf(),
+                        tracks,
+                    }
+                })
+                .collect();
+            let album = Album {
+                path,
+                folder_name: title,
+                discs,
+                cover: infos
+                    .iter()
+                    .find(|(_, t)| t.has_picture)
+                    .map(|(p, _)| Cover {
+                        source: CoverSource::Embedded(p.clone()),
+                    }),
+                metadata: resolve_metadata(&FolderHints::default(), &[], &infos),
+                collection: None,
+                signature: content_signature(&mut sizes),
+            };
+            (self.progress)(ScanEvent::Album(&album));
+            self.out.albums.push(album);
+        }
     }
 }
 

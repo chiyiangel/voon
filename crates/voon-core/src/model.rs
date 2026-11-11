@@ -284,6 +284,34 @@ pub struct Album {
     pub metadata: AlbumMetadata,
     /// The innermost enclosing collection, if any.
     pub collection: Option<PathBuf>,
+    /// Content signature: a hash of each audio file's path relative to the
+    /// album folder plus its size. Unchanged when the album folder is renamed
+    /// or moved, so a rescan can propose the old and new paths as one album.
+    pub signature: String,
+}
+
+/// Prefix of the synthetic path given to an album assembled from loose audio
+/// files directly in a library root (`<root>/.voon-loose/<artist>/<album>`).
+/// Dot folders are never scanned, so it cannot clash with a real folder.
+pub const LOOSE_DIR: &str = ".voon-loose";
+
+/// Content signature of an album from `(relative path, size)` pairs.
+/// FNV-1a 64 over the sorted pairs, prefixed with the file count.
+pub fn content_signature(files: &mut [(String, u64)]) -> String {
+    files.sort();
+    let mut h: u64 = 0xcbf2_9ce4_8422_2325;
+    let mut eat = |bytes: &[u8]| {
+        for b in bytes {
+            h ^= u64::from(*b);
+            h = h.wrapping_mul(0x0000_0100_0000_01b3);
+        }
+    };
+    for (path, size) in files.iter() {
+        eat(path.as_bytes());
+        eat(&[0]);
+        eat(&size.to_le_bytes());
+    }
+    format!("{}:{h:016x}", files.len())
 }
 
 impl Album {

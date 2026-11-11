@@ -16,7 +16,8 @@ use crate::tags::TagInfo;
 pub type Result<T> = rusqlite::Result<T>;
 
 /// Each entry upgrades the schema by one version (`PRAGMA user_version`).
-const MIGRATIONS: &[&str] = &[r#"
+const MIGRATIONS: &[&str] = &[
+    r#"
 CREATE TABLE library_root (
     id INTEGER PRIMARY KEY,
     path TEXT NOT NULL UNIQUE,
@@ -115,7 +116,39 @@ CREATE TABLE manual_collection_album (
     position INTEGER NOT NULL,
     PRIMARY KEY (collection_id, album_path)
 );
-"#];
+"#,
+    r#"
+ALTER TABLE album ADD COLUMN signature TEXT NOT NULL DEFAULT '';
+CREATE INDEX album_signature ON album(signature);
+-- An album path that vanished in a rescan while a new path with the same
+-- content signature appeared. Kept across rescans until confirmed or
+-- dismissed, or until the new path itself disappears.
+CREATE TABLE rename_candidate (
+    old_path TEXT NOT NULL,
+    new_path TEXT NOT NULL,
+    signature TEXT NOT NULL,
+    PRIMARY KEY (old_path, new_path)
+);
+"#,
+];
+
+/// A proposed pairing of a vanished album path with a new one.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct RenameCandidate {
+    pub old_path: PathBuf,
+    pub new_path: PathBuf,
+}
+
+/// How many user-owned rows a confirmed rename moved.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct RenameMigration {
+    pub edits: usize,
+    pub tags: usize,
+    pub manual_collections: usize,
+}
+
+/// Schema version after all migrations.
+pub const SCHEMA_VERSION: u32 = MIGRATIONS.len() as u32;
 
 pub struct Index {
     conn: Connection,
@@ -209,6 +242,11 @@ impl Index {
     pub fn store_scan(&mut self, root: &Path, scan: &ScanResult) -> Result<()> {
         let root_id = self.add_root(root)?;
         let tx = self.conn.transaction()?;
+        let before: Vec<(String, String)> = {
+            let mut st = tx.prepare("SELECT path, signature FROM album WHERE root_id = ?1")?;
+            st.query_map([root_id], |r| Ok((r.get(0)?, r.get(1)?)))?
+                .collect::<Result<_>>()?
+        };
         tx.execute("DELETE FROM album WHERE root_id = ?1", [root_id])?;
         tx.execute("DELETE FROM collection WHERE root_id = ?1", [root_id])?;
         tx.execute("DELETE FROM scan_issue WHERE root_id = ?1", [root_id])?;
@@ -229,15 +267,16 @@ impl Index {
                 None => (None, false),
             };
             tx.execute(
-                "INSERT INTO album (root_id, path, folder_name, collection_path, cover_path, cover_embedded)
-                 VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+                "INSERT INTO album (root_id, path, folder_name, collection_path, cover_path, cover_embedded, signature)
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
                 params![
                     root_id,
                     p(&a.path),
                     a.folder_name,
                     a.collection.as_deref().map(p),
                     cover_path,
-                    embedded
+                    embedded,
+                    a.signature
                 ],
             )?;
             let album_id = tx.last_insert_rowid();
@@ -298,6 +337,7 @@ impl Index {
                 params![root_id, p(&issue.path), kind, detail],
             )?;
         }
+        record_rename_candidates(&tx, &before, &scan.albums)?;
         tx.execute(
             "UPDATE library_root SET last_scan = strftime('%s','now') WHERE id = ?1",
             [root_id],
@@ -377,15 +417,72 @@ impl Index {
         .collect()
     }
 
-    /// `(path, kind, detail)` for the 待处理 view.
+    /// `(path, kind, detail)` for the 待处理 view, including rename
+    /// candidates (kind `PossibleRename`, path = the new album path).
     pub fn issues(&self) -> Result<Vec<(PathBuf, String, String)>> {
-        let mut st = self
-            .conn
-            .prepare("SELECT path, kind, detail FROM scan_issue ORDER BY path")?;
+        let mut st = self.conn.prepare(
+            "SELECT path, kind, detail FROM scan_issue
+             UNION ALL
+             SELECT new_path, 'PossibleRename', old_path || ' -> ' || new_path FROM rename_candidate
+             ORDER BY 1",
+        )?;
         st.query_map([], |r| {
             Ok((PathBuf::from(r.get::<_, String>(0)?), r.get(1)?, r.get(2)?))
         })?
         .collect()
+    }
+
+    pub fn rename_candidates(&self) -> Result<Vec<RenameCandidate>> {
+        let mut st = self
+            .conn
+            .prepare("SELECT old_path, new_path FROM rename_candidate ORDER BY new_path")?;
+        st.query_map([], |r| {
+            Ok(RenameCandidate {
+                old_path: PathBuf::from(r.get::<_, String>(0)?),
+                new_path: PathBuf::from(r.get::<_, String>(1)?),
+            })
+        })?
+        .collect()
+    }
+
+    /// The user confirmed that `old` was renamed or moved to `new`: move user
+    /// edits, user tags and manual collection membership over, in one
+    /// transaction. Where `new` already has its own value (an edit of the
+    /// same field, the same tag, the same collection), that value is kept and
+    /// the old one dropped. Any candidate involving either path is cleared.
+    pub fn confirm_rename(&mut self, old: &Path, new: &Path) -> Result<RenameMigration> {
+        let (old, new) = (p(old), p(new));
+        let tx = self.conn.transaction()?;
+        let mut moved = RenameMigration::default();
+        for (table, count) in [
+            ("user_edit", &mut moved.edits),
+            ("album_user_tag", &mut moved.tags),
+            ("manual_collection_album", &mut moved.manual_collections),
+        ] {
+            *count = tx.execute(
+                &format!("UPDATE OR IGNORE {table} SET album_path = ?2 WHERE album_path = ?1"),
+                params![old, new],
+            )?;
+            tx.execute(
+                &format!("DELETE FROM {table} WHERE album_path = ?1"),
+                [&old],
+            )?;
+        }
+        tx.execute(
+            "DELETE FROM rename_candidate WHERE old_path = ?1 OR new_path = ?2",
+            params![old, new],
+        )?;
+        tx.commit()?;
+        Ok(moved)
+    }
+
+    /// The user says the pairing is wrong; forget it.
+    pub fn dismiss_rename(&self, old: &Path, new: &Path) -> Result<()> {
+        self.conn.execute(
+            "DELETE FROM rename_candidate WHERE old_path = ?1 AND new_path = ?2",
+            params![p(old), p(new)],
+        )?;
+        Ok(())
     }
 
     /// Set a user edit for an album field. It beats every scanned source.
@@ -524,6 +621,65 @@ impl Index {
         )?;
         Ok(())
     }
+}
+
+/// Pair album paths that vanished in this scan with paths that appeared,
+/// when exactly one of each shares a content signature. Ambiguous matches
+/// (duplicate rips) are not proposed. Stale candidates are pruned.
+fn record_rename_candidates(
+    tx: &rusqlite::Transaction<'_>,
+    before: &[(String, String)],
+    after: &[Album],
+) -> Result<()> {
+    use std::collections::{HashMap, HashSet};
+    let now: HashSet<String> = after.iter().map(|a| p(&a.path)).collect();
+    let was: HashSet<&str> = before.iter().map(|(path, _)| path.as_str()).collect();
+    let mut gone: HashMap<&str, Vec<&str>> = HashMap::new();
+    for (path, sig) in before {
+        if !sig.is_empty() && !now.contains(path) {
+            gone.entry(sig.as_str()).or_default().push(path);
+        }
+    }
+    let mut appeared: HashMap<&str, Vec<String>> = HashMap::new();
+    for a in after {
+        let path = p(&a.path);
+        if !a.signature.is_empty() && !was.contains(path.as_str()) {
+            appeared.entry(a.signature.as_str()).or_default().push(path);
+        }
+    }
+    for (sig, old) in &gone {
+        if let (Some(new), [old]) = (appeared.get(sig), old.as_slice())
+            && let [new] = new.as_slice()
+        {
+            // Renamed again before the user decided: user data still lives
+            // at the first path, so chain X→old into X→new (or drop it when
+            // the folder went back to X).
+            let earlier: Vec<String> = {
+                let mut st =
+                    tx.prepare("SELECT old_path FROM rename_candidate WHERE new_path = ?1")?;
+                st.query_map([old], |r| r.get(0))?.collect::<Result<_>>()?
+            };
+            tx.execute("DELETE FROM rename_candidate WHERE new_path = ?1", [old])?;
+            let origins = if earlier.is_empty() {
+                vec![old.to_string()]
+            } else {
+                earlier
+            };
+            for origin in origins.iter().filter(|o| *o != new) {
+                tx.execute(
+                    "INSERT OR IGNORE INTO rename_candidate (old_path, new_path, signature) VALUES (?1, ?2, ?3)",
+                    params![origin, new, sig],
+                )?;
+            }
+        }
+    }
+    // A candidate is stale once its new path is gone or its old path is back.
+    tx.execute(
+        "DELETE FROM rename_candidate
+         WHERE new_path NOT IN (SELECT path FROM album) OR old_path IN (SELECT path FROM album)",
+        [],
+    )?;
+    Ok(())
 }
 
 /// A tag reader that consults the index first and reads the file only when
