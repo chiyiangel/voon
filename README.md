@@ -114,3 +114,7 @@ cargo run -p voon-app -- /path/to/music    # or set VOON_ROOT
 Run `cargo fmt --all` and `cargo clippy --workspace --all-targets -- -D warnings`
 before pushing. There is no hosted CI yet.
 
+
+## License
+
+[MIT](LICENSE).

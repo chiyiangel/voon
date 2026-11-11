@@ -6,6 +6,7 @@ default-members = ["crates/voon-core"]
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
 repository = "https://github.com/chiyiangel/voon"
 publish = false
 
