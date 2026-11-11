@@ -341,10 +341,12 @@ impl Index {
         .collect()
     }
 
-    /// Whether the last complete physical scan found any Album in this root.
+    /// Whether this root has accepted physical Albums, including completed
+    /// discoveries retained from an interrupted first scan.
     pub fn has_scanned_albums(&self, root: &Path) -> Result<bool> {
         self.conn.query_row(
-            "SELECT EXISTS(SELECT 1 FROM scan_baseline s JOIN library_root r ON r.id = s.root_id WHERE r.path = ?1)",
+            "SELECT EXISTS(SELECT 1 FROM scan_baseline s JOIN library_root r ON r.id = s.root_id WHERE r.path = ?1)
+             OR EXISTS(SELECT 1 FROM structure_raw s JOIN library_root r ON r.id = s.root_id WHERE r.path = ?1)",
             [p(root)], |row| row.get(0),
         )
     }
@@ -363,8 +365,9 @@ impl Index {
         tx.commit()
     }
 
-    /// Replace the completed physical scan under `root`. Call
-    /// `store_partial_scan` when traversal was cancelled or interrupted.
+    /// Replace observed physical scopes under `root`, retaining incomplete
+    /// Albums. Without successful root coverage this commits additions and
+    /// updates only, just like `store_partial_scan`.
     pub fn store_scan(&mut self, root: &Path, scan: &ScanResult) -> Result<()> {
         self.store_scan_result(root, scan, true)
     }
@@ -376,6 +379,9 @@ impl Index {
     }
 
     fn store_scan_result(&mut self, root: &Path, scan: &ScanResult, complete: bool) -> Result<()> {
+        // Cancellation is part of the result's contract, even if a caller uses
+        // the ordinary commit entry point instead of store_partial_scan.
+        let complete = complete && !scan.cancelled && scan.root_was_listed(root);
         let root_id = self.add_root(root)?;
         let tx = self.conn.transaction()?;
         let incomplete = scan.incomplete_paths();
@@ -418,6 +424,24 @@ impl Index {
                 }
             }
             tx.execute("DELETE FROM scan_issue WHERE root_id = ?1", [root_id])?;
+        } else {
+            let issues: Vec<(i64, String)> = {
+                let mut statement =
+                    tx.prepare("SELECT id,path FROM scan_issue WHERE root_id=?1")?;
+                statement
+                    .query_map([root_id], |row| Ok((row.get(0)?, row.get(1)?)))?
+                    .collect::<Result<_>>()?
+            };
+            for (id, path) in issues {
+                if scan.albums.iter().any(|album| {
+                    album
+                        .physical_directories()
+                        .iter()
+                        .any(|source| Path::new(&path).starts_with(source))
+                }) {
+                    tx.execute("DELETE FROM scan_issue WHERE id=?1", [id])?;
+                }
+            }
         }
         for c in &scan.collections {
             tx.execute(
@@ -428,10 +452,34 @@ impl Index {
             )?;
         }
         for album in &scan.albums {
+            if !complete {
+                // A task can be detached immediately after reporting a complete
+                // Album, before traversal has emitted its Collection records.
+                let mut collection = album.collection.as_deref();
+                while let Some(path) =
+                    collection.filter(|path| *path != root && path.starts_with(root))
+                {
+                    let parent = path
+                        .parent()
+                        .filter(|path| *path != root && path.starts_with(root));
+                    tx.execute(
+                        "INSERT OR IGNORE INTO collection(root_id,path,name,parent_path) VALUES (?1,?2,?3,?4)",
+                        params![root_id, p(path), path.file_name().unwrap_or_default().to_string_lossy(), parent.map(p)],
+                    )?;
+                    collection = parent;
+                }
+            }
             details::store_album(&tx, root_id, album)?;
         }
+        let mut replaced_issue_scopes = std::collections::HashSet::new();
         for issue in &scan.issues {
             let (kind, detail) = attention::describe(issue);
+            if replaced_issue_scopes.insert((issue.path.as_path(), kind)) {
+                tx.execute(
+                    "DELETE FROM scan_issue WHERE root_id=?1 AND path=?2 AND kind=?3",
+                    params![root_id, p(&issue.path), kind],
+                )?;
+            }
             tx.execute(
                 "INSERT INTO scan_issue (root_id, path, kind, detail)
                  SELECT ?1, ?2, ?3, ?4 WHERE NOT EXISTS
@@ -450,6 +498,10 @@ impl Index {
                 "UPDATE library_root SET last_scan = strftime('%s','now') WHERE id = ?1",
                 [root_id],
             )?;
+        } else if complete {
+            // A confirmed removal/change can expire an existing proposal even
+            // when another subtree is protected. Never infer a new pairing.
+            prune_rename_candidates(&tx, root_id)?;
         }
         structure::record_scan_and_replay(&tx, root_id, root, scan, complete)?;
         tx.commit()
@@ -737,7 +789,11 @@ fn record_rename_candidates(
             }
         }
     }
-    // Only reconcile the root whose complete physical snapshot was replaced.
+    prune_rename_candidates(tx, root_id)
+}
+
+fn prune_rename_candidates(tx: &rusqlite::Transaction<'_>, root_id: i64) -> Result<()> {
+    // Only reconcile the root whose accepted physical snapshot was replaced.
     // Other roots may currently expose a user merge instead of physical rows.
     tx.execute(
         "DELETE FROM rename_candidate

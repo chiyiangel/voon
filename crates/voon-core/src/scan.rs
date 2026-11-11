@@ -113,10 +113,12 @@ pub struct ScanIssue {
 
 #[derive(Clone, Debug, Default)]
 pub struct ScanCoverage {
-    /// Directories whose entries and file types were successfully observed.
+    /// Directories enumerated; individual failed entries are scoped separately.
     pub listed_directories: Vec<PathBuf>,
     /// A failure anywhere in an Album's physical subtree protects its structure.
     pub incomplete_paths: Vec<PathBuf>,
+    /// Subtrees skipped when cancellation was observed; absence is unconfirmed.
+    pub unvisited_paths: Vec<PathBuf>,
 }
 
 #[derive(Clone, Debug, Default)]
@@ -132,12 +134,22 @@ pub struct ScanResult {
 }
 
 impl ScanResult {
+    /// A root listing is required before absent paths can be considered gone.
+    /// Descendant failures still protect their respective Album subtrees.
+    pub fn root_was_listed(&self, root: &Path) -> bool {
+        self.coverage
+            .listed_directories
+            .iter()
+            .any(|path| path == root)
+    }
+
     /// Includes legacy/controlled scanner errors, so a caller cannot publish a
     /// partial Album merely by omitting its coverage record.
     pub fn incomplete_paths(&self) -> Vec<&Path> {
         self.coverage
             .incomplete_paths
             .iter()
+            .chain(&self.coverage.unvisited_paths)
             .map(PathBuf::as_path)
             .chain(self.issues.iter().filter_map(|issue| {
                 matches!(
@@ -344,19 +356,35 @@ struct Listing {
     cues: Vec<PathBuf>,
     images: Vec<PathBuf>,
     subdirs: Vec<PathBuf>,
+    failures: Vec<(PathBuf, String)>,
 }
 
 fn list(dir: &Path) -> std::io::Result<Listing> {
     let mut l = Listing::default();
     for entry in fs::read_dir(dir)? {
-        let entry = entry?;
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(error) => {
+                l.failures.push((dir.into(), error.to_string()));
+                continue;
+            }
+        };
         let name = entry.file_name().to_string_lossy().into_owned();
         if is_junk(&name) {
             continue;
         }
         let path = entry.path();
         // Follows symlinks: a library may link albums in from elsewhere.
-        let meta = fs::metadata(&path)?;
+        let meta = match fs::metadata(&path) {
+            Ok(metadata) => metadata,
+            Err(error) => {
+                if !is_attachment_dir(&name) && !IMAGE_EXTENSIONS.contains(&ext_of(&path).as_str())
+                {
+                    l.failures.push((path, error.to_string()));
+                }
+                continue;
+            }
+        };
         if meta.is_dir() {
             l.subdirs.push(path);
             continue;
@@ -415,6 +443,19 @@ impl Scanner<'_> {
             }
         };
         self.out.coverage.listed_directories.push(dir.into());
+        for (path, error) in listing.failures.drain(..) {
+            if !self
+                .ignored_paths
+                .iter()
+                .any(|ignored| path.starts_with(ignored))
+            {
+                self.out.coverage.incomplete_paths.push(path.clone());
+                self.out.issues.push(ScanIssue {
+                    path,
+                    kind: IssueKind::Unreadable { error },
+                });
+            }
+        }
         listing.subdirs.retain(|path| {
             !self
                 .ignored_paths
@@ -426,9 +467,14 @@ impl Scanner<'_> {
 
     fn visit(&mut self, dir: &Path, collection: Option<&Path>, is_root: bool) -> Found {
         if self.cancel.load(Ordering::Relaxed) {
+            self.out.coverage.unvisited_paths.push(dir.into());
             return Found::Nothing;
         }
         (self.progress)(ScanEvent::Directory(dir));
+        if self.cancel.load(Ordering::Relaxed) {
+            self.out.coverage.unvisited_paths.push(dir.into());
+            return Found::Nothing;
+        }
         let listing = match self.list(dir) {
             Ok(l) => l,
             Err(_) => return Found::Nothing,

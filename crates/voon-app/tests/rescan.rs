@@ -428,3 +428,37 @@ fn failed_album_observation_is_saved_as_attention_instead_of_an_empty_root_confi
         );
     });
 }
+
+#[gpui::test]
+fn an_empty_root_after_a_cancelled_first_scan_still_requires_confirmation(cx: &mut TestAppContext) {
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    let album = root.join("已完成");
+    std::fs::create_dir(&album).unwrap();
+    std::fs::write(album.join("01.flac"), b"fixture").unwrap();
+    let database = local.path().join("index.sqlite3");
+    let mut index = Index::open(&database).unwrap();
+    let mut partial = scan_root(&root, &mut NoTags);
+    partial.cancelled = true;
+    index.store_partial_scan(&root, &partial).unwrap();
+    std::fs::remove_dir_all(&album).unwrap();
+    let (sender, receiver) = mpsc::channel();
+    let state = cx.new(|_| {
+        AppState::new(index, root.clone())
+            .unwrap()
+            .with_scanner(Box::new(ControlledScanner(Mutex::new(Some(receiver)))))
+    });
+    state.update(cx, |state, cx| state.start_scan(root.clone(), cx).unwrap());
+    sender
+        .send(ScanUpdate::Finished(scan_root(&root, &mut NoTags), 0))
+        .unwrap();
+    state.update(cx, |state, cx| state.poll_scan(cx));
+    state.read_with(cx, |state, _| {
+        assert_eq!(state.albums().len(), 1);
+        assert!(matches!(state.scan_state(), ScanState::Empty { .. }));
+    });
+    assert_eq!(Index::open(&database).unwrap().albums().unwrap().len(), 1);
+    state.update(cx, |state, cx| state.confirm_empty_scan(cx).unwrap());
+    assert!(Index::open(&database).unwrap().albums().unwrap().is_empty());
+}

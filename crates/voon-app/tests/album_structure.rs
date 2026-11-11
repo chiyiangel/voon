@@ -51,11 +51,16 @@ fn rescanning_a_structured_root_does_not_flash_physical_album_previews(cx: &mut 
         assert_eq!(state.selected_album().unwrap().path, merged);
         assert!(state.begin_split(cx).is_err());
     });
-    sender.send(ScanUpdate::Finished(scan, 0)).unwrap();
+    sender
+        .send(ScanUpdate::Unavailable(voon_core::ScanResult::default()))
+        .unwrap();
     state.update(cx, |state, cx| {
         state.poll_scan(cx);
         assert_eq!(state.albums().len(), 1);
         assert_eq!(state.selected_album().unwrap().path, merged);
+        state.begin_structure_undo(cx).unwrap();
+        state.confirm_structure(cx).unwrap();
+        assert_eq!(state.albums().len(), 2);
     });
 }
 

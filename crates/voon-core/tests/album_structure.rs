@@ -45,6 +45,24 @@ fn merged_albums_survive_restart_and_rescan_and_can_be_undone_without_touching_m
         .unwrap();
     assert_eq!(index.albums().unwrap().len(), 1);
     assert_eq!(index.album(&merged).unwrap().unwrap().discs.len(), 2);
+    let mut interrupted = scan_root(library.path(), &mut NoTags);
+    interrupted.albums.retain(|album| album.path != first);
+    interrupted.issues.push(voon_core::scan::ScanIssue {
+        path: first.clone(),
+        kind: voon_core::scan::IssueKind::Unreadable {
+            error: "连接中断".into(),
+        },
+    });
+    index.store_scan(library.path(), &interrupted).unwrap();
+    drop(index);
+    let mut index = Index::open(&database).unwrap();
+    assert_eq!(index.album(&merged).unwrap().unwrap().tracks().count(), 2);
+    assert_eq!(
+        index.album(&merged).unwrap().unwrap().source_directories,
+        [first.clone(), second.clone()]
+    );
+    assert!(index.last_structure_operation().unwrap().is_some());
+    assert!(index.rename_candidates().unwrap().is_empty());
     assert!(index.undo_structure().unwrap().is_some());
     assert_eq!(index.albums().unwrap().len(), 2);
     assert_eq!(
@@ -244,9 +262,15 @@ fn splitting_by_disc_survives_rescan_and_undo_restores_the_original_album() {
             .audio_path(),
         &path.join("CD1/01.flac")
     );
-    index
-        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
-        .unwrap();
+    let mut incomplete = scan_root(library.path(), &mut NoTags);
+    incomplete.albums[0].discs.pop();
+    incomplete.issues.push(voon_core::scan::ScanIssue {
+        path: path.join("CD2"),
+        kind: voon_core::scan::IssueKind::Unreadable {
+            error: "部分断连".into(),
+        },
+    });
+    index.store_scan(library.path(), &incomplete).unwrap();
     assert_eq!(index.albums().unwrap().len(), 2);
     assert!(
         outputs

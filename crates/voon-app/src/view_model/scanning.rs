@@ -159,6 +159,19 @@ impl ScanSession {
     pub(super) fn preview_album(&self, path: &Path) -> Option<&Album> {
         self.previews.get(path)
     }
+
+    fn discard_late_results(&self, scan: &mut ScanResult) {
+        if self.cancel.load(Ordering::Relaxed) {
+            scan.cancelled = true;
+            scan.albums = self.previews.values().cloned().collect();
+            scan.collections.retain(|collection| {
+                collection
+                    .albums
+                    .iter()
+                    .any(|path| self.previews.contains_key(path))
+            });
+        }
+    }
 }
 impl Drop for ScanSession {
     fn drop(&mut self) {
@@ -176,7 +189,11 @@ impl AppState {
         if self.index_open_problem().is_some() {
             return Err("请先新建可用的本地索引，再添加音乐库重新扫描".into());
         }
-        if self.scan_session.is_some() {
+        if self
+            .scan_session
+            .as_ref()
+            .is_some_and(|session| !session.cancel.load(Ordering::Relaxed))
+        {
             return Err("请等待当前扫描结束，或先取消扫描".into());
         }
         let root = std::fs::canonicalize(root)?;
@@ -204,11 +221,27 @@ impl AppState {
     }
 
     pub fn start_scan(&mut self, root: PathBuf, cx: &mut Context<Self>) -> Result<()> {
-        if self.scan_session.is_some() {
+        if self
+            .scan_session
+            .as_ref()
+            .is_some_and(|session| !session.cancel.load(Ordering::Relaxed))
+        {
             return Err("已有扫描正在进行".into());
         }
         if !self.roots.iter().any(|existing| existing.path == root) {
             return Err("音乐库根目录不存在".into());
+        }
+        if let Some(previous) = &self.scan_session {
+            let completed = ScanResult {
+                albums: previous.previews.values().cloned().collect(),
+                cancelled: true,
+                ..Default::default()
+            };
+            self.index.store_partial_scan(&previous.root, &completed)?;
+            // Dropping this receiver isolates the next task from every late
+            // event of the cancelled worker, even if it cannot stop an I/O yet.
+            self.scan_session = None;
+            self.reload_library(cx)?;
         }
         self.pending_empty_scan = None;
         if self.offline_roots().contains(&root) {
@@ -244,6 +277,21 @@ impl AppState {
         cx.notify();
     }
 
+    fn preserve_interrupted_discoveries(&mut self, cx: &mut Context<Self>) -> Result<()> {
+        let Some(session) = self.scan_session.take() else {
+            return Ok(());
+        };
+        let completed = ScanResult {
+            albums: session.previews.values().cloned().collect(),
+            cancelled: true,
+            ..Default::default()
+        };
+        let stored = self.index.store_partial_scan(&session.root, &completed);
+        let reloaded = self.reload_library(cx);
+        stored?;
+        reloaded
+    }
+
     /// Drain only a bounded batch so a fast scan cannot starve UI input.
     pub fn poll_scan(&mut self, cx: &mut Context<Self>) {
         self.poll_root_availability(cx);
@@ -256,6 +304,9 @@ impl AppState {
             let root = session.root.clone();
             match session.receiver.try_recv() {
                 Ok(ScanUpdate::Directory(path)) => {
+                    if session.cancel.load(Ordering::Relaxed) {
+                        continue;
+                    }
                     if let ScanState::Scanning {
                         current_directory, ..
                     } = &mut self.scan_state
@@ -264,17 +315,17 @@ impl AppState {
                     }
                 }
                 Ok(ScanUpdate::Album(album)) => {
+                    if session.cancel.load(Ordering::Relaxed) {
+                        continue;
+                    }
                     if let ScanState::Scanning { discovered, .. } = &mut self.scan_state {
                         *discovered += 1;
                     }
-                    if session.suppress_previews {
-                        cx.notify();
-                        continue;
-                    }
-                    if !self
-                        .albums
-                        .iter()
-                        .any(|existing| existing.path == album.path)
+                    if !session.suppress_previews
+                        && !self
+                            .albums
+                            .iter()
+                            .any(|existing| existing.path == album.path)
                     {
                         self.albums.push(AlbumRow::from_album(&album));
                         self.refresh_browse();
@@ -283,10 +334,15 @@ impl AppState {
                         session.previews.insert(album.path.clone(), *album);
                     }
                 }
-                Ok(ScanUpdate::Finished(scan, reads)) => {
+                Ok(ScanUpdate::Finished(mut scan, reads)) => {
+                    session.discard_late_results(&mut scan);
                     let cancelled = scan.cancelled || session.cancel.load(Ordering::Relaxed);
                     self.scan_session = None;
-                    if !cancelled && scan.albums.is_empty() && scan.incomplete_paths().is_empty() {
+                    if !cancelled
+                        && scan.albums.is_empty()
+                        && scan.incomplete_paths().is_empty()
+                        && scan.root_was_listed(&root)
+                    {
                         match self.index.has_scanned_albums(&root) {
                             Ok(true) => {
                                 self.scan_state = ScanState::Empty { root: root.clone() };
@@ -334,11 +390,14 @@ impl AppState {
                     }
                 }
                 Ok(ScanUpdate::Failed(error)) => {
-                    self.scan_session = None;
                     self.scan_state = ScanState::Idle;
-                    self.error = Some(error);
+                    self.error = Some(match self.preserve_interrupted_discoveries(cx) {
+                        Ok(()) => error,
+                        Err(save_error) => format!("{error}；无法保存已完成专辑：{save_error}"),
+                    });
                 }
-                Ok(ScanUpdate::Unavailable(scan)) => {
+                Ok(ScanUpdate::Unavailable(mut scan)) => {
+                    session.discard_late_results(&mut scan);
                     self.scan_session = None;
                     if let Err(error) = self.index.store_partial_scan(&root, &scan) {
                         self.error = Some(format!("无法保存部分扫描结果：{error}"));
@@ -351,9 +410,11 @@ impl AppState {
                 }
                 Err(TryRecvError::Empty) => break,
                 Err(TryRecvError::Disconnected) => {
-                    self.scan_session = None;
                     self.scan_state = ScanState::Idle;
-                    self.error = Some("扫描意外结束，请重试".into());
+                    self.error = Some(match self.preserve_interrupted_discoveries(cx) {
+                        Ok(()) => "扫描意外结束，已保留已完成专辑，请重试".into(),
+                        Err(error) => format!("扫描意外结束，无法保存已完成专辑：{error}"),
+                    });
                     break;
                 }
             }
