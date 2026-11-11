@@ -1,0 +1,13 @@
+[workspace]
+resolver = "3"
+members = ["crates/voon-core"]
+default-members = ["crates/voon-core"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+repository = "https://github.com/chiyiangel/voon"
+publish = false
+
+[workspace.dependencies]
+voon-core = { path = "crates/voon-core" }
