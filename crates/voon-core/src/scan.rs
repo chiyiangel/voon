@@ -24,6 +24,7 @@ struct ObservedCue {
     sheet: CueSheet,
     observed_at: i64,
     audio_paths: Vec<PathBuf>,
+    used_for_resolution: bool,
 }
 
 pub const IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp", "bmp", "gif"];
@@ -558,7 +559,11 @@ impl Scanner<'_> {
             signature: String::new(),
         };
         let tag_infos = self.read_tags(&mut album);
-        let resolved_sheets: Vec<_> = sheets.iter().map(|sheet| sheet.sheet.clone()).collect();
+        let resolved_sheets: Vec<_> = sheets
+            .iter()
+            .filter(|sheet| sheet.used_for_resolution)
+            .map(|sheet| sheet.sheet.clone())
+            .collect();
         album.metadata = resolve_metadata(&hints, &resolved_sheets, &tag_infos);
         album.candidates = candidates::collect(&album, &hints, &sheets, &self.out.tag_observations);
         album.cover = find_cover(&listing.images, &disc_dirs, attachment_dirs)
@@ -642,11 +647,22 @@ impl Scanner<'_> {
                     }
                 }
             }
-            if missing || resolved.iter().any(|p| claimed.contains(&p.0)) {
-                // A second sheet for the same image (e.g. a UTF-8 copy) is skipped.
+            if missing {
                 continue;
             }
             let audio_paths = resolved.iter().map(|(path, _)| path.clone()).collect();
+            let used_for_resolution = !resolved.iter().any(|path| claimed.contains(&path.0));
+            sheets.push(ObservedCue {
+                path: cue_path.clone(),
+                sheet: sheet.clone(),
+                observed_at: crate::tags::observation_time(),
+                audio_paths,
+                used_for_resolution,
+            });
+            if !used_for_resolution {
+                // Keep alternate evidence without adding duplicate Tracks or changing winners.
+                continue;
+            }
             if single_file {
                 let (image, format) = resolved.remove(0);
                 let tracks = &sheet.files[0].tracks;
@@ -682,12 +698,6 @@ impl Scanner<'_> {
                     }
                 }
             }
-            sheets.push(ObservedCue {
-                path: cue_path.clone(),
-                sheet,
-                observed_at: crate::tags::observation_time(),
-                audio_paths,
-            });
         }
 
         let loose: Vec<Track> = l

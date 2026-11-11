@@ -11,6 +11,19 @@ impl Index {
             return Ok(vec![]);
         };
         let automatic = self.automatic_metadata(path)?.unwrap_or_default();
+        let mut candidates = crate::metadata_candidates::for_album(&album);
+        let issues = self.album_scan_issues(path)?;
+        for candidate in &mut candidates {
+            if let Some(issue) = issues.iter().find(|issue| {
+                candidate.source_path.starts_with(&issue.path)
+                    || issue.path.starts_with(&candidate.source_path)
+            }) {
+                candidate.status = crate::SourceStatus::Unconfirmed {
+                    reason: issue.explanation.clone(),
+                    attempted_at: None,
+                };
+            }
+        }
         let effective = album.metadata.entries();
         let automatic = automatic.entries();
         Ok(ALBUM_FIELDS
@@ -28,17 +41,10 @@ impl Index {
                     .as_ref()
                     .filter(|field| field.source == FieldSource::UserEdit)
                     .map(|field| field.value.clone());
-                let candidates = album
-                    .candidates
+                let candidates = candidates
                     .iter()
                     .filter(|candidate| candidate.name == *name)
-                    .filter_map(|candidate| {
-                        let mut candidate = candidate.clone();
-                        candidate
-                            .tracks
-                            .retain(|source| album.tracks().any(|track| track.source == *source));
-                        (!candidate.tracks.is_empty()).then_some(candidate)
-                    })
+                    .cloned()
                     .collect();
                 FieldComparison {
                     name: (*name).into(),

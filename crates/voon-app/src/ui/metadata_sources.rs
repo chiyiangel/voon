@@ -4,10 +4,7 @@ use voon_core::{FieldComparison, FieldSource, SourceStatus, TrackSource};
 
 pub(super) fn render(comparisons: &[FieldComparison], theme: Theme) -> impl IntoElement {
     let mut panel = div().p_4().flex().flex_col().gap_4();
-    for field in comparisons
-        .iter()
-        .filter(|field| ["title", "year"].contains(&field.name.as_str()))
-    {
+    for field in comparisons {
         let label = FIELD_LABELS
             .iter()
             .find(|(name, _)| *name == field.name)
@@ -15,7 +12,7 @@ pub(super) fn render(comparisons: &[FieldComparison], theme: Theme) -> impl Into
             .unwrap_or(&field.name);
         let value = |value: Option<&voon_core::Field<String>>| {
             value
-                .map(|field| field.value.clone())
+                .map(|field| format!("{}（{}）", field.value, source_label(field.source)))
                 .unwrap_or_else(|| "未知".into())
         };
         let mut row = div()
@@ -51,12 +48,7 @@ pub(super) fn render(comparisons: &[FieldComparison], theme: Theme) -> impl Into
             );
         }
         for candidate in &field.candidates {
-            let source = match candidate.source {
-                FieldSource::FolderName => "目录",
-                FieldSource::Cue => "分轨表",
-                FieldSource::Tag => "标签",
-                FieldSource::UserEdit => "人工",
-            };
+            let source = source_label(candidate.source);
             let status = match &candidate.status {
                 SourceStatus::Current => "已确认".to_string(),
                 SourceStatus::Unconfirmed { reason, .. } => {
@@ -115,6 +107,15 @@ pub(super) fn render(comparisons: &[FieldComparison], theme: Theme) -> impl Into
         panel = panel.child(row);
     }
     panel
+}
+
+pub(super) fn source_label(source: FieldSource) -> &'static str {
+    match source {
+        FieldSource::FolderName => "目录名",
+        FieldSource::Cue => "CUE",
+        FieldSource::Tag => "标签",
+        FieldSource::UserEdit => "我的编辑",
+    }
 }
 
 fn cue_time(frames: u32) -> String {

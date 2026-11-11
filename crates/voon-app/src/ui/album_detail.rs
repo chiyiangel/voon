@@ -1,5 +1,5 @@
 use gpui::{Context, Entity, FontWeight, Render, Subscription, Window, div, prelude::*, px, rgb};
-use voon_core::{Album, FieldSource, Track, TrackSource};
+use voon_core::{Album, Track, TrackSource};
 
 use super::{cover, empty, theme::Theme};
 use crate::view_model::{AppState, grid::CoverCache};
@@ -482,12 +482,7 @@ fn metadata(album: &Album, theme: Theme) -> impl IntoElement {
                 ),
             );
         if let Some((_, _, source)) = field {
-            let label = match source {
-                FieldSource::Tag => "标签",
-                FieldSource::Cue => "CUE",
-                FieldSource::FolderName => "目录名",
-                FieldSource::UserEdit => "我的编辑",
-            };
+            let label = super::metadata_sources::source_label(*source);
             row = row.child(
                 div()
                     .flex_none()
