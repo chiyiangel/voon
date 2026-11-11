@@ -30,6 +30,52 @@ pub struct TagInfo {
     pub properties: AudioProperties,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TagFailureKind {
+    Unsupported,
+    Io,
+    Parse,
+}
+
+impl TagFailureKind {
+    pub fn label(self) -> &'static str {
+        match self {
+            Self::Unsupported => "格式尚未支持",
+            Self::Io => "暂时无法读取",
+            Self::Parse => "标签解析失败",
+        }
+    }
+
+    pub fn attention_kind(self) -> &'static str {
+        match self {
+            Self::Unsupported => "TagUnsupported",
+            Self::Io => "TagIoFailure",
+            Self::Parse => "TagParseFailure",
+        }
+    }
+
+    pub fn retryable(self) -> bool {
+        matches!(self, Self::Io | Self::Parse)
+    }
+
+    pub(crate) fn attention_title(self) -> &'static str {
+        match self {
+            Self::Unsupported => "标签格式尚未支持",
+            Self::Io => "标签文件暂时无法读取",
+            Self::Parse => "标签解析失败",
+        }
+    }
+
+    pub(crate) fn from_attention_kind(kind: &str) -> Option<Self> {
+        match kind {
+            "TagUnsupported" => Some(Self::Unsupported),
+            "TagIoFailure" => Some(Self::Io),
+            "TagParseFailure" => Some(Self::Parse),
+            _ => None,
+        }
+    }
+}
+
 /// An actual read, kept distinct from the last usable metadata.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum TagReadResult {
@@ -59,17 +105,33 @@ impl TagReadResult {
         }
     }
 
-    pub fn reason(&self) -> Option<&str> {
+    pub(crate) fn failure(&self) -> Option<(TagFailureKind, &str)> {
         match self {
-            Self::Unsupported(reason) | Self::IoFailure(reason) | Self::ParseFailure(reason) => {
-                Some(reason)
-            }
-            _ => None,
+            Self::Unsupported(reason) => Some((TagFailureKind::Unsupported, reason)),
+            Self::IoFailure(reason) => Some((TagFailureKind::Io, reason)),
+            Self::ParseFailure(reason) => Some((TagFailureKind::Parse, reason)),
+            Self::Tagged(_) | Self::NoTags(_) => None,
         }
     }
 
+    pub fn failure_kind(&self) -> Option<TagFailureKind> {
+        self.failure().map(|(kind, _)| kind)
+    }
+
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Tagged(_) => "已读取标签",
+            Self::NoTags(_) => "已确认无标签",
+            failure => failure.failure_kind().expect("已分类的标签失败").label(),
+        }
+    }
+
+    pub fn reason(&self) -> Option<&str> {
+        self.failure().map(|(_, reason)| reason)
+    }
+
     pub fn retryable(&self) -> bool {
-        matches!(self, Self::IoFailure(_) | Self::ParseFailure(_))
+        self.failure_kind().is_some_and(TagFailureKind::retryable)
     }
 }
 

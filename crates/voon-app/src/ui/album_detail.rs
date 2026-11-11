@@ -178,13 +178,7 @@ impl Render for AlbumDetail {
         match observations {
             Ok(observations) => {
                 for (position, (path, observation)) in observations.into_iter().enumerate() {
-                    let label = match observation.result.status() {
-                        "Tagged" => "已读取标签",
-                        "NoTags" => "已确认无标签",
-                        "Unsupported" => "格式尚未支持",
-                        "IoFailure" => "暂时无法读取",
-                        _ => "标签解析失败",
-                    };
+                    let label = observation.result.label();
                     tag_status =
                         tag_status.child(div().text_xs().text_color(rgb(theme.secondary)).child(
                             format!(
@@ -200,13 +194,13 @@ impl Render for AlbumDetail {
                     if let Some(reason) = observation.result.reason() {
                         tag_status = tag_status.child(div().text_xs().child(reason.to_owned()));
                     }
-                    if observation.result.retryable() && !offline {
+                    if let Some(failure) = observation
+                        .result
+                        .failure_kind()
+                        .filter(|kind| kind.retryable())
+                        && !offline
+                    {
                         let retry_state = self.state.clone();
-                        let kind = if observation.result.status() == "IoFailure" {
-                            "TagIoFailure"
-                        } else {
-                            "TagParseFailure"
-                        };
                         tag_status = tag_status.child(
                             div()
                                 .id(("retry-tag-read", position))
@@ -215,7 +209,11 @@ impl Render for AlbumDetail {
                                 .child("重试此文件的标签读取")
                                 .on_click(move |_, _, cx| {
                                     retry_state.update(cx, |state, cx| {
-                                        if let Err(error) = state.retry_attention(&path, kind, cx) {
+                                        if let Err(error) = state.retry_attention(
+                                            &path,
+                                            failure.attention_kind(),
+                                            cx,
+                                        ) {
                                             state.report_error(error, cx);
                                         }
                                     });

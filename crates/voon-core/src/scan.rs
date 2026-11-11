@@ -16,7 +16,7 @@ use regex::Regex;
 use crate::cue::{self, CueSheet};
 use crate::folder_name::{self, FolderHints};
 use crate::model::*;
-use crate::tags::{TagInfo, TagObservation, TagReadResult};
+use crate::tags::{TagFailureKind, TagInfo, TagObservation, TagReadResult};
 mod candidates;
 
 struct ObservedCue {
@@ -99,7 +99,7 @@ pub enum IssueKind {
     LooseUntagged { file: PathBuf },
     /// Metadata failure does not imply missing audio or incomplete structure.
     TagRead {
-        status: String,
+        failure: TagFailureKind,
         reason: String,
         retained: bool,
     },
@@ -855,11 +855,11 @@ impl Scanner<'_> {
         stamp: FileStamp,
     ) -> Option<TagInfo> {
         let observation = self.tags.observe(path, format, stamp)?;
-        if let Some(reason) = observation.result.reason() {
+        if let Some((failure, reason)) = observation.result.failure() {
             self.out.issues.push(ScanIssue {
                 path: path.to_path_buf(),
                 kind: IssueKind::TagRead {
-                    status: observation.result.status().into(),
+                    failure,
                     reason: reason.into(),
                     retained: observation.last_success.is_some(),
                 },

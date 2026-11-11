@@ -103,7 +103,17 @@ impl Index {
                         "NoTags" => TagReadResult::NoTags(info.clone().unwrap_or_default()),
                         "Unsupported" => TagReadResult::Unsupported(reason),
                         "IoFailure" => TagReadResult::IoFailure(reason),
-                        _ => TagReadResult::ParseFailure(reason),
+                        "ParseFailure" => TagReadResult::ParseFailure(reason),
+                        _ => {
+                            return Err(rusqlite::Error::FromSqlConversionFailure(
+                                0,
+                                rusqlite::types::Type::Text,
+                                Box::new(std::io::Error::new(
+                                    std::io::ErrorKind::InvalidData,
+                                    format!("无法识别的标签读取状态：{status}"),
+                                )),
+                            ));
+                        }
                     };
                     let last_success = result
                         .reason()

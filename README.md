@@ -38,9 +38,10 @@ evidence and the remaining platform acceptance checks.
 - **Covers:** `cover`/`folder`/`front` images next to the music or in a
   `Booklet`/`Scans` folder, else embedded art. All other non-music files are
   ignored.
-- **Local index:** SQLite on the Mac, so browsing works with the NAS
-  unmounted. Rescans re-read only files whose size or modification time
-  changed. Several library roots.
+- **Local index:** SQLite on the local computer, so browsing works with the
+  NAS unmounted. Ordinary rescans reuse successful tag reads for unchanged
+  files and retry I/O or parsing failures. Unchanged unsupported formats are
+  not retried automatically. Several library roots are supported.
 - **Renamed or moved folders:** user edits, user tags and manual collection
   membership are keyed by album path. When a rescan finds an album path gone
   and a new one with the same content (relative file paths and sizes), it
@@ -130,6 +131,19 @@ cargo test --workspace
 cargo run -p voon-app -- /path/to/music    # or set VOON_ROOT
 ```
 
+Use an isolated index and temporary music folder for development:
+
+```bash
+voon_dev_dir="$(mktemp -d)"
+mkdir -p "$voon_dev_dir/music"
+VOON_INDEX_PATH="$voon_dev_dir/library-0002.sqlite3" \
+  cargo run -p voon-app -- "$voon_dev_dir/music"
+```
+
+`VOON_INDEX_PATH` must be absolute. It bypasses the default index and saved
+index selection. The temporary path above isolates this run from your normal
+index. `VOON_ROOT` only changes the suggested music folder.
+
 Run `cargo fmt --all` and `cargo clippy --workspace --all-targets -- -D warnings`
 before pushing. There is no hosted CI yet.
 
@@ -150,11 +164,21 @@ after attempting to open it, use **System Settings → Privacy & Security →
 Open Anyway**, and confirm the application name. Do this only for a build
 you trust; the packaging script does not change macOS security settings.
 
-The index is stored at `~/Library/Application Support/Voon/library.sqlite3`
-on macOS and `$XDG_DATA_HOME/voon/library.sqlite3` (or
-`~/.local/share/voon/library.sqlite3`) on Linux. Removing a Library root
-hides its scan results and retains edits, tags and manual-collection
-membership for when the same path is added again.
+The default index is stored at
+`~/Library/Application Support/Voon/library-0002.sqlite3` on macOS and
+`$XDG_DATA_HOME/voon/library-0002.sqlite3` (or
+`~/.local/share/voon/library-0002.sqlite3`) on Linux. A different index chosen
+through the app is remembered in `current-index-path` beside the default
+index. The fixed `VOON_INDEX_PATH` override bypasses that selection file.
+
+This reliability milestone starts with a separate index and a fresh scan.
+The previous `library.sqlite3` is kept in place; its edits and organization
+are not imported into the fresh index. Use the new-index action in Settings
+or on the startup error screen to create another index without replacing the
+existing file. Music files remain read-only.
+
+Removing a Library root hides its scan results and retains edits, tags and
+manual-collection membership for when the same path is added again.
 
 
 ## License

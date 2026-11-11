@@ -1,5 +1,6 @@
 use super::{Index, Result};
 use crate::scan::{IssueKind, ScanIssue};
+use crate::tags::TagFailureKind;
 use std::path::{Path, PathBuf};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -13,6 +14,14 @@ pub struct AttentionItem {
     /// Structure failures retain the last accepted Album, when one exists.
     pub stage: Option<String>,
     pub retains_previous: bool,
+}
+
+impl AttentionItem {
+    pub fn can_retry_read(&self) -> bool {
+        self.stage.is_some()
+            || TagFailureKind::from_attention_kind(&self.kind)
+                .is_some_and(TagFailureKind::retryable)
+    }
 }
 
 pub(super) fn describe(issue: &ScanIssue) -> (&'static str, String) {
@@ -40,15 +49,11 @@ pub(super) fn describe(issue: &ScanIssue) -> (&'static str, String) {
             format!("根目录散音频缺少专辑标签：{}", file.display()),
         ),
         IssueKind::TagRead {
-            status,
+            failure,
             reason,
             retained,
         } => (
-            match status.as_str() {
-                "Unsupported" => "TagUnsupported",
-                "IoFailure" => "TagIoFailure",
-                _ => "TagParseFailure",
-            },
+            failure.attention_kind(),
             format!(
                 "标签读取：{reason}{}",
                 if *retained {
@@ -62,6 +67,9 @@ pub(super) fn describe(issue: &ScanIssue) -> (&'static str, String) {
 }
 
 fn title(kind: &str) -> &'static str {
+    if let Some(failure) = TagFailureKind::from_attention_kind(kind) {
+        return failure.attention_title();
+    }
     match kind {
         "CueTargetMissing" => "分轨表指向的文件不存在",
         "CueWithoutTracks" => "分轨表没有曲目",
@@ -71,9 +79,6 @@ fn title(kind: &str) -> &'static str {
         "TitleFromFolderOnly" => "标题仅来自目录名",
         "LooseUntagged" => "根目录散音频缺少专辑标签",
         "PossibleRename" => "可能是改名或移动",
-        "TagUnsupported" => "标签格式尚未支持",
-        "TagIoFailure" => "标签文件暂时无法读取",
-        "TagParseFailure" => "标签解析失败",
         _ => "需要核对的音乐库问题",
     }
 }

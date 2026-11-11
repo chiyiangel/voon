@@ -27,11 +27,11 @@ impl AppState {
         kind: &str,
         cx: &mut Context<Self>,
     ) -> Result<()> {
-        if !self.attention.iter().any(|item| {
-            item.path == path
-                && item.kind == kind
-                && (item.stage.is_some() || matches!(kind, "TagIoFailure" | "TagParseFailure"))
-        }) {
+        if !self
+            .attention
+            .iter()
+            .any(|item| item.path == path && item.kind == kind && item.can_retry_read())
+        {
             return Err("读取问题已失效，请刷新后重试".into());
         }
         let root = self
