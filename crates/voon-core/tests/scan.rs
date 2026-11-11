@@ -116,7 +116,6 @@ fn classifies_albums_discs_and_collections() {
         names,
         vec![
             "Bach Partitas [24-96]",
-            "Broken",
             "Kind of Blue [DSD64]",
             "Mozart Concertos (1990)",
             "Pair",
@@ -235,16 +234,21 @@ fn cue_pairs_split_files_and_broken_sheets() {
             .all(|t| matches!(t.source, TrackSource::File { .. }))
     );
 
-    let broken = album(&scan, "Broken");
-    assert_eq!(broken.tracks().count(), 1);
+    // An unresolved sheet cannot establish the complete Album's structure.
+    assert!(
+        !scan
+            .albums
+            .iter()
+            .any(|album| album.folder_name == "Broken")
+    );
     assert!(scan.issues.iter().any(|i| matches!(
         &i.kind,
         IssueKind::CueTargetMissing { file, .. } if file == "missing.wav"
     )));
     assert!(
-        scan.issues
-            .iter()
-            .any(|i| i.path == broken.path && i.kind == IssueKind::TitleFromFolderOnly)
+        scan.issues.iter().any(
+            |i| i.path == lib.path().join("Broken") && i.kind == IssueKind::TitleFromFolderOnly
+        )
     );
 }
 

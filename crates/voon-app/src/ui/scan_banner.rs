@@ -15,10 +15,22 @@ pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
             current_directory.display()
         )),
         ScanState::Done {
-            discovered, reads, ..
-        } => Some(format!(
-            "扫描完成 · {discovered} 张专辑 · 读取 {reads} 个音频文件"
-        )),
+            root,
+            discovered,
+            reads,
+        } => Some(
+            if snapshot
+                .attention_items()
+                .iter()
+                .any(|item| item.stage.is_some() && item.path.starts_with(root))
+            {
+                format!(
+                    "本次读取不完整 · 已保留完整资料 · {discovered} 张专辑 · 读取 {reads} 个音频文件；请查看待处理"
+                )
+            } else {
+                format!("扫描完成 · {discovered} 张专辑 · 读取 {reads} 个音频文件")
+            },
+        ),
         ScanState::Cancelled { discovered, .. } => Some(format!(
             "已取消 · 本次发现 {discovered} 张专辑 · 扫描结果已保留"
         )),

@@ -42,6 +42,27 @@ pub fn render(entity: &Entity<AppState>, theme: Theme, cx: &App) -> impl IntoEle
             .on_click(move |_, _, cx| {
                 state.update(cx, |state, cx| state.open_attention(&path, &kind, cx))
             });
+        if item.stage.is_some() {
+            let retry_state = entity.clone();
+            let retry_path = item.path.clone();
+            let retry_kind = item.kind.clone();
+            row = row.child(
+                div()
+                    .id(("retry-structure-read", position))
+                    .cursor_pointer()
+                    .text_color(rgb(theme.accent))
+                    .child("重试读取")
+                    .on_click(move |_, _, cx| {
+                        cx.stop_propagation();
+                        retry_state.update(cx, |state, cx| {
+                            if let Err(error) = state.retry_attention(&retry_path, &retry_kind, cx)
+                            {
+                                state.report_error(error, cx);
+                            }
+                        });
+                    }),
+            );
+        }
         if let Some(old) = &item.previous_path {
             let confirm_state = entity.clone();
             let dismiss_state = entity.clone();

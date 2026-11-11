@@ -283,7 +283,7 @@ impl AppState {
                 Ok(ScanUpdate::Finished(scan, reads)) => {
                     let cancelled = scan.cancelled || session.cancel.load(Ordering::Relaxed);
                     self.scan_session = None;
-                    if !cancelled && scan.albums.is_empty() {
+                    if !cancelled && scan.albums.is_empty() && scan.incomplete_paths().is_empty() {
                         match self.index.has_scanned_albums(&root) {
                             Ok(true) => {
                                 self.scan_state = ScanState::Empty { root: root.clone() };

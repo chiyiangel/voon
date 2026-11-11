@@ -474,6 +474,17 @@ pub(super) fn record_scan_and_replay(
     Ok(())
 }
 
+/// Last accepted physical Albums, before local merge/split operations.
+pub(super) fn physical_albums(conn: &Connection, root_id: i64) -> Result<Vec<Album>> {
+    bootstrap_raw(conn)?;
+    let mut statement =
+        conn.prepare("SELECT album FROM structure_raw WHERE root_id=?1 ORDER BY path")?;
+    statement
+        .query_map([root_id], |row| row.get::<_, String>(0))?
+        .map(|json| decode(&json?))
+        .collect()
+}
+
 fn bootstrap_raw(conn: &Connection) -> Result<()> {
     let mut statement = conn.prepare("SELECT a.path,a.root_id FROM album a WHERE NOT EXISTS(SELECT 1 FROM structure_raw r WHERE r.path=a.path)")?;
     let missing = statement

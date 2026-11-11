@@ -338,6 +338,19 @@ impl Index {
     fn store_scan_result(&mut self, root: &Path, scan: &ScanResult, complete: bool) -> Result<()> {
         let root_id = self.add_root(root)?;
         let tx = self.conn.transaction()?;
+        let incomplete = scan.incomplete_paths();
+        let mut accepted = scan.clone();
+        accepted
+            .albums
+            .retain(|album| scan.album_is_complete(album));
+        if complete && !incomplete.is_empty() {
+            accepted.albums.extend(
+                structure::physical_albums(&tx, root_id)?
+                    .into_iter()
+                    .filter(|album| !scan.album_is_complete(album)),
+            );
+        }
+        let scan = &accepted;
         browse::record_album_added(&tx, root, &scan.albums)?;
         let before: Vec<(String, String)> = {
             let mut st =
@@ -347,7 +360,23 @@ impl Index {
         };
         if complete {
             tx.execute("DELETE FROM album WHERE root_id = ?1", [root_id])?;
-            tx.execute("DELETE FROM collection WHERE root_id = ?1", [root_id])?;
+            let collections: Vec<String> = {
+                let mut statement = tx.prepare("SELECT path FROM collection WHERE root_id=?1")?;
+                statement
+                    .query_map([root_id], |row| row.get(0))?
+                    .collect::<Result<_>>()?
+            };
+            for path in collections {
+                if !incomplete
+                    .iter()
+                    .any(|failed| Path::new(&path).starts_with(failed) || failed.starts_with(&path))
+                {
+                    tx.execute(
+                        "DELETE FROM collection WHERE root_id=?1 AND path=?2",
+                        params![root_id, path],
+                    )?;
+                }
+            }
             tx.execute("DELETE FROM scan_issue WHERE root_id = ?1", [root_id])?;
         }
         for c in &scan.collections {
@@ -370,7 +399,7 @@ impl Index {
                 params![root_id, p(&issue.path), kind, detail],
             )?;
         }
-        if complete {
+        if complete && incomplete.is_empty() {
             record_rename_candidates(&tx, root_id, &before, &scan.albums)?;
             tx.execute("DELETE FROM scan_baseline WHERE root_id = ?1", [root_id])?;
             tx.execute(

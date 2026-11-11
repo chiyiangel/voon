@@ -81,6 +81,8 @@ pub enum IssueKind {
     NestedAlbum { inner: PathBuf },
     /// A folder could not be listed.
     Unreadable { error: String },
+    /// The CUE could not be read, so its Track structure is unconfirmed.
+    CueUnreadable { error: String },
     /// No title from tags or CUE; only the folder name is known.
     TitleFromFolderOnly,
     /// An audio file directly in a library root has no album tag, so it
@@ -101,6 +103,14 @@ pub struct ScanIssue {
 }
 
 #[derive(Clone, Debug, Default)]
+pub struct ScanCoverage {
+    /// Directories whose entries and file types were successfully observed.
+    pub listed_directories: Vec<PathBuf>,
+    /// A failure anywhere in an Album's physical subtree protects its structure.
+    pub incomplete_paths: Vec<PathBuf>,
+}
+
+#[derive(Clone, Debug, Default)]
 pub struct ScanResult {
     pub albums: Vec<Album>,
     pub collections: Vec<Collection>,
@@ -109,6 +119,37 @@ pub struct ScanResult {
     pub stamps: Vec<(PathBuf, FileStamp)>,
     pub tag_observations: BTreeMap<PathBuf, TagObservation>,
     pub cancelled: bool,
+    pub coverage: ScanCoverage,
+}
+
+impl ScanResult {
+    /// Includes legacy/controlled scanner errors, so a caller cannot publish a
+    /// partial Album merely by omitting its coverage record.
+    pub fn incomplete_paths(&self) -> Vec<&Path> {
+        self.coverage
+            .incomplete_paths
+            .iter()
+            .map(PathBuf::as_path)
+            .chain(self.issues.iter().filter_map(|issue| {
+                matches!(
+                    issue.kind,
+                    IssueKind::Unreadable { .. }
+                        | IssueKind::CueUnreadable { .. }
+                        | IssueKind::CueWithoutTracks { .. }
+                        | IssueKind::CueTargetMissing { .. }
+                )
+                .then_some(issue.path.as_path())
+            }))
+            .collect()
+    }
+
+    pub fn album_is_complete(&self, album: &Album) -> bool {
+        !album.physical_directories().iter().any(|source| {
+            self.incomplete_paths()
+                .iter()
+                .any(|failed| source.starts_with(failed) || failed.starts_with(source))
+        })
+    }
 }
 
 /// Progress reported while scanning.
@@ -299,16 +340,14 @@ struct Listing {
 fn list(dir: &Path) -> std::io::Result<Listing> {
     let mut l = Listing::default();
     for entry in fs::read_dir(dir)? {
-        let Ok(entry) = entry else { continue };
+        let entry = entry?;
         let name = entry.file_name().to_string_lossy().into_owned();
         if is_junk(&name) {
             continue;
         }
         let path = entry.path();
         // Follows symlinks: a library may link albums in from elsewhere.
-        let Ok(meta) = fs::metadata(&path) else {
-            continue;
-        };
+        let meta = fs::metadata(&path)?;
         if meta.is_dir() {
             l.subdirs.push(path);
             continue;
@@ -348,8 +387,25 @@ enum Found {
 }
 
 impl Scanner<'_> {
-    fn list(&self, dir: &Path) -> std::io::Result<Listing> {
-        let mut listing = list(dir)?;
+    fn list(&mut self, dir: &Path) -> std::io::Result<Listing> {
+        let mut listing = match list(dir) {
+            Ok(listing) => listing,
+            Err(error) => {
+                self.out.coverage.incomplete_paths.push(dir.into());
+                if !self.out.issues.iter().any(|issue| {
+                    issue.path == dir && matches!(issue.kind, IssueKind::Unreadable { .. })
+                }) {
+                    self.out.issues.push(ScanIssue {
+                        path: dir.into(),
+                        kind: IssueKind::Unreadable {
+                            error: error.to_string(),
+                        },
+                    });
+                }
+                return Err(error);
+            }
+        };
+        self.out.coverage.listed_directories.push(dir.into());
         listing.subdirs.retain(|path| {
             !self
                 .ignored_paths
@@ -366,15 +422,7 @@ impl Scanner<'_> {
         (self.progress)(ScanEvent::Directory(dir));
         let listing = match self.list(dir) {
             Ok(l) => l,
-            Err(e) => {
-                self.out.issues.push(ScanIssue {
-                    path: dir.to_path_buf(),
-                    kind: IssueKind::Unreadable {
-                        error: e.to_string(),
-                    },
-                });
-                return Found::Nothing;
-            }
+            Err(_) => return Found::Nothing,
         };
 
         let mut disc_dirs: Vec<(u32, PathBuf, Listing)> = Vec::new();
@@ -401,9 +449,7 @@ impl Scanner<'_> {
         let is_album = !listing.audio.is_empty() || !disc_dirs.is_empty();
         if is_album && !is_root {
             let album = self.build_album(dir, &listing, disc_dirs, &attachment_dirs, collection);
-            let mut found = vec![album.path.clone()];
-            (self.progress)(ScanEvent::Album(&album));
-            self.out.albums.push(album);
+            let mut found = Vec::new();
             // Albums inside an album folder are kept, but flagged.
             for sub in other_dirs {
                 if let Found::Albums(inner) = self.visit(&sub, collection, false) {
@@ -415,6 +461,11 @@ impl Scanner<'_> {
                     }
                     found.extend(inner);
                 }
+            }
+            if self.out.album_is_complete(&album) {
+                found.insert(0, album.path.clone());
+                (self.progress)(ScanEvent::Album(&album));
+                self.out.albums.push(album);
             }
             return Found::Albums(found);
         }
@@ -539,8 +590,18 @@ impl Scanner<'_> {
             HashMap::new();
 
         for cue_path in &l.cues {
-            let Ok(bytes) = fs::read(cue_path) else {
-                continue;
+            let bytes = match fs::read(cue_path) {
+                Ok(bytes) => bytes,
+                Err(error) => {
+                    self.out.coverage.incomplete_paths.push(cue_path.clone());
+                    self.out.issues.push(ScanIssue {
+                        path: cue_path.clone(),
+                        kind: IssueKind::CueUnreadable {
+                            error: error.to_string(),
+                        },
+                    });
+                    continue;
+                }
             };
             let sheet = cue::parse_bytes(&bytes);
             if sheet.track_count() == 0 {

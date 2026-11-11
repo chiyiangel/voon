@@ -10,6 +10,9 @@ pub struct AttentionItem {
     pub explanation: String,
     pub album_path: Option<PathBuf>,
     pub previous_path: Option<PathBuf>,
+    /// Structure failures retain the last accepted Album, when one exists.
+    pub stage: Option<String>,
+    pub retains_previous: bool,
 }
 
 pub(super) fn describe(issue: &ScanIssue) -> (&'static str, String) {
@@ -27,6 +30,7 @@ pub(super) fn describe(issue: &ScanIssue) -> (&'static str, String) {
             format!("专辑目录里还包含另一张专辑：{}", inner.display()),
         ),
         IssueKind::Unreadable { error } => ("Unreadable", format!("目录无法读取：{error}")),
+        IssueKind::CueUnreadable { error } => ("CueUnreadable", format!("分轨表读取失败：{error}")),
         IssueKind::TitleFromFolderOnly => (
             "TitleFromFolderOnly",
             "标题仅来自目录名，尚无标签或分轨表标题".into(),
@@ -63,6 +67,7 @@ fn title(kind: &str) -> &'static str {
         "CueWithoutTracks" => "分轨表没有曲目",
         "NestedAlbum" => "专辑里套着专辑",
         "Unreadable" => "目录无法读取",
+        "CueUnreadable" => "分轨表无法读取",
         "TitleFromFolderOnly" => "标题仅来自目录名",
         "LooseUntagged" => "根目录散音频缺少专辑标签",
         "PossibleRename" => "可能是改名或移动",
@@ -119,15 +124,50 @@ impl Index {
                     detail
                 };
                 let album_path = related_album(&path).map(|album| album.path.clone());
+                let stage = match kind.as_str() {
+                    "Unreadable" => Some("目录列表"),
+                    "CueUnreadable" => Some("分轨表读取"),
+                    "CueWithoutTracks" | "CueTargetMissing" => Some("分轨表结构"),
+                    _ => None,
+                };
+                let retains_previous = stage.is_some() && album_path.is_some();
+                let explanation = if let Some(stage) = stage {
+                    format!(
+                        "阶段：{stage}；{explanation}。{}",
+                        if retains_previous {
+                            "已保留上次完整资料，尚未重新确认。"
+                        } else {
+                            "尚无完整资料，暂不发布专辑。"
+                        }
+                    )
+                } else {
+                    explanation
+                };
                 AttentionItem {
-                    title: title(&kind).into(),
+                    title: if stage.is_some() {
+                        "本次读取不完整"
+                    } else {
+                        title(&kind)
+                    }
+                    .into(),
                     path,
                     kind,
                     explanation,
                     album_path,
                     previous_path,
+                    stage: stage.map(str::to_owned),
+                    retains_previous,
                 }
             })
+            .collect())
+    }
+
+    /// Structure problems associated with an accepted physical or logical Album.
+    pub fn album_scan_issues(&self, album: &Path) -> Result<Vec<AttentionItem>> {
+        Ok(self
+            .attention_items()?
+            .into_iter()
+            .filter(|item| item.stage.is_some() && item.album_path.as_deref() == Some(album))
             .collect())
     }
 }

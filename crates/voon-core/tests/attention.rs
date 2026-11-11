@@ -48,12 +48,15 @@ fn a_physical_issue_links_to_the_local_merge_result() {
         fs::create_dir(path).unwrap();
         fs::write(path.join("01.flac"), b"fixture").unwrap();
     }
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
+        .unwrap();
     fs::write(
         first.join("broken.cue"),
         "FILE \"missing.wav\" WAVE\n TRACK 01 AUDIO\n INDEX 01 00:00:00\n",
     )
     .unwrap();
-    let mut index = Index::open_in_memory().unwrap();
     index
         .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
         .unwrap();
@@ -84,12 +87,15 @@ fn indexed_attention_explains_cue_failures_and_links_the_related_album() {
     let album = library.path().join("专辑");
     fs::create_dir(&album).unwrap();
     fs::write(album.join("01.flac"), b"fixture").unwrap();
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
+        .unwrap();
     fs::write(
         album.join("broken.cue"),
         "FILE \"missing.wav\" WAVE\n TRACK 01 AUDIO\n INDEX 01 00:00:00\n",
     )
     .unwrap();
-    let mut index = Index::open_in_memory().unwrap();
     index
         .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
         .unwrap();
@@ -127,6 +133,18 @@ fn every_attention_kind_is_queryable_after_real_scans() {
         )
         .unwrap();
     }
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
+        .unwrap();
+    fs::rename(
+        library.path().join("外层/内层"),
+        library.path().join("外层/改名后"),
+    )
+    .unwrap();
+    index
+        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
+        .unwrap();
     fs::write(library.path().join("散音频.flac"), b"loose").unwrap();
     fs::write(
         library.path().join("坏分轨/empty.cue"),
@@ -136,15 +154,6 @@ fn every_attention_kind_is_queryable_after_real_scans() {
     fs::write(
         library.path().join("坏分轨/broken.cue"),
         "FILE \"missing.wav\" WAVE\n TRACK 01 AUDIO\n INDEX 01 00:00:00\n",
-    )
-    .unwrap();
-    let mut index = Index::open_in_memory().unwrap();
-    index
-        .store_scan(library.path(), &scan_root(library.path(), &mut NoTags))
-        .unwrap();
-    fs::rename(
-        library.path().join("外层/内层"),
-        library.path().join("外层/改名后"),
     )
     .unwrap();
     index

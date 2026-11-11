@@ -279,3 +279,152 @@ fn an_empty_mountpoint_keeps_the_previous_index_until_the_user_confirms(cx: &mut
     );
     assert!(std::fs::read_dir(&root).unwrap().next().is_none());
 }
+
+#[gpui::test]
+fn an_incomplete_album_remains_browsable_with_a_persisted_stale_explanation(
+    cx: &mut TestAppContext,
+) {
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    for file in [
+        "套装/甲/CD1/01.flac",
+        "套装/甲/CD2/01.flac",
+        "套装/乙/01.flac",
+    ] {
+        let path = root.join(file);
+        std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+        std::fs::write(path, b"fixture").unwrap();
+    }
+    let album = root.join("套装/甲");
+    let database = local.path().join("index.sqlite3");
+    let mut index = Index::open(&database).unwrap();
+    index
+        .store_scan(&root, &scan_root(&root, &mut NoTags))
+        .unwrap();
+    index
+        .set_user_edit(&album, "title", "已经整理的标题")
+        .unwrap();
+    let mut partial = scan_root(&root, &mut NoTags);
+    partial
+        .albums
+        .iter_mut()
+        .find(|found| found.path == album)
+        .unwrap()
+        .discs
+        .pop();
+    partial.issues.push(voon_core::scan::ScanIssue {
+        path: album.join("CD2"),
+        kind: voon_core::scan::IssueKind::Unreadable {
+            error: "权限不足".into(),
+        },
+    });
+    let (sender, receiver) = mpsc::channel();
+    let state = cx.new(|_| {
+        AppState::new(index, root.clone())
+            .unwrap()
+            .with_scanner(Box::new(ControlledScanner(Mutex::new(Some(receiver)))))
+    });
+    state.update(cx, |state, cx| state.start_scan(root.clone(), cx).unwrap());
+    sender.send(ScanUpdate::Finished(partial, 0)).unwrap();
+    state.update(cx, |state, cx| {
+        state.poll_scan(cx);
+        state.select_album(Some(album.clone()), cx);
+        state.set_search("已经整理".into(), cx);
+    });
+    state.read_with(cx, |state, _| {
+        assert_eq!(state.album_detail().unwrap().tracks().count(), 2);
+        let issue = state
+            .attention_items()
+            .iter()
+            .find(|item| item.path == album.join("CD2"))
+            .unwrap();
+        assert_eq!(issue.title, "本次读取不完整");
+        assert!(issue.explanation.contains("保留上次完整资料"));
+        assert!(issue.explanation.contains("目录列表"));
+        assert!(issue.explanation.contains("权限不足"));
+        assert_eq!(state.albums().len(), 2);
+    });
+    let reopened = Index::open(&database).unwrap();
+    assert_eq!(reopened.album(&album).unwrap().unwrap().tracks().count(), 2);
+    assert!(reopened.attention_items().unwrap().iter().any(|item| {
+        item.title == "本次读取不完整" && item.album_path.as_ref() == Some(&album)
+    }));
+}
+
+#[gpui::test]
+fn retrying_a_first_incomplete_location_publishes_the_recovered_album(cx: &mut TestAppContext) {
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    let album = root.join("首次发现");
+    std::fs::create_dir(&album).unwrap();
+    std::fs::write(album.join("image.flac"), b"fixture").unwrap();
+    let cue = album.join("image.cue");
+    std::fs::write(&cue, "FILE \"image.flac\" WAVE\n").unwrap();
+    let mut index = Index::open(&local.path().join("index.sqlite3")).unwrap();
+    index
+        .store_scan(&root, &scan_root(&root, &mut NoTags))
+        .unwrap();
+    let state = cx.new(|_| AppState::new(index, root.clone()).unwrap());
+    assert!(state.read_with(cx, |state, _| state.albums().is_empty()));
+    std::fs::write(&cue, "FILE \"image.flac\" WAVE\n TRACK 01 AUDIO\n INDEX 01 00:00:00\n TRACK 02 AUDIO\n INDEX 01 03:00:00\n").unwrap();
+    state.update(cx, |state, cx| {
+        state
+            .retry_attention(&album, "CueWithoutTracks", cx)
+            .unwrap()
+    });
+    finish_scan(&state, cx);
+    state.update(cx, |state, cx| state.select_album(Some(album.clone()), cx));
+    state.read_with(cx, |state, _| {
+        assert_eq!(state.albums().len(), 1);
+        assert_eq!(state.album_detail().unwrap().tracks().count(), 2);
+        assert!(
+            !state
+                .attention_items()
+                .iter()
+                .any(|item| item.kind == "CueWithoutTracks")
+        );
+    });
+}
+
+#[gpui::test]
+fn failed_album_observation_is_saved_as_attention_instead_of_an_empty_root_confirmation(
+    cx: &mut TestAppContext,
+) {
+    let library = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    let album = root.join("甲");
+    std::fs::create_dir(&album).unwrap();
+    std::fs::write(album.join("01.flac"), b"fixture").unwrap();
+    let mut index = Index::open_in_memory().unwrap();
+    index
+        .store_scan(&root, &scan_root(&root, &mut NoTags))
+        .unwrap();
+    let (sender, receiver) = mpsc::channel();
+    let state = cx.new(|_| {
+        AppState::new(index, root.clone())
+            .unwrap()
+            .with_scanner(Box::new(ControlledScanner(Mutex::new(Some(receiver)))))
+    });
+    state.update(cx, |state, cx| state.start_scan(root.clone(), cx).unwrap());
+    let mut failed = voon_core::ScanResult::default();
+    failed.issues.push(voon_core::scan::ScanIssue {
+        path: album.clone(),
+        kind: voon_core::scan::IssueKind::Unreadable {
+            error: "网络读取失败".into(),
+        },
+    });
+    sender.send(ScanUpdate::Finished(failed, 0)).unwrap();
+    state.update(cx, |state, cx| state.poll_scan(cx));
+    state.read_with(cx, |state, _| {
+        assert!(!matches!(state.scan_state(), ScanState::Empty { .. }));
+        assert_eq!(state.albums().len(), 1);
+        assert!(
+            state
+                .album_scan_issues(&album)
+                .iter()
+                .any(|item| item.retains_previous)
+        );
+    });
+}

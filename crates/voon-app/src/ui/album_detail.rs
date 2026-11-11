@@ -44,7 +44,7 @@ impl AlbumDetail {
 impl Render for AlbumDetail {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = Theme::for_window(window);
-        let (album, images, loading, image_error, offline, player_label) = {
+        let (album, images, loading, image_error, offline, player_label, scan_issues) = {
             let state = self.state.read(cx);
             (
                 state.album_detail().cloned(),
@@ -58,6 +58,16 @@ impl Render for AlbumDetail {
                         .any(|root| album.path.starts_with(root))
                 }),
                 state.album_player_label(),
+                state
+                    .album_detail()
+                    .map(|album| {
+                        state
+                            .album_scan_issues(&album.path)
+                            .into_iter()
+                            .cloned()
+                            .collect::<Vec<_>>()
+                    })
+                    .unwrap_or_default(),
             )
         };
         let Some(album) = album else {
@@ -141,6 +151,21 @@ impl Render for AlbumDetail {
                 theme,
                 cx,
             ));
+        for issue in scan_issues {
+            body = body.child(
+                div()
+                    .px_4()
+                    .py_2()
+                    .bg(rgb(0xfff4dc))
+                    .text_color(rgb(0x8a5a16))
+                    .child(format!(
+                        "{} · {}\n{}",
+                        issue.title,
+                        issue.path.display(),
+                        issue.explanation
+                    )),
+            );
+        }
         let edit_state = self.state.clone();
         let observations = self.state.read(cx).album_tag_observations();
         let mut tag_status = div().flex_none().p_4().flex().flex_col().gap_2().child(

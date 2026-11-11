@@ -11,6 +11,38 @@ impl AppState {
         self.attention_path.as_deref()
     }
 
+    pub fn album_scan_issues(&self, album: &Path) -> Vec<&AttentionItem> {
+        self.attention
+            .iter()
+            .filter(|item| item.stage.is_some() && item.album_path.as_deref() == Some(album))
+            .collect()
+    }
+
+    /// A finite background rescan also retries first-discovery failures that
+    /// have no Album to select yet.
+    pub fn retry_attention(
+        &mut self,
+        path: &Path,
+        kind: &str,
+        cx: &mut Context<Self>,
+    ) -> Result<()> {
+        if !self
+            .attention
+            .iter()
+            .any(|item| item.path == path && item.kind == kind && item.stage.is_some())
+        {
+            return Err("读取问题已失效，请刷新后重试".into());
+        }
+        let root = self
+            .roots
+            .iter()
+            .find(|root| path.starts_with(&root.path))
+            .ok_or("音乐库根目录不存在")?
+            .path
+            .clone();
+        self.start_scan(root, cx)
+    }
+
     pub fn open_attention(&mut self, path: &Path, kind: &str, cx: &mut Context<Self>) {
         if let Some(item) = self
             .attention
