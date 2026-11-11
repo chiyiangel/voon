@@ -130,6 +130,16 @@ impl<R: TagReader> TagReader for CountingTags<R> {
         self.reads += 1;
         self.inner.read(path, format, stamp)
     }
+
+    fn read_observation(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        stamp: FileStamp,
+    ) -> voon_core::tags::TagObservation {
+        self.reads += 1;
+        self.inner.read_observation(path, format, stamp)
+    }
 }
 
 pub(super) struct ScanSession {

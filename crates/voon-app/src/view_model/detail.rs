@@ -46,6 +46,15 @@ impl Drop for AttachmentSession {
 }
 
 impl AppState {
+    pub fn album_tag_observations(
+        &self,
+    ) -> Result<Vec<(PathBuf, voon_core::tags::TagObservation)>> {
+        match self.album_detail() {
+            Some(album) => Ok(self.index.album_tag_observations(&album.path)?),
+            None => Ok(vec![]),
+        }
+    }
+
     /// Absolute ignore paths also cover secondary physical sources of a local
     /// merge; its logical Album key may belong to only the primary root.
     pub(super) fn ignored_image_paths(&self) -> Result<Vec<PathBuf>> {

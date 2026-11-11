@@ -141,6 +141,39 @@ impl Render for AlbumDetail {
                 cx,
             ));
         let edit_state = self.state.clone();
+        let observations = self.state.read(cx).album_tag_observations();
+        let mut tag_status = div().flex_none().p_4().flex().flex_col().gap_2().child(
+            div()
+                .font_weight(FontWeight::SEMIBOLD)
+                .child("标签读取状态"),
+        );
+        match observations {
+            Ok(observations) => {
+                for (path, observation) in observations {
+                    let label = match observation.result.status() {
+                        "Tagged" => "已读取标签",
+                        "NoTags" => "已确认无标签",
+                        "Unsupported" => "格式尚未支持",
+                        "IoFailure" => "暂时无法读取",
+                        _ => "标签解析失败",
+                    };
+                    tag_status =
+                        tag_status.child(div().text_xs().text_color(rgb(theme.secondary)).child(
+                            format!(
+                                "{label} · {}{}",
+                                path.display(),
+                                if observation.last_success.is_some() {
+                                    " · 保留上次成功资料，尚未重新确认"
+                                } else {
+                                    ""
+                                }
+                            ),
+                        ));
+                }
+            }
+            Err(_) => tag_status = tag_status.child("无法读取本地标签状态，请重新打开专辑"),
+        }
+        body = body.child(tag_status);
         body = body.child(
             div()
                 .id("edit-album-information")

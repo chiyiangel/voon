@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 0002 资料库扫描可靠性与离线浏览工单
@@ -10,11 +10,11 @@ status: ready-for-agent
 
 | # | 标题 | Blocked by | Status |
 | --- | --- | --- | --- |
-| [01](01-preserve-complete-albums.md) | 局部扫描失败保留完整 Album | — | ready-for-agent |
-| [02](02-recover-tag-reads.md) | 标签失败分类与增量恢复 | — | ready-for-agent |
-| [03](03-cue-duration-and-performers.md) | CUE 时长与曲目演奏者完整呈现 | — | ready-for-agent |
-| [04](04-persistent-cover-thumbnails.md) | 当前 Cover 持久化与离线重开 | — | ready-for-agent |
-| [05](05-new-index-and-version-guard.md) | 新建索引与资料库版本保护 | — | ready-for-agent |
+| [01](01-preserve-complete-albums.md) | 局部扫描失败保留完整 Album | — | in-progress |
+| [02](02-recover-tag-reads.md) | 标签失败分类与增量恢复 | — | in-progress |
+| [03](03-cue-duration-and-performers.md) | CUE 时长与曲目演奏者完整呈现 | — | in-progress |
+| [04](04-persistent-cover-thumbnails.md) | 当前 Cover 持久化与离线重开 | — | in-progress |
+| [05](05-new-index-and-version-guard.md) | 新建索引与资料库版本保护 | — | in-progress |
 | [06](06-scan-interruption-and-organization.md) | 取消离线与结构整理保持一致 | [01](01-preserve-complete-albums.md) | ready-for-agent |
 | [07](07-retry-and-force-reread.md) | 重试失败项与强制重读标签 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | ready-for-agent |
 | [08](08-title-and-year-candidates.md) | 标题与年份的完整来源比较 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | ready-for-agent |
@@ -47,4 +47,4 @@ status: ready-for-agent
 
 11 使用约 20 张用户认可的真实专辑；真实样本和读取位置在执行前确定。真实 NAS、实际窗口及相应平台环境可用后完成对应验收，不虚报结果，也不据此阻塞无外部依赖的功能票开工。
 
-本次发布只创建工单和依赖索引，父规格保持原样，未开始应用功能实现。
+2026-11-11 已按用户指令进入实施；功能票验收与最终外部验收分别记录，未验证的环境不计为通过。

@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 02: 标签失败分类与增量恢复
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** 无（可立即开始）
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 成功有数据、成功无标签、未支持格式、暂时 I/O 失败和解析失败具有可观察的不同结果。
 - [ ] 失败记录与上次成功资料分开保留；失败不把已有元数据覆盖成空值。
@@ -22,3 +22,12 @@ status: ready-for-agent
 **User Stories:** 22–27、30、44。
 
 规格：[0002 资料库扫描可靠性与离线浏览](../../0002-library-reliability-and-protection.md)。通用约束与实施前沿见[工单索引](README.md)。
+
+## 实施与验证（2026-11-11）
+
+- 新增 TagObservation / TagReadResult；真实读取、成功缓存与失败记录分开，保留上次成功值及读取时间。现有结构型 TagReader 保持兼容。
+- Needs attention 显示失败路径、标签读取阶段、原因及是否使用旧资料；详情显示五类读取状态。
+- 首个回归先因公开读取契约缺失失败，补实现后通过；后续覆盖保留成功值、无标签缓存、未支持格式以及关闭重开。
+- `cargo test -p voon-core --test tag_recovery --test library_roots --test scan --locked --offline`：15 项通过。`cargo test -p voon-app --test attention --locked --offline`：3 项通过。工作区 check、格式和差异检查通过。
+- 原增量测试使用无效占位音频，却期待解析失败被永久缓存；改为结构型 NoTags 成功读取 fixture，失败必须重试由新回归单独验证。
+- 实际窗口和真实 SMB 恢复仍由工单 11 联验；没有以接缝注入代替真实网络证据。

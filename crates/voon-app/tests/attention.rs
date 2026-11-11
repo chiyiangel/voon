@@ -86,3 +86,41 @@ fn confirming_a_rename_removes_the_candidate_and_refreshes_the_new_album(cx: &mu
         );
     });
 }
+
+#[gpui::test]
+fn tag_failure_is_visible_after_reopen_and_links_to_the_preserved_album(cx: &mut TestAppContext) {
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let album = library.path().join("专辑");
+    fs::create_dir(&album).unwrap();
+    let audio = album.join("01.flac");
+    fs::write(&audio, b"invalid FLAC").unwrap();
+    let database = local.path().join("index.sqlite3");
+    let mut index = Index::open(&database).unwrap();
+    let scan = {
+        let mut tags = voon_core::db::CachedTags::new(&index, voon_core::scan::DiskTags);
+        scan_root(library.path(), &mut tags)
+    };
+    index.store_scan(library.path(), &scan).unwrap();
+    drop(index);
+    let state =
+        cx.new(|_| AppState::new(Index::open(&database).unwrap(), library.path().into()).unwrap());
+    let item = state.read_with(cx, |state, _| {
+        state
+            .attention_items()
+            .iter()
+            .find(|item| item.kind == "TagParseFailure")
+            .unwrap()
+            .clone()
+    });
+    assert_eq!(item.path, audio);
+    assert!(item.explanation.contains("标签读取"));
+    assert!(item.explanation.contains("尚无成功资料"));
+    state.update(cx, |state, cx| {
+        state.open_attention(&item.path, &item.kind, cx)
+    });
+    state.read_with(cx, |state, _| {
+        assert_eq!(state.album_detail().unwrap().path, album);
+        assert_eq!(state.album_detail().unwrap().tracks().count(), 1);
+    });
+}

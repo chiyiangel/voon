@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use voon_core::db::{CachedTags, Index};
-use voon_core::scan::{self, DiskTags, IssueKind, NoTags, ScanEvent};
+use voon_core::scan::{self, IssueKind, NoTags, ScanEvent};
 use voon_core::*;
 
 fn touch(root: &Path, rel: &str) -> PathBuf {
@@ -311,7 +311,7 @@ fn index_round_trip_user_edits_and_incremental_tags() {
         voon_core::db::SCHEMA_VERSION
     );
 
-    let mut reader = CachedTags::new(&index, DiskTags);
+    let mut reader = CachedTags::new(&index, NoTags);
     let scan = scan_root(lib.path(), &mut reader);
     let first_reads = reader.reads;
     assert!(first_reads > 0);
@@ -333,8 +333,9 @@ fn index_round_trip_user_edits_and_incremental_tags() {
     let mix = index.create_manual_collection("周末").unwrap();
     index.add_to_manual_collection(mix, &deng.path).unwrap();
 
-    // Nothing changed on disk: no file is read again.
-    let mut reader = CachedTags::new(&index, DiskTags);
+    // These placeholder audio files are intentionally observed as successful no-tags.
+    // Nothing changed on disk: successful reads are cached, unlike parse failures.
+    let mut reader = CachedTags::new(&index, NoTags);
     let rescan = scan_root(lib.path(), &mut reader);
     assert_eq!(reader.reads, 0);
     index.store_scan(lib.path(), &rescan).unwrap();

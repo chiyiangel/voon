@@ -7,14 +7,14 @@
 
 use std::path::{Path, PathBuf};
 
-use rusqlite::{Connection, OptionalExtension, params};
+use rusqlite::{Connection, params};
 
 use crate::model::*;
 use crate::scan::{FileStamp, ScanResult, TagReader};
-use crate::tags::TagInfo;
 mod details;
 mod edits;
 mod structure;
+mod tag_cache;
 pub use edits::EditError;
 pub use structure::{DiscRef, SplitMode, StructureOperation, TrackRef};
 mod collections;
@@ -160,6 +160,7 @@ INSERT INTO scan_baseline (root_id, path, signature) SELECT root_id, path, signa
     structure::MIGRATION,
     structure::PERSIST_ROOT_MIGRATION,
     covers::SOURCE_DIRECTORIES_MIGRATION,
+    tag_cache::MIGRATION,
 ];
 
 /// A proposed pairing of a vanished album path with a new one.
@@ -614,77 +615,6 @@ impl Index {
         st.query_map([collection], |r| Ok(PathBuf::from(r.get::<_, String>(0)?)))?
             .collect()
     }
-
-    fn cached_tags(&self, path: &Path, stamp: FileStamp) -> Result<Option<Option<TagInfo>>> {
-        self.conn
-            .query_row(
-                "SELECT readable, title, artist, album, album_artist, composer, conductor, genre,
-                        year, track, disc, catalog_number, has_picture, sample_rate, bit_depth,
-                        channels, duration_ms
-                 FROM file_cache WHERE path = ?1 AND size = ?2 AND mtime = ?3",
-                params![p(path), stamp.size as i64, stamp.mtime],
-                |r| {
-                    if !r.get::<_, bool>(0)? {
-                        return Ok(None);
-                    }
-                    Ok(Some(TagInfo {
-                        title: r.get(1)?,
-                        artist: r.get(2)?,
-                        album: r.get(3)?,
-                        album_artist: r.get(4)?,
-                        composer: r.get(5)?,
-                        conductor: r.get(6)?,
-                        genre: r.get(7)?,
-                        year: r.get(8)?,
-                        track: r.get(9)?,
-                        disc: r.get(10)?,
-                        catalog_number: r.get(11)?,
-                        has_picture: r.get(12)?,
-                        properties: AudioProperties {
-                            sample_rate: r.get(13)?,
-                            bit_depth: r.get(14)?,
-                            channels: r.get(15)?,
-                            duration_ms: r.get::<_, Option<i64>>(16)?.map(|d| d as u64),
-                        },
-                    }))
-                },
-            )
-            .optional()
-    }
-
-    fn cache_tags(&self, path: &Path, stamp: FileStamp, info: Option<&TagInfo>) -> Result<()> {
-        let d = TagInfo::default();
-        let t = info.unwrap_or(&d);
-        self.conn.execute(
-            "INSERT OR REPLACE INTO file_cache (path, size, mtime, readable, title, artist, album,
-               album_artist, composer, conductor, genre, year, track, disc, catalog_number,
-               has_picture, sample_rate, bit_depth, channels, duration_ms)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15, ?16, ?17, ?18, ?19, ?20)",
-            params![
-                p(path),
-                stamp.size as i64,
-                stamp.mtime,
-                info.is_some(),
-                t.title,
-                t.artist,
-                t.album,
-                t.album_artist,
-                t.composer,
-                t.conductor,
-                t.genre,
-                t.year,
-                t.track,
-                t.disc,
-                t.catalog_number,
-                t.has_picture,
-                t.properties.sample_rate,
-                t.properties.bit_depth,
-                t.properties.channels,
-                t.properties.duration_ms.map(|d| d as i64),
-            ],
-        )?;
-        Ok(())
-    }
 }
 
 /// Pair album paths that vanished in this scan with paths that appeared,
@@ -773,13 +703,39 @@ impl<'a, R: TagReader> CachedTags<'a, R> {
 }
 
 impl<R: TagReader> TagReader for CachedTags<'_, R> {
-    fn read(&mut self, path: &Path, format: AudioFormat, stamp: FileStamp) -> Option<TagInfo> {
-        if let Ok(Some(cached)) = self.index.cached_tags(path, stamp) {
+    fn read(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        stamp: FileStamp,
+    ) -> Option<crate::tags::TagInfo> {
+        self.read_observation(path, format, stamp).info().cloned()
+    }
+
+    fn read_observation(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        stamp: FileStamp,
+    ) -> crate::tags::TagObservation {
+        let previous = self.index.tag_observation(path).ok().flatten();
+        if let Ok(Some(cached)) = self.index.cached_observation(path, stamp)
+            && !cached.result.retryable()
+        {
             return cached;
         }
         self.reads += 1;
-        let info = self.inner.read(path, format, stamp);
-        let _ = self.index.cache_tags(path, stamp, info.as_ref());
-        info
+        let mut observation = self.inner.read_observation(path, format, stamp);
+        if observation.result.reason().is_some() {
+            observation.last_success = previous.and_then(|old| {
+                Some(crate::tags::SuccessfulTags {
+                    info: old.info()?.clone(),
+                    observed_at: old.data_observed_at()?,
+                })
+            });
+        }
+        // A cache write failure cannot turn a successful source read into missing metadata.
+        let _ = self.index.cache_observation(path, stamp, &observation);
+        observation
     }
 }

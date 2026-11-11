@@ -35,6 +35,25 @@ pub(super) fn describe(issue: &ScanIssue) -> (&'static str, String) {
             "LooseUntagged",
             format!("根目录散音频缺少专辑标签：{}", file.display()),
         ),
+        IssueKind::TagRead {
+            status,
+            reason,
+            retained,
+        } => (
+            match status.as_str() {
+                "Unsupported" => "TagUnsupported",
+                "IoFailure" => "TagIoFailure",
+                _ => "TagParseFailure",
+            },
+            format!(
+                "标签读取：{reason}{}",
+                if *retained {
+                    "；保留上次成功资料，尚未重新确认"
+                } else {
+                    "；尚无成功资料"
+                }
+            ),
+        ),
     }
 }
 
@@ -47,6 +66,9 @@ fn title(kind: &str) -> &'static str {
         "TitleFromFolderOnly" => "标题仅来自目录名",
         "LooseUntagged" => "根目录散音频缺少专辑标签",
         "PossibleRename" => "可能是改名或移动",
+        "TagUnsupported" => "标签格式尚未支持",
+        "TagIoFailure" => "标签文件暂时无法读取",
+        "TagParseFailure" => "标签解析失败",
         _ => "需要核对的音乐库问题",
     }
 }

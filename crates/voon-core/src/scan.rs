@@ -16,7 +16,7 @@ use regex::Regex;
 use crate::cue::{self, CueSheet};
 use crate::folder_name::{self, FolderHints};
 use crate::model::*;
-use crate::tags::TagInfo;
+use crate::tags::{TagInfo, TagObservation, TagReadResult};
 
 pub const IMAGE_EXTENSIONS: &[&str] = &["jpg", "jpeg", "png", "webp", "bmp", "gif"];
 
@@ -86,6 +86,12 @@ pub enum IssueKind {
     /// An audio file directly in a library root has no album tag, so it
     /// cannot be grouped into an album.
     LooseUntagged { file: PathBuf },
+    /// Metadata failure does not imply missing audio or incomplete structure.
+    TagRead {
+        status: String,
+        reason: String,
+        retained: bool,
+    },
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -101,6 +107,7 @@ pub struct ScanResult {
     pub issues: Vec<ScanIssue>,
     /// Every audio file seen, for incremental rescans.
     pub stamps: Vec<(PathBuf, FileStamp)>,
+    pub tag_observations: BTreeMap<PathBuf, TagObservation>,
     pub cancelled: bool,
 }
 
@@ -113,6 +120,20 @@ pub enum ScanEvent<'a> {
 /// Reads tags for one audio file. Returning `None` means "no tags".
 pub trait TagReader {
     fn read(&mut self, path: &Path, format: AudioFormat, stamp: FileStamp) -> Option<TagInfo>;
+
+    /// Existing structure-only readers remain valid. Real readers report failures explicitly.
+    fn read_observation(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        stamp: FileStamp,
+    ) -> TagObservation {
+        TagObservation::new(
+            self.read(path, format, stamp)
+                .map(TagReadResult::success)
+                .unwrap_or_else(|| TagReadResult::NoTags(TagInfo::default())),
+        )
+    }
 }
 
 /// Reads every file from disk, no caching.
@@ -121,6 +142,15 @@ pub struct DiskTags;
 impl TagReader for DiskTags {
     fn read(&mut self, path: &Path, format: AudioFormat, _stamp: FileStamp) -> Option<TagInfo> {
         crate::tags::read(path, format).ok()
+    }
+
+    fn read_observation(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        _: FileStamp,
+    ) -> TagObservation {
+        crate::tags::observe(path, format)
     }
 }
 
@@ -625,7 +655,7 @@ impl Scanner<'_> {
                     self.out.stamps.push((path.clone(), stamp));
                     let rel = path.strip_prefix(&base).unwrap_or(&path);
                     sizes.push((rel.to_string_lossy().into_owned(), stamp.size));
-                    self.tags.read(&path, track.format, stamp)
+                    self.observe_tags(&path, track.format, stamp)
                 });
                 let Some(info) = info else { continue };
                 track.properties = info.properties.clone();
@@ -664,6 +694,30 @@ impl Scanner<'_> {
 }
 
 impl Scanner<'_> {
+    fn observe_tags(
+        &mut self,
+        path: &Path,
+        format: AudioFormat,
+        stamp: FileStamp,
+    ) -> Option<TagInfo> {
+        let observation = self.tags.read_observation(path, format, stamp);
+        if let Some(reason) = observation.result.reason() {
+            self.out.issues.push(ScanIssue {
+                path: path.to_path_buf(),
+                kind: IssueKind::TagRead {
+                    status: observation.result.status().into(),
+                    reason: reason.into(),
+                    retained: observation.last_success.is_some(),
+                },
+            });
+        }
+        let info = observation.info().cloned();
+        self.out
+            .tag_observations
+            .insert(path.to_path_buf(), observation);
+        info
+    }
+
     /// Audio files directly in a library root: one album per (album artist,
     /// album) tag pair; files without an album tag become issues.
     fn loose_root_albums(&mut self, root: &Path, audio: &[(PathBuf, AudioFormat)]) {
@@ -677,7 +731,7 @@ impl Scanner<'_> {
                 continue;
             };
             self.out.stamps.push((path.clone(), stamp));
-            let info = self.tags.read(path, *format, stamp);
+            let info = self.observe_tags(path, *format, stamp);
             match info {
                 Some(info) if info.album.is_some() => {
                     let key = (

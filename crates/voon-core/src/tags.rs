@@ -13,7 +13,7 @@ use lofty::prelude::*;
 
 use crate::model::{AudioFormat, AudioProperties};
 
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub struct TagInfo {
     pub title: Option<String>,
     pub artist: Option<String>,
@@ -28,6 +28,143 @@ pub struct TagInfo {
     pub catalog_number: Option<String>,
     pub has_picture: bool,
     pub properties: AudioProperties,
+}
+
+/// An actual read, kept distinct from the last usable metadata.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum TagReadResult {
+    Tagged(TagInfo),
+    NoTags(TagInfo),
+    Unsupported(String),
+    IoFailure(String),
+    ParseFailure(String),
+}
+
+impl TagReadResult {
+    pub fn success(info: TagInfo) -> Self {
+        if info.has_tags() {
+            Self::Tagged(info)
+        } else {
+            Self::NoTags(info)
+        }
+    }
+
+    pub fn status(&self) -> &'static str {
+        match self {
+            Self::Tagged(_) => "Tagged",
+            Self::NoTags(_) => "NoTags",
+            Self::Unsupported(_) => "Unsupported",
+            Self::IoFailure(_) => "IoFailure",
+            Self::ParseFailure(_) => "ParseFailure",
+        }
+    }
+
+    pub fn reason(&self) -> Option<&str> {
+        match self {
+            Self::Unsupported(reason) | Self::IoFailure(reason) | Self::ParseFailure(reason) => {
+                Some(reason)
+            }
+            _ => None,
+        }
+    }
+
+    pub fn retryable(&self) -> bool {
+        matches!(self, Self::IoFailure(_) | Self::ParseFailure(_))
+    }
+}
+
+impl TagInfo {
+    pub fn has_tags(&self) -> bool {
+        self.title.is_some()
+            || self.artist.is_some()
+            || self.album.is_some()
+            || self.album_artist.is_some()
+            || self.composer.is_some()
+            || self.conductor.is_some()
+            || self.genre.is_some()
+            || self.year.is_some()
+            || self.track.is_some()
+            || self.disc.is_some()
+            || self.catalog_number.is_some()
+            || self.has_picture
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SuccessfulTags {
+    pub info: TagInfo,
+    /// Milliseconds since the Unix epoch when the source was actually read.
+    pub observed_at: i64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct TagObservation {
+    pub result: TagReadResult,
+    pub observed_at: i64,
+    pub last_success: Option<SuccessfulTags>,
+}
+
+impl TagObservation {
+    pub fn new(result: TagReadResult) -> Self {
+        Self {
+            result,
+            observed_at: observation_time(),
+            last_success: None,
+        }
+    }
+
+    pub fn info(&self) -> Option<&TagInfo> {
+        match &self.result {
+            TagReadResult::Tagged(info) | TagReadResult::NoTags(info) => Some(info),
+            _ => self.last_success.as_ref().map(|success| &success.info),
+        }
+    }
+
+    pub fn data_observed_at(&self) -> Option<i64> {
+        match self.result {
+            TagReadResult::Tagged(_) | TagReadResult::NoTags(_) => Some(self.observed_at),
+            _ => self
+                .last_success
+                .as_ref()
+                .map(|success| success.observed_at),
+        }
+    }
+}
+
+pub(crate) fn observation_time() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|time| time.as_millis().min(i64::MAX as u128) as i64)
+        .unwrap_or(0)
+}
+
+/// Preserve I/O errors through parser wrappers instead of reporting them as bad tags.
+pub fn observe(path: &Path, format: AudioFormat) -> TagObservation {
+    use std::error::Error;
+    let result = match read(path, format) {
+        Ok(info) => TagReadResult::success(info),
+        Err(TagError::Unsupported(format)) => {
+            TagReadResult::Unsupported(format!("尚不支持 {format} 标签"))
+        }
+        Err(error) => {
+            let mut source: Option<&(dyn Error + 'static)> = Some(&error);
+            let mut io_error = None;
+            let mut reason = error.to_string();
+            while let Some(cause) = source {
+                reason = cause.to_string();
+                if let Some(error) = cause.downcast_ref::<std::io::Error>() {
+                    io_error = Some(error.to_string());
+                    break;
+                }
+                source = cause.source();
+            }
+            match io_error {
+                Some(reason) => TagReadResult::IoFailure(format!("文件暂时无法读取：{reason}")),
+                None => TagReadResult::ParseFailure(format!("标签解析失败：{reason}")),
+            }
+        }
+    };
+    TagObservation::new(result)
 }
 
 #[derive(Debug, thiserror::Error)]
