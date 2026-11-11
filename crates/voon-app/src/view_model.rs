@@ -14,6 +14,7 @@ pub mod browse;
 pub mod collections;
 pub mod composers;
 pub mod cover_picker;
+pub mod cover_thumbnails;
 pub mod detail;
 pub mod edit;
 pub mod facets;
@@ -114,6 +115,7 @@ pub struct AppState {
     cover_picker: cover_picker::CoverPickerState,
     structure: structure::StructureState,
     cover_revision: u64,
+    thumbnails: cover_thumbnails::CoverThumbnails,
     scanner: Box<dyn scanning::Scanner>,
     scan_session: Option<scanning::ScanSession>,
     pending_empty_scan: Option<scanning::PendingEmptyScan>,
@@ -135,6 +137,7 @@ impl AppState {
         let scanner = Box::new(scanning::DiskScanner::new(
             index.database_path().map(Path::to_path_buf),
         ));
+        let thumbnails = cover_thumbnails::CoverThumbnails::new(index.database_path());
         let mut state = Self {
             roots: index.roots()?,
             albums: index.albums()?,
@@ -158,6 +161,7 @@ impl AppState {
             composers: composers::ComposerState::default(),
             cover_picker: cover_picker::CoverPickerState::default(),
             cover_revision: 0,
+            thumbnails,
             scanner,
             scan_session: None,
             pending_empty_scan: None,

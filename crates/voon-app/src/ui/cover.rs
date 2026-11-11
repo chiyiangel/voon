@@ -4,10 +4,10 @@ use super::{icons::icon, theme::Theme};
 use crate::view_model::grid::CoverStatus;
 
 pub fn render(status: Option<CoverStatus>, edge: f32, selected: bool, theme: Theme) -> AnyElement {
-    let placeholder = if matches!(status, Some(CoverStatus::Loading)) {
-        "正在加载"
-    } else {
-        "无封面"
+    let placeholder = match &status {
+        Some(CoverStatus::Loading) => "正在缓存封面",
+        Some(CoverStatus::Unavailable) => "封面不可用",
+        _ => "无封面",
     };
     let picture = match status {
         Some(CoverStatus::Ready(image)) => img(image)

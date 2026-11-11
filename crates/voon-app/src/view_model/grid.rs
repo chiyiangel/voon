@@ -35,6 +35,7 @@ impl AppState {
 
     pub(super) fn refresh_covers(&mut self) {
         self.cover_revision = self.cover_revision.wrapping_add(1);
+        self.thumbnails.invalidate();
     }
 
     pub fn grid_layout(&self, available_width: f32) -> GridLayout {
@@ -79,6 +80,8 @@ pub struct CoverCache {
     clock: u64,
     revision: u64,
     _state_subscription: Option<Subscription>,
+    state: Option<Entity<AppState>>,
+    linked_statuses: HashMap<Cover, CoverStatus>,
 }
 
 impl CoverCache {
@@ -87,6 +90,7 @@ impl CoverCache {
     pub fn new(state: &Entity<AppState>, cx: &mut Context<Self>) -> Self {
         let revision = state.read(cx).cover_revision();
         let subscription = cx.observe(state, |this, state, cx| {
+            this.linked_statuses = state.read(cx).thumbnail_statuses();
             let revision = state.read(cx).cover_revision();
             if this.revision != revision {
                 this.revision = revision;
@@ -94,21 +98,32 @@ impl CoverCache {
                 this.queue.clear();
                 // In-flight jobs still occupy their slots until completion.
                 // Their revision/identity prevents them populating new entries.
-                cx.notify();
             }
+            cx.notify();
         });
         Self {
             revision,
             _state_subscription: Some(subscription),
+            state: Some(state.clone()),
             ..Self::default()
         }
     }
 
     pub fn status(&self, cover: &Cover) -> Option<CoverStatus> {
+        if self.state.is_some() {
+            return self.linked_statuses.get(cover).cloned();
+        }
         self.entries.get(cover).map(|entry| entry.status.clone())
     }
 
     pub fn request(&mut self, cover: Cover, cx: &mut Context<Self>) -> CoverStatus {
+        if let Some(state) = &self.state {
+            let status = state.update(cx, |state, cx| {
+                state.request_cover_thumbnail(cover.clone(), cx)
+            });
+            self.linked_statuses.insert(cover, status.clone());
+            return status;
+        }
         self.clock += 1;
         if let Some(entry) = self.entries.get_mut(&cover) {
             entry.used = self.clock;

@@ -13,7 +13,7 @@ status: in-progress
 | [01](01-preserve-complete-albums.md) | 局部扫描失败保留完整 Album | — | done |
 | [02](02-recover-tag-reads.md) | 标签失败分类与增量恢复 | — | done |
 | [03](03-cue-duration-and-performers.md) | CUE 时长与曲目演奏者完整呈现 | — | in-progress |
-| [04](04-persistent-cover-thumbnails.md) | 当前 Cover 持久化与离线重开 | — | in-progress |
+| [04](04-persistent-cover-thumbnails.md) | 当前 Cover 持久化与离线重开 | — | done |
 | [05](05-new-index-and-version-guard.md) | 新建索引与资料库版本保护 | — | in-progress |
 | [06](06-scan-interruption-and-organization.md) | 取消离线与结构整理保持一致 | [01](01-preserve-complete-albums.md) | in-progress |
 | [07](07-retry-and-force-reread.md) | 重试失败项与强制重读标签 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | ready-for-agent |

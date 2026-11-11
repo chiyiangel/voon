@@ -229,6 +229,20 @@ impl Render for AlbumDetail {
                 }
             }
         }
+        if let Some(crate::view_model::cover_thumbnails::ThumbnailState::Failed(error)) = album
+            .cover
+            .as_ref()
+            .and_then(|cover| self.state.read(cx).cover_thumbnail_state(cover))
+        {
+            body = body.child(
+                div()
+                    .px_4()
+                    .py_2()
+                    .text_size(px(11.))
+                    .text_color(rgb(theme.secondary))
+                    .child(error.clone()),
+            );
+        }
         body = body.child(
             div()
                 .id("edit-album-information")

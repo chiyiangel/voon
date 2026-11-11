@@ -6117,8 +6117,10 @@ name = "voon-app"
 version = "0.1.0"
 dependencies = [
  "gpui",
+ "id3",
  "image",
  "libc",
+ "serde_json",
  "tempfile",
  "unicode-segmentation",
  "voon-core",
