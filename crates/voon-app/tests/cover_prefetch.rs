@@ -98,6 +98,7 @@ async fn loading_the_library_prefetches_unbrowsed_automatic_and_selected_covers(
                     .into_iter()
                     .map(|name| Album {
                         source_directories: vec![],
+                        candidates: vec![],
                         path: root.join(name),
                         folder_name: name.into(),
                         discs: vec![],
@@ -202,6 +203,7 @@ async fn failed_cover_prefetch_can_be_retried_without_rescanning_the_library(
                     .into_iter()
                     .map(|(name, cover)| Album {
                         source_directories: vec![],
+                        candidates: vec![],
                         path: root.join(name),
                         folder_name: name.into(),
                         discs: vec![],
@@ -275,6 +277,7 @@ async fn whole_library_prefetch_is_bounded_and_memory_eviction_does_not_reset_as
         };
         albums.push(Album {
             source_directories: vec![],
+            candidates: vec![],
             path: root.join(number.to_string()),
             folder_name: number.to_string(),
             discs: vec![],

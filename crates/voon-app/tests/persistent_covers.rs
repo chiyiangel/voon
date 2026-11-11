@@ -53,6 +53,7 @@ fn store_album(index: &mut Index, root: &Path, name: &str, cover: Cover) -> Path
             &ScanResult {
                 albums: vec![Album {
                     source_directories: vec![],
+                    candidates: vec![],
                     path: path.clone(),
                     folder_name: name.into(),
                     discs: vec![],
@@ -435,6 +436,7 @@ async fn decoded_image_eviction_keeps_requested_thumbnails_available_after_reope
         };
         albums.push(Album {
             source_directories: vec![],
+            candidates: vec![],
             path: root.join(number.to_string()),
             folder_name: number.to_string(),
             discs: vec![],
