@@ -657,27 +657,28 @@ impl Scanner<'_> {
                     sizes.push((rel.to_string_lossy().into_owned(), stamp.size));
                     self.observe_tags(&path, track.format, stamp)
                 });
-                let Some(info) = info else { continue };
-                track.properties = info.properties.clone();
-                if let TrackSource::File { .. } = track.source {
-                    merge_field(
-                        &mut track.title,
-                        info.title.clone().map(|v| Field::new(v, FieldSource::Tag)),
-                    );
-                    merge_field(
-                        &mut track.artist,
-                        info.artist.clone().map(|v| Field::new(v, FieldSource::Tag)),
-                    );
-                    if info.track.is_some() {
-                        track.number = info.track;
+                if let Some(info) = info {
+                    track.properties = info.properties.clone();
+                    if let TrackSource::File { .. } = track.source {
+                        merge_field(
+                            &mut track.title,
+                            info.title.clone().map(|v| Field::new(v, FieldSource::Tag)),
+                        );
+                        merge_field(
+                            &mut track.artist,
+                            info.artist.clone().map(|v| Field::new(v, FieldSource::Tag)),
+                        );
+                        if info.track.is_some() {
+                            track.number = info.track;
+                        }
                     }
                 }
                 if let TrackSource::Virtual { start, end, .. } = track.source {
-                    // A virtual track's duration comes from the sheet; the
-                    // last one runs to the end of the image.
+                    // Known CUE boundaries do not depend on readable tags.
+                    // The last track needs the image's total duration.
                     track.properties.duration_ms = match end {
                         Some(e) => Some((e.saturating_sub(start)) as u64 * 1000 / 75),
-                        None => info
+                        None => track
                             .properties
                             .duration_ms
                             .map(|d| d.saturating_sub(start as u64 * 1000 / 75)),

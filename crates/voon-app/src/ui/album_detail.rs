@@ -44,7 +44,7 @@ impl AlbumDetail {
 impl Render for AlbumDetail {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = Theme::for_window(window);
-        let (album, images, loading, image_error, offline) = {
+        let (album, images, loading, image_error, offline, player_label) = {
             let state = self.state.read(cx);
             (
                 state.album_detail().cloned(),
@@ -57,6 +57,7 @@ impl Render for AlbumDetail {
                         .iter()
                         .any(|root| album.path.starts_with(root))
                 }),
+                state.album_player_label(),
             )
         };
         let Some(album) = album else {
@@ -200,7 +201,7 @@ impl Render for AlbumDetail {
                     .px_4()
                     .py_2()
                     .text_color(rgb(theme.accent))
-                    .child("用默认播放器打开")
+                    .child(player_label.unwrap_or("用默认播放器打开"))
                     .on_click(move |_, _, cx| {
                         state.update(cx, |state, cx| {
                             if let Err(error) = state.open_album_in_player(cx) {
@@ -232,6 +233,10 @@ impl Render for AlbumDetail {
                             .map(|(track_position, track)| {
                                 let state = self.state.clone();
                                 let album_path = album.path.clone();
+                                let player_label = state
+                                    .read(cx)
+                                    .track_player_label(disc_position, track_position)
+                                    .unwrap_or("用默认播放器打开");
                                 div().child(track_row(track, theme)).when(!offline, |row| {
                                     row.child(
                                         div()
@@ -242,7 +247,7 @@ impl Render for AlbumDetail {
                                             .cursor_pointer()
                                             .text_xs()
                                             .text_color(rgb(theme.accent))
-                                            .child("用默认播放器打开")
+                                            .child(player_label)
                                             .on_click(move |_, _, cx| {
                                                 state.update(cx, |state, cx| {
                                                     if let Err(error) = state.open_track_in_player(
@@ -478,6 +483,13 @@ fn track_row(track: &Track, theme: Theme) -> impl IntoElement {
                     .child(duration(track.properties.duration_ms)),
             ),
     );
+    if let Some(artist) = &track.artist {
+        row = row.child(
+            div()
+                .text_color(rgb(theme.secondary))
+                .child(format!("演奏者：{}", artist.value)),
+        );
+    }
     let mut properties = vec![track.format.label().to_owned()];
     properties.push(
         track

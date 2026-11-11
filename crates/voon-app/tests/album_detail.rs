@@ -19,6 +19,47 @@ use voon_core::{
     Track, TrackSource, db::Index,
 };
 
+#[gpui::test]
+fn reopened_cue_detail_keeps_each_performer_and_describes_opening_the_whole_image(
+    cx: &mut TestAppContext,
+) {
+    let library = tempfile::tempdir().unwrap();
+    let path = library.path().join("双演奏者");
+    std::fs::create_dir(&path).unwrap();
+    std::fs::write(path.join("disc.dff"), b"DFF placeholder").unwrap();
+    std::fs::write(
+        path.join("disc.cue"),
+        "TITLE \"双演奏者\"\nFILE \"disc.dff\" WAVE\n TRACK 01 AUDIO\n  PERFORMER \"演奏者甲\"\n  INDEX 01 00:00:00\n TRACK 02 AUDIO\n  PERFORMER \"演奏者乙\"\n  INDEX 01 03:00:00\n",
+    )
+    .unwrap();
+    let storage = tempfile::tempdir().unwrap();
+    let database = storage.path().join("index.sqlite");
+    {
+        let mut index = Index::open(&database).unwrap();
+        index
+            .store_scan(
+                library.path(),
+                &voon_core::scan::scan_root(library.path(), &mut voon_core::scan::DiskTags),
+            )
+            .unwrap();
+    }
+    let state =
+        cx.new(|_| AppState::new(Index::open(&database).unwrap(), library.path().into()).unwrap());
+    state.update(cx, |state, cx| state.select_album(Some(path.clone()), cx));
+    state.read_with(cx, |state, _| {
+        let tracks = &state.album_detail().unwrap().discs[0].tracks;
+        assert_eq!(tracks[0].properties.duration_ms, Some(180_000));
+        assert_eq!(tracks[1].properties.duration_ms, None);
+        assert_eq!(tracks[0].artist.as_ref().unwrap().value, "演奏者甲");
+        assert_eq!(tracks[1].artist.as_ref().unwrap().value, "演奏者乙");
+        assert_eq!(state.album_player_label(), Some("用默认播放器打开整个映像"));
+        assert_eq!(
+            state.track_player_label(0, 1),
+            Some("用默认播放器打开整个映像")
+        );
+    });
+}
+
 fn album(path: &str, title: &str) -> Album {
     Album {
         source_directories: vec![],

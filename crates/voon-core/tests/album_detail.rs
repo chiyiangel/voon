@@ -3,7 +3,7 @@ use std::path::Path;
 use voon_core::{
     AudioFormat, AudioProperties, Field, FieldSource, TrackSource,
     db::Index,
-    scan::{FileStamp, TagReader, scan_root},
+    scan::{DiskTags, FileStamp, TagReader, scan_root},
     tags::TagInfo,
 };
 
@@ -23,6 +23,70 @@ impl TagReader for FixtureTags {
             ..TagInfo::default()
         })
     }
+}
+
+#[test]
+fn cue_boundaries_and_performers_survive_reopening_when_dff_tags_are_unsupported() {
+    let library = tempfile::tempdir().unwrap();
+    let album_path = library.path().join("双演奏者");
+    std::fs::create_dir(&album_path).unwrap();
+    let image = album_path.join("disc.dff");
+    let cue = album_path.join("disc.cue");
+    let audio_bytes = b"DFF placeholder: properties deliberately unsupported";
+    let cue_bytes = b"TITLE \"Two performers\"\nFILE \"disc.dff\" WAVE\n TRACK 01 AUDIO\n  TITLE \"Allegro\"\n  PERFORMER \"First performer\"\n  INDEX 01 00:00:00\n TRACK 02 AUDIO\n  TITLE \"Andante\"\n  PERFORMER \"Second performer\"\n  INDEX 01 03:00:00\n";
+    std::fs::write(&image, audio_bytes).unwrap();
+    std::fs::write(&cue, cue_bytes).unwrap();
+    let before = [FileStamp::of(&image), FileStamp::of(&cue)];
+    let storage = tempfile::tempdir().unwrap();
+    let database = storage.path().join("index.sqlite");
+    {
+        let mut index = Index::open(&database).unwrap();
+        index
+            .store_scan(library.path(), &scan_root(library.path(), &mut DiskTags))
+            .unwrap();
+    }
+
+    let index = Index::open(&database).unwrap();
+    let album = index.album(&album_path).unwrap().unwrap();
+    let tracks = &album.discs[0].tracks;
+    assert_eq!(
+        tracks
+            .iter()
+            .map(|track| track.properties.duration_ms)
+            .collect::<Vec<_>>(),
+        vec![Some(180_000), None]
+    );
+    assert_eq!(
+        tracks
+            .iter()
+            .map(|track| track.artist.clone())
+            .collect::<Vec<_>>(),
+        vec![
+            Some(Field::new("First performer".into(), FieldSource::Cue)),
+            Some(Field::new("Second performer".into(), FieldSource::Cue)),
+        ]
+    );
+    assert_eq!(
+        tracks[0].source,
+        TrackSource::Virtual {
+            image: image.clone(),
+            cue: cue.clone(),
+            start: 0,
+            end: Some(13_500),
+        }
+    );
+    assert_eq!(
+        tracks[1].source,
+        TrackSource::Virtual {
+            image: image.clone(),
+            cue: cue.clone(),
+            start: 13_500,
+            end: None,
+        }
+    );
+    assert_eq!([FileStamp::of(&image), FileStamp::of(&cue)], before);
+    assert_eq!(std::fs::read(image).unwrap(), audio_bytes);
+    assert_eq!(std::fs::read(cue).unwrap(), cue_bytes);
 }
 
 #[test]
