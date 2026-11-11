@@ -2,8 +2,8 @@
 //! first; for now the window only proves the wiring: it scans one Library
 //! root with voon-core in the background and shows how many albums it found.
 //!
-//! Root: first command-line argument, else `VOON_ROOT`, else
-//! `/Volumes/NAS1/Music`.
+//! Root: first command-line argument, else `VOON_ROOT`, else the platform
+//! default (`/Volumes/NAS1/Music` on macOS, `~/Music` on Linux).
 
 use std::path::PathBuf;
 use std::sync::mpsc::{Receiver, channel};
@@ -14,8 +14,6 @@ use gpui::{
     div, prelude::*, px, rgb, size,
 };
 use voon_core::scan::{NoTags, scan_root};
-
-const DEFAULT_ROOT: &str = "/Volumes/NAS1/Music";
 
 enum Status {
     Scanning,
@@ -92,12 +90,31 @@ impl Render for VoonWindow {
     }
 }
 
+/// Where the library is when nothing says otherwise.
+#[cfg(target_os = "macos")]
+fn default_root(_home: Option<PathBuf>) -> PathBuf {
+    PathBuf::from("/Volumes/NAS1/Music")
+}
+
+#[cfg(not(target_os = "macos"))]
+fn default_root(home: Option<PathBuf>) -> PathBuf {
+    home.unwrap_or_else(|| PathBuf::from("/")).join("Music")
+}
+
+/// CLI argument, then `VOON_ROOT`, then the platform default.
+fn resolve_root(arg: Option<String>, env: Option<String>, home: Option<PathBuf>) -> PathBuf {
+    arg.or(env)
+        .filter(|s| !s.is_empty())
+        .map(PathBuf::from)
+        .unwrap_or_else(|| default_root(home))
+}
+
 fn library_root() -> PathBuf {
-    std::env::args()
-        .nth(1)
-        .or_else(|| std::env::var("VOON_ROOT").ok())
-        .unwrap_or_else(|| DEFAULT_ROOT.to_string())
-        .into()
+    resolve_root(
+        std::env::args().nth(1),
+        std::env::var("VOON_ROOT").ok(),
+        std::env::var_os("HOME").map(PathBuf::from),
+    )
 }
 
 fn main() {
@@ -118,4 +135,28 @@ fn main() {
         cx.on_window_closed(|cx| cx.quit()).detach();
         cx.activate(true);
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn argument_beats_env_beats_default() {
+        let home = Some(PathBuf::from("/home/u"));
+        assert_eq!(
+            resolve_root(Some("/a".into()), Some("/b".into()), home.clone()),
+            PathBuf::from("/a")
+        );
+        assert_eq!(
+            resolve_root(None, Some("/b".into()), home.clone()),
+            PathBuf::from("/b")
+        );
+        let default = resolve_root(None, Some(String::new()), home);
+        if cfg!(target_os = "macos") {
+            assert_eq!(default, PathBuf::from("/Volumes/NAS1/Music"));
+        } else {
+            assert_eq!(default, PathBuf::from("/home/u/Music"));
+        }
+    }
 }
