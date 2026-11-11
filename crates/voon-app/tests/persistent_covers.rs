@@ -69,6 +69,114 @@ fn store_album(index: &mut Index, root: &Path, name: &str, cover: Cover) -> Path
     path
 }
 
+#[gpui::test(seeds(0, 1))]
+fn switching_to_a_new_index_retires_old_cover_results_before_new_work_is_published(
+    cx: &mut TestAppContext,
+) {
+    use voon_app::view_model::cover_thumbnails::ThumbnailState;
+
+    let directory = tempfile::tempdir().unwrap();
+    let local = directory.path().canonicalize().unwrap();
+    let root = local.join("music");
+    std::fs::create_dir(&root).unwrap();
+    let source = root.join("cover.png");
+    std::fs::write(&source, png(400, 200, [200, 40, 10, 255])).unwrap();
+    let cover = Cover {
+        source: CoverSource::File(source.clone()),
+    };
+    let mut index = Index::open(&local.join("old.sqlite3")).unwrap();
+    store_album(&mut index, &root, "Album", cover.clone());
+    let state = cx.new(|_| AppState::new(index, root.clone()).unwrap());
+    state.update(cx, |state, cx| {
+        state.request_cover_thumbnail(cover.clone(), cx);
+    });
+    // Finish the actual read, decode and local write while keeping its GPUI
+    // completion queued. No fake thumbnail result or private cache seam is used.
+    while cx.dispatcher.tick(true) {}
+    state.read_with(cx, |state, _| {
+        assert_eq!(
+            state.cover_thumbnail_state(&cover),
+            Some(&ThumbnailState::Loading)
+        );
+        assert!(state.cover_thumbnail_path(&cover).is_none());
+    });
+
+    std::fs::write(&source, png(200, 400, [10, 40, 200, 255])).unwrap();
+    let mut current_covers = vec![cover.clone()];
+    for number in 1..6 {
+        let source = root.join(format!("new-{number}.png"));
+        std::fs::write(&source, png(20, 40, [10, 40, 200, 255])).unwrap();
+        current_covers.push(Cover {
+            source: CoverSource::File(source),
+        });
+    }
+    let new_database = local.join("new.sqlite3");
+    let current_directory = state.update(cx, |state, cx| {
+        state.create_new_index(new_database.clone(), cx).unwrap();
+        for cover in &current_covers {
+            state.request_cover_thumbnail(cover.clone(), cx);
+        }
+        assert_eq!(state.index_path(), Some(new_database.as_path()));
+        assert_eq!(
+                current_covers
+                    .iter()
+                    .filter(|cover| state.cover_thumbnail_state(cover)
+                        == Some(&ThumbnailState::Loading))
+                    .count(),
+                4
+            );
+        assert_eq!(
+                current_covers
+                    .iter()
+                    .filter(|cover| state.cover_thumbnail_state(cover)
+                        == Some(&ThumbnailState::Pending))
+                    .count(),
+                2
+            );
+        state.cover_thumbnail_directory().unwrap().to_path_buf()
+    });
+
+    while cx.dispatcher.tick(false) {
+        state.read_with(cx, |state, _| {
+            assert!(
+                current_covers
+                    .iter()
+                    .filter(|cover| state.cover_thumbnail_state(cover)
+                        == Some(&ThumbnailState::Loading))
+                    .count()
+                    <= 4,
+                "旧完成消息不能腾出新队列仍在使用的并发槽位"
+            );
+            for cover in &current_covers {
+                assert!(
+                    !matches!(
+                        state.cover_thumbnail_state(cover),
+                        Some(ThumbnailState::Failed(_))
+                    ),
+                    "旧任务错误不能污染新索引的封面状态"
+                );
+                if let Some(path) = state.cover_thumbnail_path(cover) {
+                    assert!(
+                        path.starts_with(&current_directory),
+                        "新索引收到旧缩略图路径：{}",
+                        path.display()
+                    );
+                }
+            }
+        });
+    }
+    state.read_with(cx, |state, _| {
+        assert!(
+            current_covers
+                .iter()
+                .all(|cover| state.cover_thumbnail_state(cover) == Some(&ThumbnailState::Ready))
+        );
+        let image = image::open(state.cover_thumbnail_path(&cover).unwrap()).unwrap();
+        assert_eq!((image.width(), image.height()), (128, 256));
+        assert_eq!(state.index_path(), Some(new_database.as_path()));
+    });
+}
+
 #[gpui::test]
 async fn automatic_and_manually_selected_embedded_pictures_reopen_offline(cx: &mut TestAppContext) {
     let directory = tempfile::tempdir().unwrap();

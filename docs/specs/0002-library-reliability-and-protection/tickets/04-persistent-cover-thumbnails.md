@@ -33,3 +33,10 @@ status: done
 - 网格、列表与详情保留共享 CoverCache API，委托 AppState 的同一有界队列处理；最多 4 项后台读取/解码/写入，最多 256 张解码图驻留。内存淘汰不删除持久图片。失败提示与无封面分开，详情显示来源/本地写入原因。
 - 独立构建目录 `/private/tmp/voon-0002-implementation/covers-target`，定向命令：`cargo test -p voon-app --test persistent_covers --test album_grid --test cover_picker --locked --offline`；7 项新资产测试与 4 项既有回归通过。`cargo check --workspace --locked --offline`、严格 app Clippy、格式和 diff 检查通过。
 - 未访问真实 NAS、用户数据库或真实 Voon 窗口。这里验证关闭并重建 AppState/Index 的离线行为；实际进程退出后的窗口验收、真实样本和 Linux/Wayland 结论保留在 11，不以状态测试代替。全库未浏览 Album 的主动覆盖由 10 继续交付。
+
+### Review 修正：新索引的封面任务所有者
+
+- 真实图片回归先完成旧索引的后台读图、解码和持久写入，保留其前台完成消息；通过公开 create_new_index 替换同一 AppState 后，为相同 Cover 和其他图片发起新请求。修正前 red 明确观察到旧的 `old.sqlite3.covers-v1` 路径回写新索引。
+- 完成回调现在先校验捕获的队列 owner Arc 身份，再退休该 owner 的 active 槽位；数值相同的 generation/任务编号不会跨索引复用。相同 owner 内失效 generation 的任务仍正常退休槽位。
+- 固定 GPUI 调度 seed 0、1，逐项检查新索引路径、失败状态与最多 4 项 Loading，最终核对来源已替换后的实际图像尺寸。额外把身份检查故意移至 active.remove 之后时，seed 1 的并发断言 red；恢复正确顺序后 green。
+- `persistent_covers` 8 项、`cover_prefetch` 4 项和 `index_startup` 3 项定向测试全部通过；工作区 check、严格 app Clippy、格式与差异检查通过。此修正未运行真实窗口、NAS 或用户数据库。

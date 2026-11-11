@@ -252,7 +252,8 @@ impl AppState {
             }
             let identity = entry.identity;
             self.thumbnails.active.insert(identity);
-            let generation = self.thumbnails.generation.clone();
+            let owner = self.thumbnails.generation.clone();
+            let generation = owner.clone();
             let expected = *generation.lock().unwrap();
             let directory = self.thumbnails.directory.clone();
             let source = cover.clone();
@@ -262,6 +263,11 @@ impl AppState {
             cx.spawn(async move |this, cx| {
                 let result = task.await;
                 let _ = this.update(cx, |this, cx| {
+                    // Switching Index replaces the entire queue. Numeric task
+                    // identities and generations can repeat in its new owner.
+                    if !Arc::ptr_eq(&this.thumbnails.generation, &owner) {
+                        return;
+                    }
                     this.thumbnails.active.remove(&identity);
                     if *this.thumbnails.generation.lock().unwrap() == expected
                         && let Some(entry) = this.thumbnails.entries.get_mut(&cover)
