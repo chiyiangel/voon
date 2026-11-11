@@ -193,7 +193,7 @@ function readHash(): void {
   const z = Number(params.get("z"));
   const x = Number(params.get("x"));
   const y = Number(params.get("y"));
-  if (Number.isFinite(z) && Number.isFinite(x) && Number.isFinite(y)) {
+  if (params.has("z") && Number.isFinite(z) && Number.isFinite(x) && Number.isFinite(y)) {
     camera.z = clamp(z, 0.04, 2.5);
     camera.x = x;
     camera.y = y;
