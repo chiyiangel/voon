@@ -9,6 +9,7 @@ publish.workspace = true
 [dependencies]
 chardetng = "1"
 encoding_rs = "0.8"
+id3 = "1"
 lofty = "0.25"
 regex = "1"
 rusqlite = { version = "0.42", features = ["bundled"] }

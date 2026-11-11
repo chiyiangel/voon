@@ -1,11 +1,12 @@
 //! Embedded metadata tags and stream properties.
 //!
 //! Coverage (via `lofty`): FLAC, APE (APEv2), WavPack, WAV, AIFF, MP3, M4A,
-//! AAC, Ogg Vorbis, Opus. DSF: stream properties are read from the file
-//! header here; its ID3v2 tag is not read yet. DFF: nothing is read yet.
+//! AAC, Ogg Vorbis, Opus. DSF: stream properties come from the file header
+//! and tags from the ID3v2 chunk the header points at (via the `id3` crate).
+//! DFF: nothing is read in phase 1; folder name and CUE still apply.
 
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Seek, SeekFrom};
 use std::path::Path;
 
 use lofty::prelude::*;
@@ -37,6 +38,8 @@ pub enum TagError {
     Lofty(#[from] lofty::error::FileParseError),
     #[error("reading file: {0}")]
     Io(#[from] std::io::Error),
+    #[error("reading ID3v2: {0}")]
+    Id3(#[from] id3::Error),
 }
 
 pub fn read(path: &Path, format: AudioFormat) -> Result<TagInfo, TagError> {
@@ -81,15 +84,48 @@ fn read_lofty(path: &Path) -> Result<TagInfo, TagError> {
     Ok(info)
 }
 
-/// DSF layout: "DSD " chunk (28 bytes), then "fmt " chunk whose body holds
-/// channel count at +24 and sampling frequency at +28 (little-endian).
+/// DSF layout: "DSD " chunk (28 bytes, metadata offset at +20), then the
+/// "fmt " chunk whose body holds channel count at +24 and sampling frequency
+/// at +28 (little-endian). A non-zero metadata offset points at an ID3v2 tag.
 fn read_dsf_header(path: &Path) -> Result<TagInfo, TagError> {
+    let mut file = File::open(path)?;
     let mut buf = [0u8; 28 + 52];
-    File::open(path)?.read_exact(&mut buf)?;
-    Ok(TagInfo {
+    file.read_exact(&mut buf)?;
+    let mut info = TagInfo {
         properties: parse_dsf_header(&buf).unwrap_or_default(),
         ..Default::default()
-    })
+    };
+    let metadata = u64::from_le_bytes(buf[20..28].try_into().unwrap());
+    if &buf[0..4] == b"DSD " && metadata > 0 {
+        file.seek(SeekFrom::Start(metadata))?;
+        match id3::Tag::read_from2(&mut file) {
+            Ok(tag) => apply_id3(&tag, &mut info),
+            // A dangling pointer or an empty chunk: properties only.
+            Err(e) if matches!(e.kind, id3::ErrorKind::NoTag) => {}
+            Err(e) => return Err(e.into()),
+        }
+    }
+    Ok(info)
+}
+
+fn apply_id3(tag: &id3::Tag, info: &mut TagInfo) {
+    use id3::TagLike;
+    let text = |id: &str| clean(tag.get(id).and_then(|f| f.content().text()));
+    info.title = clean(tag.title());
+    info.artist = clean(tag.artist());
+    info.album = clean(tag.album());
+    info.album_artist = clean(tag.album_artist());
+    info.genre = clean(tag.genre_parsed());
+    info.composer = text("TCOM");
+    info.conductor = text("TPE3");
+    info.track = tag.track();
+    info.disc = tag.disc();
+    info.year = tag
+        .date_recorded()
+        .map(|d| d.year)
+        .or_else(|| tag.year())
+        .and_then(|y| u16::try_from(y).ok());
+    info.has_picture = tag.pictures().next().is_some();
 }
 
 pub(crate) fn parse_dsf_header(buf: &[u8]) -> Option<AudioProperties> {
@@ -127,6 +163,79 @@ mod tests {
         assert_eq!(p.sample_rate, Some(2_822_400));
         assert_eq!(p.channels, Some(2));
         assert_eq!(p.duration_ms, Some(3000));
+    }
+
+    /// A minimal DSF: header chunks, a few bytes of "audio", then ID3v2.
+    fn synth_dsf(tag: Option<&id3::Tag>) -> Vec<u8> {
+        let mut b = vec![0u8; 80];
+        b[0..4].copy_from_slice(b"DSD ");
+        b[4..12].copy_from_slice(&28u64.to_le_bytes());
+        b[28..32].copy_from_slice(b"fmt ");
+        b[32..40].copy_from_slice(&52u64.to_le_bytes());
+        b[52..56].copy_from_slice(&2u32.to_le_bytes());
+        b[56..60].copy_from_slice(&5_644_800u32.to_le_bytes());
+        b[60..64].copy_from_slice(&1u32.to_le_bytes());
+        b[64..72].copy_from_slice(&(5_644_800u64 * 2).to_le_bytes());
+        b.extend_from_slice(b"data");
+        b.extend_from_slice(&20u64.to_le_bytes());
+        b.extend_from_slice(&[0x69; 8]);
+        if let Some(tag) = tag {
+            let offset = b.len() as u64;
+            b[20..28].copy_from_slice(&offset.to_le_bytes());
+            tag.write_to(&mut b, id3::Version::Id3v24).unwrap();
+        }
+        let total = b.len() as u64;
+        b[12..20].copy_from_slice(&total.to_le_bytes());
+        b
+    }
+
+    #[test]
+    fn dsf_id3_tag() {
+        use id3::TagLike;
+        let mut tag = id3::Tag::new();
+        tag.set_title("So What");
+        tag.set_artist("Miles Davis");
+        tag.set_album("Kind of Blue");
+        tag.set_album_artist("Miles Davis Sextet");
+        tag.set_genre("Jazz");
+        tag.set_track(1);
+        tag.set_disc(1);
+        tag.set_date_recorded("1959-03-02".parse().unwrap());
+        tag.set_text("TCOM", "Miles Davis");
+        tag.add_frame(id3::frame::Picture {
+            mime_type: "image/jpeg".into(),
+            picture_type: id3::frame::PictureType::CoverFront,
+            description: String::new(),
+            data: vec![0xFF, 0xD8, 0xFF],
+        });
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("01.dsf");
+        std::fs::write(&path, synth_dsf(Some(&tag))).unwrap();
+
+        let info = read(&path, AudioFormat::Dsf).unwrap();
+        assert_eq!(info.title.as_deref(), Some("So What"));
+        assert_eq!(info.artist.as_deref(), Some("Miles Davis"));
+        assert_eq!(info.album.as_deref(), Some("Kind of Blue"));
+        assert_eq!(info.album_artist.as_deref(), Some("Miles Davis Sextet"));
+        assert_eq!(info.genre.as_deref(), Some("Jazz"));
+        assert_eq!(info.composer.as_deref(), Some("Miles Davis"));
+        assert_eq!(
+            (info.track, info.disc, info.year),
+            (Some(1), Some(1), Some(1959))
+        );
+        assert!(info.has_picture);
+        assert_eq!(info.properties.sample_rate, Some(5_644_800));
+        assert_eq!(info.properties.duration_ms, Some(2000));
+    }
+
+    #[test]
+    fn dsf_without_tag() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("02.dsf");
+        std::fs::write(&path, synth_dsf(None)).unwrap();
+        let info = read(&path, AudioFormat::Dsf).unwrap();
+        assert_eq!(info.title, None);
+        assert_eq!(info.properties.channels, Some(2));
     }
 
     #[test]
