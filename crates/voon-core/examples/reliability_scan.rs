@@ -1,5 +1,5 @@
 //! Reproducible read-only acceptance run against an explicitly selected Library root.
-//! Usage: cargo run -p voon-core --example reliability_scan -- INDEX ROOT REPORT.json
+//! Usage: cargo run -p voon-core --example reliability_scan -- INDEX ROOT REPORT.json [ALBUM]
 use std::{
     error::Error,
     path::{Path, PathBuf},
@@ -25,15 +25,33 @@ fn main() -> Result<(), Box<dyn Error>> {
         .skip(1)
         .map(PathBuf::from)
         .collect::<Vec<_>>();
-    let [database, root, report] = args.as_slice() else {
-        return Err("usage: reliability_scan INDEX ROOT REPORT.json".into());
+    let (database, root, report, force_album) = match args.as_slice() {
+        [database, root, report] => (database, root, report, None),
+        [database, root, report, album] => (database, root, report, Some(album)),
+        _ => return Err("usage: reliability_scan INDEX ROOT REPORT.json [ALBUM]".into()),
     };
     let root = root.canonicalize()?;
     local_output(database, &root)?;
     local_output(report, &root)?;
     let mut index = Index::open(database)?;
+    let forced_paths = match force_album {
+        Some(path) => {
+            let album = index
+                .album(path)?
+                .ok_or("selected Album is not in this index")?;
+            let paths = album
+                .tracks()
+                .map(|track| track.source.audio_path().clone())
+                .collect::<std::collections::BTreeSet<_>>();
+            if paths.iter().any(|path| !path.starts_with(&root)) {
+                return Err("selected Album must belong to the requested Library root".into());
+            }
+            paths
+        }
+        None => Default::default(),
+    };
     let (scan, reads) = {
-        let mut tags = CachedTags::new(&index, DiskTags);
+        let mut tags = CachedTags::new(&index, DiskTags).with_forced_paths(forced_paths.clone());
         let scan = scan_root(&root, &mut tags);
         (scan, tags.reads)
     };
@@ -64,6 +82,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         "root": root, "schema_version": index.schema_version()?, "actual_tag_reads": reads,
         "albums": albums, "observations": observations, "attention": attention,
         "cancelled": scan.cancelled, "incomplete_paths": scan.incomplete_paths(),
+        "forced_album": force_album, "forced_paths": forced_paths,
     });
     std::fs::write(report, serde_json::to_vec_pretty(&snapshot)?)?;
     println!(
