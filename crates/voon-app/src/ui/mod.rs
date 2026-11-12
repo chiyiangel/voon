@@ -28,5 +28,5 @@ mod window;
 
 pub use album_grid::AlbumGrid;
 pub use icons::Assets;
-pub use settings_window::SettingsWindow;
+pub use settings_window::{SettingsPage, SettingsWindow};
 pub use window::VoonWindow;

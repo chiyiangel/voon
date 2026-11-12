@@ -11,6 +11,7 @@ use voon_core::{
 
 #[derive(Default)]
 pub(super) struct CollectionState {
+    sidebar_collapsed: bool,
     tree: Vec<Collection>,
     children: BTreeMap<Option<PathBuf>, Vec<usize>>,
     expanded: BTreeSet<PathBuf>,
@@ -66,6 +67,18 @@ impl CollectionState {
 }
 
 impl AppState {
+    pub fn collections_sidebar_expanded(&self) -> bool {
+        !self.collections.sidebar_collapsed
+    }
+
+    pub fn toggle_collections_sidebar(&mut self, cx: &mut Context<Self>) {
+        self.collections.sidebar_collapsed = !self.collections.sidebar_collapsed;
+        if !self.collections.sidebar_collapsed {
+            self.navigate(Navigation::Collections, cx);
+        }
+        cx.notify();
+    }
+
     pub fn selected_collection(&self) -> Option<&Collection> {
         let selected = self.collections.selected.as_ref()?;
         self.collections

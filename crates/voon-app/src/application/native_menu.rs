@@ -1,104 +1,39 @@
-//! macOS application menus observe the same library as both windows.
+//! Native application and window menus keep settings in one place.
 
-use std::path::PathBuf;
+use super::{CloseCurrentWindow, OpenSettings, Quit};
+use gpui::{App, KeyBinding, Menu, MenuItem, SystemMenuType, actions};
 
-use gpui::{App, Entity, Menu, MenuItem, actions};
+actions!(
+    voon,
+    [HideApplication, HideOtherApplications, ShowAllApplications]
+);
 
-use super::{CloseCurrentWindow, OpenSettings, Quit, RescanRoot};
-use crate::view_model::AppState;
-
-// GPUI 0.2 validates native items by action type. An unhandled action is
-// disabled; using RescanRoot for a disabled item would leave it enabled.
-actions!(voon, [DisabledMenuItem]);
-
-#[derive(PartialEq, Eq)]
-struct MenuState {
-    roots: Vec<(PathBuf, bool)>,
-    blocked_reason: Option<&'static str>,
-}
-
-impl MenuState {
-    fn read(state: &AppState) -> Self {
-        Self {
-            roots: state
-                .roots()
-                .iter()
-                .map(|root| {
-                    (
-                        root.path.clone(),
-                        state.offline_roots().contains(&root.path),
-                    )
-                })
-                .collect(),
-            blocked_reason: if state.index_open_problem().is_some() {
-                Some("索引不可用，请先新建索引")
-            } else if state.root_changes_blocked_reason().is_some() {
-                Some("正在扫描，结束后可重新扫描")
-            } else {
-                None
-            },
-        }
-    }
-
-    fn install(&self, cx: &App) {
-        let mut rescans = Vec::new();
-        if let Some(reason) = self.blocked_reason {
-            rescans.push(MenuItem::action(reason, DisabledMenuItem));
-            if !self.roots.is_empty() {
-                rescans.push(MenuItem::separator());
-            }
-        }
-        if self.roots.is_empty() && self.blocked_reason.is_none() {
-            rescans.push(MenuItem::action(
-                "尚未添加音乐目录，请前往设置…",
-                DisabledMenuItem,
-            ));
-        }
-        for (root, offline) in &self.roots {
-            let label = if *offline {
-                format!("{}（未挂载）", root.display())
-            } else {
-                root.display().to_string()
-            };
-            rescans.push(if *offline || self.blocked_reason.is_some() {
-                MenuItem::action(label, DisabledMenuItem)
-            } else {
-                MenuItem::action(label, RescanRoot { root: root.clone() })
-            });
-        }
-        cx.set_menus(vec![
-            Menu {
-                name: "Voon".into(),
-                items: vec![
-                    MenuItem::action("设置…", OpenSettings),
-                    MenuItem::separator(),
-                    MenuItem::action("关闭当前窗口", CloseCurrentWindow),
-                    MenuItem::separator(),
-                    MenuItem::action("退出 Voon", Quit),
-                ],
-            },
-            Menu {
-                name: "资料库".into(),
-                items: vec![MenuItem::submenu(Menu {
-                    name: "重新扫描".into(),
-                    items: rescans,
-                })],
-            },
-        ]);
-    }
-}
-
-pub(super) fn install(state: Entity<AppState>, cx: &mut App) {
-    let mut previous = MenuState::read(state.read(cx));
-    previous.install(cx);
-    cx.observe(&state, move |state, cx| {
-        let current = MenuState::read(state.read(cx));
-        // Scanning and cover updates also notify the state. Rebuild native
-        // menus only when their roots or command availability actually change.
-        if current != previous {
-            current.install(cx);
-            previous = current;
-        }
-    })
-    .detach();
+pub(super) fn install(cx: &mut App) {
+    cx.bind_keys([
+        KeyBinding::new("cmd-h", HideApplication, None),
+        KeyBinding::new("cmd-alt-h", HideOtherApplications, None),
+    ]);
+    cx.on_action(|_: &HideApplication, cx| cx.hide());
+    cx.on_action(|_: &HideOtherApplications, cx| cx.hide_other_apps());
+    cx.on_action(|_: &ShowAllApplications, cx| cx.unhide_other_apps());
+    cx.set_menus(vec![
+        Menu {
+            name: "Voon".into(),
+            items: vec![
+                MenuItem::action("设置…", OpenSettings),
+                MenuItem::separator(),
+                MenuItem::os_submenu("服务", SystemMenuType::Services),
+                MenuItem::separator(),
+                MenuItem::action("隐藏 Voon", HideApplication),
+                MenuItem::action("隐藏其他", HideOtherApplications),
+                MenuItem::action("显示全部", ShowAllApplications),
+                MenuItem::separator(),
+                MenuItem::action("退出 Voon", Quit),
+            ],
+        },
+        Menu {
+            name: "窗口".into(),
+            items: vec![MenuItem::action("关闭窗口", CloseCurrentWindow)],
+        },
+    ]);
 }

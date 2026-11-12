@@ -59,6 +59,9 @@ for completed checks and pending external verification.
   conflicting information, each with the reason.
 - **Editing:** album-level fields, merging and splitting albums, choosing the
   cover.
+- **Album inspector:** Overview, Tracks, Organization and Files tabs keep the
+  summary visible; track details, metadata sources and reading status expand
+  on demand.
 - **No playback.** At most "open in the default player".
 - **macOS packaging:** at the end of phase 1, a `.app` bundle with an icon.
   No code signing or notarization (personal use).
@@ -121,10 +124,20 @@ On macOS, open **Voon → 设置…** in the screen's menu bar (`⌘,`). On Linu
 use the menu bar at the top of the application window (`Ctrl+,`). Settings
 opens a separate window; closing it keeps the library and scans running.
 
-Use **资料库 → 重新扫描 → music folder** for a per-folder incremental scan.
-Failure retries and selected-album tag rereads remain beside the relevant
-library content. Settings contains library folders, ignore rules and local
-index information; ignore-rule changes take effect on the next scan.
+Settings uses four sidebar categories:
+
+- **音乐目录**: add or remove music folders, inspect availability and reconnect.
+- **扫描与读取**: per-folder incremental scans, task status and cancellation,
+  empty-scan confirmation, failed-read retries and tag rereads for the selected album.
+- **忽略规则**: manage each folder's exclusions and inspect built-in rules.
+  Rule changes take effect on the next scan.
+- **本地数据**: inspect the index location, confirm creation of a separate empty
+  index, and inspect or retry the local cover cache.
+
+The **Voon → 设置…** menu opens Settings; maintenance links in the browser open
+the corresponding page. **窗口 → 关闭窗口** handles window closing. The main browser shows scan/offline status; maintenance controls
+live in Settings. Opening Settings preserves the selected album and edits.
+Settings stays a single separate window; closing it does not stop scanning.
 
 ### Linux build dependencies
 

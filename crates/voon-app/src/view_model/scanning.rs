@@ -582,6 +582,16 @@ impl AppState {
         Ok(())
     }
 
+    pub fn scan_blocked_reason(&self) -> Option<&'static str> {
+        if self.index_open_problem().is_some() {
+            Some("请先新建可用的本地索引，再开始扫描")
+        } else if self.scan_session.is_some() {
+            Some("请等待当前扫描结束，再开始其他读取任务")
+        } else {
+            None
+        }
+    }
+
     pub fn root_changes_blocked_reason(&self) -> Option<&'static str> {
         if self.index_open_problem().is_some() {
             Some("请先新建可用的本地索引，再修改音乐目录")

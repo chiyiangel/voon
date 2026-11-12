@@ -1,14 +1,13 @@
-use crate::view_model::{AppState, ScanState};
-use gpui::{App, Entity, IntoElement, ParentElement, Styled, div, prelude::*, rgb};
+use super::theme::Theme;
+use crate::{
+    ui::SettingsPage,
+    view_model::{AppState, ScanState},
+};
+use gpui::{App, Entity, IntoElement, div, prelude::*, rgb};
 
-pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
-    let snapshot = state.read(cx);
+pub(super) fn scan_status(snapshot: &AppState) -> Option<String> {
     let operation = snapshot.scan_operation();
-    let mut banner = div().flex().flex_col().text_sm();
-    if let Some(notice) = snapshot.index_notice() {
-        banner = banner.child(div().px_4().py_2().child(notice.to_owned()));
-    }
-    let status = match snapshot.scan_state() {
+    match snapshot.scan_state() {
         ScanState::Idle => None,
         ScanState::Scanning {
             current_directory,
@@ -45,149 +44,81 @@ pub fn scan_banner(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
             "{}已取消 · 本次发现 {discovered} 张专辑 · 已接受的完整资料已保留",
             operation.label()
         )),
-        ScanState::Missing { .. } => None,
+        ScanState::Missing { root } => Some(format!("目录未连接：{}", root.display())),
         ScanState::Empty { root } => Some(format!(
             "本次未发现专辑，已保留上次索引。请确认音乐库已挂载。\n{}",
             root.display()
         )),
-    };
+    }
+}
+
+/// Browsing shows task status; maintenance controls live in Settings.
+pub fn scan_banner(state: &Entity<AppState>, theme: Theme, cx: &App) -> impl IntoElement {
+    let snapshot = state.read(cx);
+    let mut banner = div().flex().flex_col().text_sm();
     if !snapshot.offline_roots().is_empty() {
-        let reconnect_state = state.clone();
-        let paths = snapshot
-            .offline_roots()
-            .iter()
-            .map(|root| root.display().to_string())
-            .collect::<Vec<_>>()
-            .join("、");
+        let settings = state.clone();
         banner = banner.child(
             div()
-                .flex()
-                .items_center()
-                .justify_between()
-                .gap_3()
                 .px_4()
                 .py_2()
-                .bg(rgb(0xfff4dc))
-                .text_color(rgb(0x8a5a16))
+                .flex()
+                .items_center()
+                .gap_3()
+                .bg(rgb(theme.well))
                 .child(
                     div()
                         .flex_1()
-                        .flex()
-                        .flex_col()
-                        .gap_1()
-                        .child("音乐库目录不存在或未挂载")
-                        .child(div().text_xs().child(format!(
-                            "{paths} · 正在使用本地索引，浏览、搜索、编辑照常可用。"
-                        ))),
+                        .min_w_0()
+                        .child("音乐目录未连接 · 正在使用本地索引"),
                 )
                 .child(
-                    div()
-                        .id("reconnect-library")
-                        .cursor_pointer()
-                        .child("重新连接")
-                        .on_click(move |_, _, cx| {
-                            reconnect_state
-                                .update(cx, |state, cx| state.refresh_root_availability(cx))
-                        }),
+                    super::settings::button(
+                        "offline-library-settings",
+                        "管理音乐目录…",
+                        true,
+                        theme,
+                    )
+                    .on_click(move |_, _, cx| {
+                        crate::application::open_settings_page(
+                            settings.clone(),
+                            SettingsPage::Directories,
+                            cx,
+                        )
+                    }),
                 ),
         );
     }
-    if let Some(status) = status {
-        let cancel_state = state.clone();
-        let mut row = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .gap_3()
-            .px_4()
-            .py_2()
-            .bg(rgb(0xf4f4f6))
-            .child(div().flex_1().child(status));
-        if matches!(snapshot.scan_state(), ScanState::Scanning { .. }) {
-            row = row.child(
-                div()
-                    .id("cancel-scan")
-                    .cursor_pointer()
-                    .child("取消")
-                    .on_click(move |_, _, cx| {
-                        cancel_state.update(cx, |state, cx| state.cancel_scan(cx))
-                    }),
-            );
-        }
-        if matches!(snapshot.scan_state(), ScanState::Empty { .. }) {
-            let keep = state.clone();
-            let confirm = state.clone();
-            row = row.child(
-                div()
-                    .flex()
-                    .flex_col()
-                    .gap_2()
-                    .child(
-                        div()
-                            .id("keep-previous-scan")
-                            .cursor_pointer()
-                            .child("保留上次索引")
-                            .on_click(move |_, _, cx| {
-                                keep.update(cx, |state, cx| state.keep_previous_scan(cx))
-                            }),
-                    )
-                    .child(
-                        div()
-                            .id("confirm-empty-scan")
-                            .cursor_pointer()
-                            .child("确认目录为空，更新本地索引")
-                            .on_click(move |_, _, cx| {
-                                confirm.update(cx, |state, cx| {
-                                    if let Err(error) = state.confirm_empty_scan(cx) {
-                                        state.report_error(error, cx);
-                                    }
-                                })
-                            }),
+    if let Some(status) = scan_status(snapshot) {
+        let settings = state.clone();
+        banner = banner.child(
+            div()
+                .px_4()
+                .py_2()
+                .flex()
+                .items_center()
+                .gap_3()
+                .bg(rgb(theme.well))
+                .child(div().flex_1().min_w_0().child(status))
+                .child(
+                    super::settings::button("scan-settings", "扫描与读取…", true, theme).on_click(
+                        move |_, _, cx| {
+                            crate::application::open_settings_page(
+                                settings.clone(),
+                                SettingsPage::Scanning,
+                                cx,
+                            )
+                        },
                     ),
-            );
-        }
-        banner = banner.child(row);
-    }
-    let progress = snapshot.cover_cache_progress();
-    if progress.total > 0 {
-        let mut row = div()
-            .flex()
-            .items_center()
-            .justify_between()
-            .gap_3()
-            .px_4()
-            .py_2()
-            .bg(rgb(0xf4f4f6))
-            .child(format!(
-                "封面缓存 · 已就绪 {}/{} · 未缓存 {} · 处理中 {} · 失败 {} · 无封面 {}",
-                progress.ready,
-                progress.total - progress.no_cover,
-                progress.pending,
-                progress.loading,
-                progress.failed,
-                progress.no_cover
-            ));
-        if progress.failed > 0 {
-            let retry = state.clone();
-            row = row.child(
-                div()
-                    .id("retry-failed-covers")
-                    .cursor_pointer()
-                    .child("重试失败封面")
-                    .on_click(move |_, _, cx| {
-                        retry.update(cx, |state, cx| state.retry_failed_covers(cx))
-                    }),
-            );
-        }
-        banner = banner.child(row);
+                ),
+        );
     }
     if let Some(error) = snapshot.error() {
         banner = banner.child(
             div()
                 .px_4()
                 .py_2()
-                .bg(rgb(0xfdecea))
-                .text_color(rgb(0xc0352b))
+                .text_color(rgb(theme.accent))
                 .child(error.to_owned()),
         );
     }

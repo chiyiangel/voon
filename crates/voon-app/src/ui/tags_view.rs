@@ -355,6 +355,9 @@ pub fn album_organization(
         .text_size(px(11.5));
     section = section.child(div().text_color(rgb(theme.secondary)).child("我的标签"));
     let mut tags = div().flex().flex_wrap().gap_2();
+    if state.album_user_tags(path).is_empty() {
+        tags = tags.child(div().text_color(rgb(theme.tertiary)).child("尚未添加标签"));
+    }
     for tag in state.album_user_tags(path) {
         let entity = entity.clone();
         let path = path.to_path_buf();
@@ -380,6 +383,13 @@ pub fn album_organization(
     section = section
         .child(tags)
         .child(div().text_color(rgb(theme.secondary)).child("手动合集"));
+    if state.album_manual_collections(path).is_empty() {
+        section = section.child(
+            div()
+                .text_color(rgb(theme.tertiary))
+                .child("尚未加入手动合集"),
+        );
+    }
     for collection in state.album_manual_collections(path) {
         let entity = entity.clone();
         let path = path.to_path_buf();

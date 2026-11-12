@@ -1,8 +1,14 @@
+use std::{collections::HashSet, path::PathBuf};
+
 use gpui::{Context, Entity, FontWeight, Render, Subscription, Window, div, prelude::*, px, rgb};
 use voon_core::{Album, Track, TrackSource};
 
 use super::{cover, empty, theme::Theme};
 use crate::view_model::{AppState, grid::CoverCache};
+
+mod files;
+mod overview;
+mod tracks;
 
 pub(super) const FIELD_LABELS: &[(&str, &str)] = &[
     ("title", "标题"),
@@ -17,11 +23,35 @@ pub(super) const FIELD_LABELS: &[(&str, &str)] = &[
     ("edition", "版次"),
 ];
 
+#[derive(Clone, Copy, Default, PartialEq, Eq)]
+enum DetailPage {
+    #[default]
+    Overview,
+    Tracks,
+    Organization,
+    Files,
+}
+
+impl DetailPage {
+    const ALL: [(Self, &'static str, &'static str); 4] = [
+        (Self::Overview, "detail-overview", "概览"),
+        (Self::Tracks, "detail-tracks", "曲目"),
+        (Self::Organization, "detail-organization", "整理"),
+        (Self::Files, "detail-files", "文件"),
+    ];
+}
+
 pub struct AlbumDetail {
     state: Entity<AppState>,
     covers: Entity<CoverCache>,
     _subscriptions: Vec<Subscription>,
+    page: DetailPage,
+    album_path: Option<PathBuf>,
     sources_open: bool,
+    metadata_open: bool,
+    reading_open: bool,
+    open_discs: HashSet<usize>,
+    open_tracks: HashSet<(usize, usize)>,
 }
 
 impl AlbumDetail {
@@ -31,14 +61,37 @@ impl AlbumDetail {
         cx: &mut Context<Self>,
     ) -> Self {
         let subscriptions = vec![
-            cx.observe(&state, |_, _, cx| cx.notify()),
+            cx.observe(&state, |this, state, cx| {
+                let path = state
+                    .read(cx)
+                    .album_detail()
+                    .map(|album| album.path.clone());
+                if this.album_path != path {
+                    this.album_path = path;
+                    this.sources_open = false;
+                    this.metadata_open = false;
+                    this.reading_open = false;
+                    this.open_discs = HashSet::from([0]);
+                    this.open_tracks.clear();
+                }
+                cx.notify();
+            }),
             cx.observe(&covers, |_, _, cx| cx.notify()),
         ];
         Self {
+            album_path: state
+                .read(cx)
+                .album_detail()
+                .map(|album| album.path.clone()),
             state,
             covers,
             _subscriptions: subscriptions,
+            page: DetailPage::default(),
             sources_open: false,
+            metadata_open: false,
+            reading_open: false,
+            open_discs: HashSet::from([0]),
+            open_tracks: HashSet::new(),
         }
     }
 }
@@ -46,68 +99,96 @@ impl AlbumDetail {
 impl Render for AlbumDetail {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = Theme::for_window(window);
-        let (album, images, loading, image_error, offline, player_label, scan_issues) = {
-            let state = self.state.read(cx);
-            (
-                state.album_detail().cloned(),
-                state.attachment_images().to_vec(),
-                state.attachment_images_loading(),
-                state.attachment_images_error().map(str::to_owned),
-                state.album_detail().is_some_and(|album| {
-                    state
-                        .offline_roots()
-                        .iter()
-                        .any(|root| album.path.starts_with(root))
-                }),
-                state.album_player_label(),
-                state
-                    .album_detail()
-                    .map(|album| {
-                        state
-                            .album_scan_issues(&album.path)
-                            .into_iter()
-                            .cloned()
-                            .collect::<Vec<_>>()
-                    })
-                    .unwrap_or_default(),
-            )
-        };
-        let Some(album) = album else {
+        let state = self.state.read(cx);
+        let Some(album) = state.album_detail().cloned() else {
             return empty::detail(theme).into_any_element();
         };
+        let offline = album.physical_directories().iter().any(|path| {
+            state
+                .offline_roots()
+                .iter()
+                .any(|root| path.starts_with(root))
+        });
+        let issue_count = state.album_scan_issues(&album.path).len();
+        let player_label = state.album_player_label().unwrap_or("用默认播放器打开");
         let status = album
             .cover
             .clone()
             .map(|cover| self.covers.update(cx, |cache, cx| cache.request(cover, cx)));
-        let mut body = div()
-            .id("album-detail")
-            .size_full()
-            .overflow_y_scroll()
+        let cover_state = self.state.clone();
+        let edit_state = self.state.clone();
+        let player_state = self.state.clone();
+        let mut actions = div().flex().flex_wrap().gap_3().text_size(px(12.));
+        if !offline {
+            actions = actions.child(
+                div()
+                    .id("open-album-player")
+                    .debug_selector(|| "open-album-player".into())
+                    .cursor_pointer()
+                    .px_2()
+                    .py_2()
+                    .rounded_md()
+                    .bg(rgb(theme.accent))
+                    .text_color(rgb(theme.window))
+                    .child(player_label)
+                    .on_click(move |_, _, cx| {
+                        player_state.update(cx, |state, cx| {
+                            if let Err(error) = state.open_album_in_player(cx) {
+                                state.report_error(error, cx);
+                            }
+                        })
+                    }),
+            );
+        }
+        actions = actions.child(
+            div()
+                .id("edit-album-information")
+                .debug_selector(|| "edit-album-information".into())
+                .cursor_pointer()
+                .px_2()
+                .py_2()
+                .rounded_md()
+                .bg(rgb(theme.well))
+                .child("编辑信息")
+                .on_click(move |_, _, cx| {
+                    edit_state.update(cx, |state, cx| {
+                        if let Err(error) = state.begin_album_edit(cx) {
+                            state.report_error(error, cx);
+                        }
+                    })
+                }),
+        );
+        let header = div()
+            .flex_none()
+            .p_4()
             .flex()
             .flex_col()
+            .gap_3()
             .child(
                 div()
-                    .flex_none()
-                    .p_4()
-                    .border_b_1()
-                    .border_color(rgb(theme.line))
+                    .text_size(px(11.))
+                    .text_color(rgb(theme.secondary))
+                    .child("专辑详情"),
+            )
+            .child(
+                div()
                     .flex()
                     .gap_3()
                     .items_start()
-                    .child({
-                        let state = self.state.clone();
+                    .child(
                         div()
                             .id("choose-album-cover")
                             .cursor_pointer()
-                            .child(cover::render(status, 112., false, theme))
+                            .flex_none()
+                            .child(cover::render(status, 72., false, theme))
                             .on_click(move |_, _, cx| {
-                                state.update(cx, |state, cx| {
+                                cover_state.update(cx, |state, cx| {
                                     if let Err(error) = state.begin_cover_picker(cx) {
                                         state.report_error(error, cx);
                                     }
                                 })
-                            })
-                    })
+                            }),
+                    )
                     .child(
                         div()
                             .flex_1()
@@ -133,562 +214,131 @@ impl Render for AlbumDetail {
                                             .map(|field| field.value.clone())
                                             .unwrap_or_else(|| "未知艺术家".into()),
                                     ),
-                            )
-                            .child(
-                                div()
-                                    .text_size(px(11.))
-                                    .text_color(rgb(theme.tertiary))
-                                    .child(format!(
-                                        "{} 碟 · {} 轨",
-                                        album.discs.len(),
-                                        album.tracks().count()
-                                    )),
                             ),
                     ),
             )
-            .child(metadata(&album, theme))
-            .child(super::tags_view::album_organization(
-                &self.state,
-                &album.path,
-                theme,
-                cx,
-            ));
-        for issue in scan_issues {
-            body = body.child(
+            .child(
                 div()
-                    .px_4()
-                    .py_2()
-                    .bg(rgb(0xfff4dc))
-                    .text_color(rgb(0x8a5a16))
+                    .text_size(px(11.))
+                    .text_color(rgb(theme.secondary))
                     .child(format!(
-                        "{} · {}\n{}",
-                        issue.title,
-                        issue.path.display(),
-                        issue.explanation
+                        "{} 碟 · {} 轨{}",
+                        album.discs.len(),
+                        album.tracks().count(),
+                        audio_summary(&album)
                     )),
-            );
-        }
-        let edit_state = self.state.clone();
-        let observations = self.state.read(cx).album_tag_observations();
-        let mut tag_status = div().flex_none().p_4().flex().flex_col().gap_2().child(
-            div()
-                .font_weight(FontWeight::SEMIBOLD)
-                .child("标签读取状态"),
-        );
-        match observations {
-            Ok(observations) => {
-                for (position, (path, observation)) in observations.into_iter().enumerate() {
-                    let label = observation.result.label();
-                    tag_status =
-                        tag_status.child(div().text_xs().text_color(rgb(theme.secondary)).child(
-                            format!(
-                                "{label} · {}{}",
-                                path.display(),
-                                if observation.last_success.is_some() {
-                                    " · 保留上次成功资料，尚未重新确认"
-                                } else {
-                                    ""
-                                }
-                            ),
-                        ));
-                    if let Some(reason) = observation.result.reason() {
-                        tag_status = tag_status.child(div().text_xs().child(reason.to_owned()));
-                    }
-                    if let Some(failure) = observation
-                        .result
-                        .failure_kind()
-                        .filter(|kind| kind.retryable())
-                        && !offline
-                    {
-                        let retry_state = self.state.clone();
-                        tag_status = tag_status.child(
-                            div()
-                                .id(("retry-tag-read", position))
-                                .cursor_pointer()
-                                .text_color(rgb(theme.accent))
-                                .child("重试此文件的标签读取")
-                                .on_click(move |_, _, cx| {
-                                    retry_state.update(cx, |state, cx| {
-                                        if let Err(error) = state.retry_attention(
-                                            &path,
-                                            failure.attention_kind(),
-                                            cx,
-                                        ) {
-                                            state.report_error(error, cx);
-                                        }
-                                    });
-                                }),
-                        );
-                    }
-                }
-            }
-            Err(_) => tag_status = tag_status.child("无法读取本地标签状态，请重新打开专辑"),
-        }
-        body = body.child(tag_status);
-        if let Some(notice) = self.state.read(cx).album_tag_refresh_notice() {
-            body = body.child(
-                div()
-                    .px_4()
-                    .py_2()
-                    .text_xs()
-                    .text_color(rgb(theme.secondary))
-                    .child(notice),
-            );
-        }
-        if !offline {
-            let state = self.state.clone();
-            body = body.child(
-                div()
-                    .id("force-album-tags")
-                    .cursor_pointer()
-                    .px_4()
-                    .py_2()
-                    .text_color(rgb(theme.accent))
-                    .child("强制重读此专辑标签")
-                    .on_click(move |_, _, cx| {
-                        state.update(cx, |state, cx| {
-                            if let Err(error) = state.force_selected_album_tags(cx) {
-                                state.report_error(error, cx);
-                            }
-                        })
-                    }),
-            );
-        }
-        body = body.child(
-            div()
-                .id("toggle-metadata-sources")
-                .cursor_pointer()
-                .px_4()
-                .py_2()
-                .text_color(rgb(theme.accent))
-                .child(if self.sources_open {
-                    "收起字段来源"
-                } else {
-                    "比较字段来源"
-                })
-                .on_click(cx.listener(|this, _, _, cx| {
-                    this.sources_open = !this.sources_open;
-                    cx.notify();
-                })),
-        );
-        if self.sources_open {
-            match self.state.read(cx).album_metadata_comparison() {
-                Ok(comparison) => {
-                    body = body.child(super::metadata_sources::render(&comparison, theme))
-                }
-                Err(_) => {
-                    body = body.child(div().p_4().child("无法读取本地字段来源，请重新打开专辑"))
-                }
-            }
-        }
-        if let Some(crate::view_model::cover_thumbnails::ThumbnailState::Failed(error)) = album
-            .cover
-            .as_ref()
-            .and_then(|cover| self.state.read(cx).cover_thumbnail_state(cover))
-        {
-            body = body.child(
-                div()
-                    .px_4()
-                    .py_2()
-                    .text_size(px(11.))
-                    .text_color(rgb(theme.secondary))
-                    .child(error.clone()),
-            );
-        }
-        body = body.child(
-            div()
-                .id("edit-album-information")
-                .flex_none()
-                .cursor_pointer()
-                .px_4()
-                .py_2()
-                .text_color(rgb(theme.accent))
-                .child("编辑信息")
-                .on_click(move |_, _, cx| {
-                    edit_state.update(cx, |state, cx| {
-                        if let Err(error) = state.begin_album_edit(cx) {
-                            state.report_error(error, cx);
-                        }
-                    })
-                }),
-        );
-        if !offline {
-            let state = self.state.clone();
-            body = body.child(
-                div()
-                    .id("open-album-player")
-                    .cursor_pointer()
-                    .px_4()
-                    .py_2()
-                    .text_color(rgb(theme.accent))
-                    .child(player_label.unwrap_or("用默认播放器打开"))
-                    .on_click(move |_, _, cx| {
-                        state.update(cx, |state, cx| {
-                            if let Err(error) = state.open_album_in_player(cx) {
-                                state.report_error(error, cx);
-                            }
-                        })
-                    }),
-            );
-        }
-        for (disc_position, disc) in album.discs.iter().enumerate() {
-            body = body.child(
-                div()
-                    .flex_none()
-                    .p_4()
-                    .border_b_1()
-                    .border_color(rgb(theme.line))
-                    .flex()
-                    .flex_col()
-                    .gap_3()
-                    .child(div().font_weight(FontWeight::SEMIBOLD).child(format!(
-                        "碟 {} · {} 轨",
-                        disc.number,
-                        disc.tracks.len()
-                    )))
-                    .children(
-                        disc.tracks
-                            .iter()
-                            .enumerate()
-                            .map(|(track_position, track)| {
-                                let state = self.state.clone();
-                                let album_path = album.path.clone();
-                                let player_label = state
-                                    .read(cx)
-                                    .track_player_label(disc_position, track_position)
-                                    .unwrap_or("用默认播放器打开");
-                                div().child(track_row(track, theme)).when(!offline, |row| {
-                                    row.child(
-                                        div()
-                                            .id((
-                                                "open-track-player",
-                                                disc_position * 100_000 + track_position,
-                                            ))
-                                            .cursor_pointer()
-                                            .text_xs()
-                                            .text_color(rgb(theme.accent))
-                                            .child(player_label)
-                                            .on_click(move |_, _, cx| {
-                                                state.update(cx, |state, cx| {
-                                                    if let Err(error) = state.open_track_in_player(
-                                                        &album_path,
-                                                        disc_position,
-                                                        track_position,
-                                                        cx,
-                                                    ) {
-                                                        state.report_error(error, cx);
-                                                    }
-                                                })
-                                            }),
-                                    )
-                                })
-                            }),
-                    ),
-            );
-        }
-        let mut attachments = div()
+            )
+            .child(actions);
+        let mut tabs = div()
             .flex_none()
-            .p_4()
+            .flex()
             .border_b_1()
-            .border_color(rgb(theme.line))
-            .flex()
-            .flex_col()
-            .gap_2()
-            .child(div().font_weight(FontWeight::SEMIBOLD).child("附件图片"));
-        if loading {
-            attachments = attachments.child(
+            .border_color(rgb(theme.line));
+        for (page, id, label) in DetailPage::ALL {
+            let active = self.page == page;
+            tabs = tabs.child(
                 div()
-                    .text_color(rgb(theme.secondary))
-                    .child("正在读取图片列表…"),
-            );
-        } else if let Some(error) = image_error {
-            let state = self.state.clone();
-            attachments = attachments
-                .child(
-                    div()
-                        .text_size(px(11.))
-                        .text_color(rgb(theme.secondary))
-                        .child(error),
-                )
-                .child(
-                    div()
-                        .id("reload-attachment-images")
-                        .cursor_pointer()
-                        .text_color(rgb(theme.accent))
-                        .child("重新载入")
-                        .on_click(move |_, _, cx| {
-                            state.update(cx, |state, cx| {
-                                if let Err(error) = state.reload_attachment_images(cx) {
-                                    state.report_error(error, cx);
-                                }
-                            })
-                        }),
-                );
-        } else if images.is_empty() {
-            attachments =
-                attachments.child(div().text_color(rgb(theme.tertiary)).child("没有附件图片"));
-        } else {
-            attachments =
-                attachments.children(images.into_iter().enumerate().map(|(position, image)| {
-                    let state = self.state.clone();
-                    let label = image
-                        .strip_prefix(&album.path)
-                        .unwrap_or(&image)
-                        .display()
-                        .to_string();
-                    div()
-                        .id(("attachment-image", position))
-                        .cursor_pointer()
-                        .text_size(px(12.))
-                        .text_color(rgb(theme.accent))
-                        .child(format!("查看 · {label}"))
-                        .on_click(move |_, _, cx| {
-                            state.update(cx, |state, cx| {
-                                if let Err(error) = state.open_attachment_image(image.clone(), cx) {
-                                    state.report_error(error, cx);
-                                }
-                            })
-                        })
-                }));
-        }
-        body = body.child(attachments);
-        let mut location = div()
-            .flex_none()
-            .p_4()
-            .flex()
-            .flex_col()
-            .gap_2()
-            .child(div().font_weight(FontWeight::SEMIBOLD).child("位置"))
-            .child(
-                div()
-                    .text_size(px(11.))
-                    .text_color(rgb(theme.secondary))
-                    .flex()
-                    .flex_col()
-                    .gap_1()
-                    .children(
-                        album
-                            .physical_directories()
-                            .into_iter()
-                            .map(|path| div().child(path.display().to_string())),
-                    ),
-            );
-        if offline {
-            location = location.child(div().text_color(rgb(theme.tertiary)).child("音乐库未挂载"));
-        } else {
-            let state = self.state.clone();
-            let label = if cfg!(target_os = "macos") {
-                "在 Finder 中显示"
-            } else {
-                "在文件管理器中显示"
-            };
-            location = location.child(
-                div()
-                    .id("reveal-album")
+                    .id(id)
+                    .debug_selector(move || id.into())
+                    .flex_1()
                     .cursor_pointer()
-                    .text_color(rgb(theme.accent))
+                    .py_3()
+                    .text_center()
+                    .text_size(px(12.))
+                    .text_color(rgb(if active {
+                        theme.accent
+                    } else {
+                        theme.secondary
+                    }))
+                    .border_b_2()
+                    .border_color(rgb(if active { theme.accent } else { theme.line }))
                     .child(label)
-                    .on_click(move |_, _, cx| {
-                        state.update(cx, |state, cx| {
-                            if let Err(error) = state.reveal_selected_album(cx) {
-                                state.report_error(error, cx);
-                            }
-                        })
-                    }),
+                    .on_click(cx.listener(move |this, _, _, cx| {
+                        this.page = page;
+                        cx.notify();
+                    })),
             );
         }
-        body.child(location).into_any_element()
-    }
-}
-
-fn metadata(album: &Album, theme: Theme) -> impl IntoElement {
-    let fields = album.metadata.entries();
-    let mut section = div()
-        .flex_none()
-        .p_4()
-        .border_b_1()
-        .border_color(rgb(theme.line))
-        .flex()
-        .flex_col()
-        .gap_3()
-        .child(div().font_weight(FontWeight::SEMIBOLD).child("专辑信息"));
-    for &(name, label) in FIELD_LABELS {
-        let field = fields.iter().find(|(field, _, _)| *field == name);
-        let mut row = div()
+        let mut body = div()
+            .id("album-detail")
+            .size_full()
             .flex()
-            .items_start()
-            .gap_2()
-            .text_size(px(11.5))
-            .child(
+            .flex_col()
+            .child(header);
+        if offline || issue_count > 0 {
+            body = body.child(
                 div()
-                    .w(px(66.))
-                    .flex_none()
-                    .text_color(rgb(theme.secondary))
-                    .child(label),
-            )
-            .child(
-                div().flex_1().min_w_0().child(
-                    field
-                        .map(|(_, value, _)| value.clone())
-                        .unwrap_or_else(|| "未填写".into()),
-                ),
-            );
-        if let Some((_, _, source)) = field {
-            let label = super::metadata_sources::source_label(*source);
-            row = row.child(
-                div()
-                    .flex_none()
-                    .px_1()
-                    .rounded_sm()
+                    .id("detail-warning")
+                    .debug_selector(|| "detail-warning".into())
+                    .cursor_pointer()
+                    .mx_4()
+                    .mb_2()
+                    .p_2()
+                    .rounded_md()
                     .bg(rgb(theme.well))
-                    .text_color(rgb(theme.secondary))
-                    .text_size(px(10.))
-                    .child(label),
+                    .text_size(px(11.))
+                    .text_color(rgb(theme.accent))
+                    .child(if offline {
+                        "目录离线 · 可查看已保存资料 ›".into()
+                    } else {
+                        format!("{issue_count} 项读取提示 · 查看详情 ›")
+                    })
+                    .on_click(cx.listener(|this, _, _, cx| {
+                        this.page = DetailPage::Files;
+                        this.reading_open = true;
+                        cx.notify();
+                    })),
             );
         }
-        section = section.child(row);
-    }
-    if let Some(collection) = &album.collection {
-        section = section.child(
-            div()
-                .text_size(px(11.5))
-                .text_color(rgb(theme.secondary))
-                .child(format!("所属合集 · {}", collection.display())),
-        );
-    }
-    section
-}
-
-fn track_row(track: &Track, theme: Theme) -> impl IntoElement {
-    let title = track
-        .title
-        .as_ref()
-        .map(|field| field.value.clone())
-        .unwrap_or_else(|| {
-            track
-                .source
-                .audio_path()
-                .file_name()
-                .unwrap_or_default()
-                .to_string_lossy()
-                .into_owned()
-        });
-    let mut row = div().flex().flex_col().gap_1().text_size(px(11.5)).child(
-        div()
-            .flex()
-            .items_start()
-            .gap_2()
+        let content = match self.page {
+            DetailPage::Overview => self.overview(&album, theme, cx),
+            DetailPage::Tracks => self.tracks(&album, offline, theme, cx),
+            DetailPage::Organization => {
+                super::tags_view::album_organization(&self.state, &album.path, theme, cx)
+                    .into_any_element()
+            }
+            DetailPage::Files => self.files(&album, offline, theme, cx),
+        };
+        // Page-specific scroll identity keeps long file/track views from scrolling the summary away.
+        let scroll_id = DetailPage::ALL
+            .iter()
+            .find(|(page, _, _)| *page == self.page)
+            .unwrap()
+            .1;
+        body.child(tabs)
             .child(
                 div()
-                    .w(px(20.))
-                    .flex_none()
-                    .text_color(rgb(theme.tertiary))
-                    .child(
-                        track
-                            .number
-                            .map(|number| number.to_string())
-                            .unwrap_or_else(|| "—".into()),
-                    ),
+                    .id(gpui::SharedString::from(format!("detail-page-{scroll_id}")))
+                    .flex_1()
+                    .min_h_0()
+                    .overflow_y_scroll()
+                    .child(content),
             )
-            .child(div().flex_1().min_w_0().child(title))
-            .child(
-                div()
-                    .flex_none()
-                    .text_color(rgb(theme.secondary))
-                    .child(duration(track.properties.duration_ms)),
-            ),
-    );
-    if let Some(artist) = &track.artist {
-        row = row.child(
-            div()
-                .text_color(rgb(theme.secondary))
-                .child(format!("演奏者：{}", artist.value)),
-        );
+            .into_any_element()
     }
-    let mut properties = vec![track.format.label().to_owned()];
-    properties.push(
-        track
-            .properties
-            .sample_rate
-            .map(|rate| format!("{} kHz", rate as f64 / 1000.))
-            .unwrap_or_else(|| "采样率未知".into()),
-    );
-    properties.push(
-        track
-            .properties
-            .bit_depth
-            .map(|depth| format!("{depth} 位"))
-            .unwrap_or_else(|| "位深未知".into()),
-    );
-    if let Some(channels) = track.properties.channels {
-        properties.push(format!("{channels} 声道"));
-    }
-    row = row.child(
-        div()
-            .text_size(px(10.5))
-            .text_color(rgb(theme.secondary))
-            .child(properties.join(" · ")),
-    );
-    match &track.source {
-        TrackSource::Virtual {
-            image,
-            cue,
-            start,
-            end,
-        } => {
-            row = row
-                .child(div().text_color(rgb(theme.accent)).child(format!(
-                    "虚拟曲目 · {} → {}",
-                    cue_time(*start),
-                    end.map(cue_time).unwrap_or_else(|| "整轨末尾".into())
-                )))
-                .child(
-                    div()
-                        .text_size(px(10.))
-                        .text_color(rgb(theme.tertiary))
-                        .child(format!("整轨文件：{}", image.display())),
-                )
-                .child(
-                    div()
-                        .text_size(px(10.))
-                        .text_color(rgb(theme.tertiary))
-                        .child(format!("CUE：{}", cue.display())),
-                );
-        }
-        TrackSource::File { path } => {
-            row = row.child(
-                div()
-                    .text_size(px(10.))
-                    .text_color(rgb(theme.tertiary))
-                    .child(format!("文件：{}", path.display())),
-            );
-        }
-    }
-    row
 }
 
-fn duration(milliseconds: Option<u64>) -> String {
-    let Some(milliseconds) = milliseconds else {
-        return "时长未知".into();
+fn audio_summary(album: &Album) -> String {
+    let mut tracks = album.tracks();
+    let Some(first) = tracks.next() else {
+        return String::new();
     };
-    let seconds = milliseconds / 1000;
-    if seconds >= 3600 {
-        format!(
-            "{}:{:02}:{:02}",
-            seconds / 3600,
-            seconds / 60 % 60,
-            seconds % 60
-        )
-    } else {
-        format!("{}:{:02}", seconds / 60, seconds % 60)
+    if tracks.any(|track| {
+        track.format != first.format
+            || track.properties.sample_rate != first.properties.sample_rate
+            || track.properties.bit_depth != first.properties.bit_depth
+    }) {
+        return " · 多种音频规格".into();
     }
+    let mut summary = format!(" · {}", first.format.label());
+    if let Some(depth) = first.properties.bit_depth {
+        summary.push_str(&format!(" · {depth} bit"));
+    }
+    if let Some(rate) = first.properties.sample_rate {
+        summary.push_str(&format!(" / {} kHz", rate as f64 / 1000.));
+    }
+    summary
 }
 
-fn cue_time(frames: u32) -> String {
-    format!(
-        "{:02}:{:02}:{:02}",
-        frames / 75 / 60,
-        frames / 75 % 60,
-        frames % 75
-    )
-}
+#[cfg(test)]
+mod tests;

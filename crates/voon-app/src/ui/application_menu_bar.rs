@@ -1,43 +1,33 @@
 //! Visible window menus for platforms without a native application menu.
 
 use gpui::{
-    Action, Context, Div, Entity, FocusHandle, KeyDownEvent, MouseButton, MouseDownEvent, Render,
-    Stateful, Subscription, Window, deferred, div, prelude::*, px, rgb,
+    Action, Context, Div, FocusHandle, KeyDownEvent, MouseButton, MouseDownEvent, Render, Stateful,
+    Window, deferred, div, prelude::*, px, rgb,
 };
 
 use super::theme::Theme;
-use crate::{
-    application::{CloseCurrentWindow, OpenSettings, Quit, RescanRoot},
-    view_model::AppState,
-};
+use crate::application::{CloseCurrentWindow, OpenSettings, Quit};
 
 const MENU_HEIGHT: f32 = 32.;
 
 #[derive(Clone, Copy, PartialEq)]
 enum Menu {
     Application,
-    Library,
+    Window,
 }
 
 pub struct ApplicationMenuBar {
-    state: Entity<AppState>,
     open: Option<Menu>,
-    rescan_open: bool,
     focus: FocusHandle,
     previous_focus: Option<FocusHandle>,
-    _subscription: Subscription,
 }
 
 impl ApplicationMenuBar {
-    pub fn new(state: Entity<AppState>, cx: &mut Context<Self>) -> Self {
-        let subscription = cx.observe(&state, |_, _, cx| cx.notify());
+    pub fn new(cx: &mut Context<Self>) -> Self {
         Self {
-            state,
             open: None,
-            rescan_open: false,
             focus: cx.focus_handle(),
             previous_focus: None,
-            _subscription: subscription,
         }
     }
 
@@ -51,13 +41,11 @@ impl ApplicationMenuBar {
             self.focus.focus(window);
         }
         self.open = Some(menu);
-        self.rescan_open = false;
         cx.notify();
     }
 
     fn close(&mut self, window: &mut Window, cx: &mut Context<Self>) {
         self.open = None;
-        self.rescan_open = false;
         if let Some(focus) = self.previous_focus.take() {
             focus.focus(window);
         }
@@ -88,91 +76,6 @@ impl ApplicationMenuBar {
                 this.close(window, cx);
                 window.dispatch_action(action.boxed_clone(), cx);
             }))
-    }
-
-    fn library_menu(&self, window: &Window, theme: Theme, cx: &mut Context<Self>) -> Div {
-        let snapshot = self.state.read(cx);
-        let blocked = snapshot.root_changes_blocked_reason();
-        let mut menu = div().flex().items_start().gap_1().child(
-            menu_panel("library-menu", theme).w(px(180.)).child(
-                div()
-                    .id("open-rescan-menu")
-                    .px_3()
-                    .py_2()
-                    .flex()
-                    .justify_between()
-                    .rounded_sm()
-                    .cursor_pointer()
-                    .bg(rgb(if self.rescan_open {
-                        theme.selected
-                    } else {
-                        theme.window
-                    }))
-                    .hover(move |style| style.bg(rgb(theme.well)))
-                    .child("重新扫描")
-                    .child("›")
-                    .on_click(cx.listener(|this, _, _, cx| {
-                        this.rescan_open = !this.rescan_open;
-                        cx.notify();
-                    })),
-            ),
-        );
-        if self.rescan_open {
-            let width = (window.viewport_size().width - px(268.)).min(px(420.));
-            let mut roots = menu_panel("rescan-roots-menu", theme)
-                .w(width)
-                .max_h(window.viewport_size().height - px(MENU_HEIGHT + 16.))
-                .overflow_y_scroll();
-            if let Some(reason) = blocked {
-                roots = roots.child(
-                    div()
-                        .px_3()
-                        .py_2()
-                        .text_color(rgb(theme.secondary))
-                        .child(reason),
-                );
-            }
-            if snapshot.roots().is_empty() {
-                roots = roots.child(
-                    div()
-                        .px_3()
-                        .py_2()
-                        .text_color(rgb(theme.secondary))
-                        .child("尚未添加音乐目录"),
-                );
-            }
-            for (position, root) in snapshot.roots().iter().enumerate() {
-                let offline = snapshot.offline_roots().contains(&root.path);
-                let enabled = blocked.is_none() && !offline;
-                let path = root.path.clone();
-                roots = roots.child(
-                    div()
-                        .id(("menu-rescan-root", position))
-                        .px_3()
-                        .py_2()
-                        .rounded_sm()
-                        .text_color(rgb(if enabled { theme.ink } else { theme.tertiary }))
-                        .child(root.path.display().to_string())
-                        .when(offline, |row| {
-                            row.child(div().text_sm().child("目录离线，暂不可扫描"))
-                        })
-                        .when(enabled, |row| {
-                            row.cursor_pointer()
-                                .hover(move |style| style.bg(rgb(theme.well)))
-                                .on_click(cx.listener(move |this, _, window, cx| {
-                                    this.close(window, cx);
-                                    // The shared action rechecks the current roots and task state.
-                                    window.dispatch_action(
-                                        Box::new(RescanRoot { root: path.clone() }),
-                                        cx,
-                                    );
-                                }))
-                        }),
-                );
-            }
-            menu = menu.child(roots);
-        }
-        menu
     }
 }
 
@@ -214,7 +117,7 @@ impl Render for ApplicationMenuBar {
             }));
         for (menu, label, id) in [
             (Menu::Application, "Voon", "open-application-menu"),
-            (Menu::Library, "资料库", "open-library-menu"),
+            (Menu::Window, "窗口", "open-window-menu"),
         ] {
             bar = bar.child(
                 div()
@@ -250,14 +153,6 @@ impl Render for ApplicationMenuBar {
                         cx,
                     ))
                     .child(Self::command(
-                        "menu-close-window",
-                        "关闭当前窗口",
-                        "Ctrl+W",
-                        CloseCurrentWindow,
-                        theme,
-                        cx,
-                    ))
-                    .child(Self::command(
                         "menu-quit",
                         "退出 Voon",
                         "Ctrl+Q",
@@ -266,7 +161,17 @@ impl Render for ApplicationMenuBar {
                         cx,
                     ))
                     .into_any_element(),
-                Menu::Library => self.library_menu(window, theme, cx).into_any_element(),
+                Menu::Window => menu_panel("window-menu", theme)
+                    .w(px(220.))
+                    .child(Self::command(
+                        "menu-close-window",
+                        "关闭窗口",
+                        "Ctrl+W",
+                        CloseCurrentWindow,
+                        theme,
+                        cx,
+                    ))
+                    .into_any_element(),
             };
             bar = bar.child(
                 deferred(

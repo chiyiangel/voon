@@ -45,17 +45,40 @@ pub fn render(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> Div 
             })
             .hover(|row| row.bg(rgb(theme.selected)))
             .child(icon(glyph, 16., theme.accent))
-            .child(navigation_label(destination))
+            .child(
+                div()
+                    .flex_1()
+                    .min_w_0()
+                    .truncate()
+                    .child(navigation_label(destination)),
+            )
+            .when(destination == Navigation::Collections, |row| {
+                row.child(div().flex_none().flex().items_center().child(icon(
+                    if state.collections_sidebar_expanded() {
+                        "chevron-down"
+                    } else {
+                        "chevron-right"
+                    },
+                    14.,
+                    theme.tertiary,
+                )))
+            })
             .when(destination == Navigation::NeedsAttention, |row| {
                 row.child(
                     div()
-                        .ml_auto()
+                        .flex_none()
                         .text_xs()
                         .child(state.attention_items().len().to_string()),
                 )
             })
             .on_click(move |_, _, cx| {
-                entity.update(cx, |state, cx| state.navigate(destination, cx))
+                entity.update(cx, |state, cx| {
+                    if destination == Navigation::Collections {
+                        state.toggle_collections_sidebar(cx);
+                    } else {
+                        state.navigate(destination, cx);
+                    }
+                })
             })
     };
 
@@ -75,9 +98,11 @@ pub fn render(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> Div 
         .child(group("资料库"))
         .child(row(Navigation::AllAlbums, "library"))
         .child(row(Navigation::Collections, "box"))
-        .child(super::collection_view::navigation_tree(
-            state, entity, theme,
-        ))
+        .when(state.collections_sidebar_expanded(), |sidebar| {
+            sidebar.child(super::collection_view::navigation_tree(
+                state, entity, theme,
+            ))
+        })
         .child(row(Navigation::Composers, "composer"))
         .child(row(Navigation::Facets, "facet"))
         .child(group("整理"))

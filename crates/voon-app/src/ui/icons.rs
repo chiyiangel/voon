@@ -6,6 +6,17 @@ use gpui::{AssetSource, SharedString, Svg, prelude::*, px, rgb, svg};
 pub struct Assets;
 
 const ICONS: &[(&str, &str)] = &[
+    ("chevron-right", "M9 6l6 6-6 6"),
+    ("chevron-down", "M6 9l6 6 6-6"),
+    ("folder", "M3 6h7l2 2h9v12H3z M3 6V4h7l2 2"),
+    (
+        "refresh",
+        "M20 7a9 9 0 0 0-15-2L2 8 M2 3v5h5 M4 17a9 9 0 0 0 15 2l3-3 M22 21v-5h-5",
+    ),
+    (
+        "database",
+        "M3 6a9 3 0 1 0 18 0 9 3 0 1 0-18 0 M3 6v12a9 3 0 0 0 18 0V6 M3 12a9 3 0 0 0 18 0",
+    ),
     ("library", "M3 3h18v18H3z M7 3v18 M11 7h6 M11 11h6 M11 15h4"),
     (
         "box",

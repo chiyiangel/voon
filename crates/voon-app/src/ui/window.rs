@@ -30,7 +30,7 @@ impl VoonWindow {
     pub fn new(state: Entity<AppState>, cx: &mut Context<Self>) -> Self {
         state.update(cx, |state, cx| state.prefetch_covers(cx));
         let subscription = cx.observe(&state, |_, _, cx| cx.notify());
-        let menu_bar = cx.new(|cx| ApplicationMenuBar::new(state.clone(), cx));
+        let menu_bar = cx.new(ApplicationMenuBar::new);
         let grid = cx.new(|cx| super::album_grid::AlbumGrid::new(state.clone(), cx));
         let covers = grid.read(cx).cover_cache();
         let list =
@@ -144,7 +144,7 @@ impl Render for VoonWindow {
                     .flex()
                     .flex_col()
                     .child(self.toolbar.clone())
-                    .child(scan_banner::scan_banner(&self.state, cx))
+                    .child(scan_banner::scan_banner(&self.state, theme, cx))
                     .child(super::collection_view::summary(state, theme))
                     .child(super::tags_view::organization_toolbar(
                         &self.state,
