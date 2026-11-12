@@ -42,6 +42,7 @@ work it describes.
 |---|---|---|
 | [0001 Phase 1](0001-phase-1.md) | Initial desktop library features | See the [ticket index](0001-phase-1/tickets/README.md) for implementation and platform acceptance. |
 | [0002 Library reliability and offline browsing](0002-library-reliability-and-protection.md) | Scan integrity, tag recovery, metadata candidates, CUE details, persistent covers and database version checks | in-progress · [11 tickets](0002-library-reliability-and-protection/tickets/README.md) · [acceptance](0002-library-reliability-and-protection/acceptance.md) |
+| [0003 Menus and a separate settings window](0003-settings-menubar.md) | Native macOS menus, a visible Linux menu bar, a separate settings window and operation guards | ready-for-agent · [6 tickets](0003-settings-menubar/tickets/README.md) · [agreed design](../design/2026-11-12-settings-menubar.md) |
 
 Spec 0002 starts with a fresh index. Backups, restore and legacy-library
 migration are outside its implementation scope.
