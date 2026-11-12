@@ -1,14 +1,20 @@
-use gpui::{Context, Entity, Render, Subscription, Timer, Window, div, prelude::*, px, rgb};
+use gpui::{
+    App, Context, Entity, FocusHandle, Focusable, Render, Subscription, Timer, Window, div,
+    prelude::*, px, rgb,
+};
 
 use super::{
-    empty, scan_banner, settings, sidebar,
+    application_menu_bar::ApplicationMenuBar,
+    scan_banner, settings, sidebar, startup,
     theme::{DETAIL_WIDTH, Theme},
     toolbar,
 };
 use crate::view_model::AppState;
 
 pub struct VoonWindow {
+    focus: FocusHandle,
     state: Entity<AppState>,
+    menu_bar: Entity<ApplicationMenuBar>,
     grid: Entity<super::album_grid::AlbumGrid>,
     list: Entity<super::album_list::AlbumList>,
     toolbar: Entity<toolbar::Toolbar>,
@@ -24,6 +30,7 @@ impl VoonWindow {
     pub fn new(state: Entity<AppState>, cx: &mut Context<Self>) -> Self {
         state.update(cx, |state, cx| state.prefetch_covers(cx));
         let subscription = cx.observe(&state, |_, _, cx| cx.notify());
+        let menu_bar = cx.new(|cx| ApplicationMenuBar::new(state.clone(), cx));
         let grid = cx.new(|cx| super::album_grid::AlbumGrid::new(state.clone(), cx));
         let covers = grid.read(cx).cover_cache();
         let list =
@@ -51,7 +58,9 @@ impl VoonWindow {
         })
         .detach();
         Self {
+            focus: cx.focus_handle(),
             state,
+            menu_bar,
             grid,
             list,
             toolbar,
@@ -70,66 +79,25 @@ impl Render for VoonWindow {
         let theme = Theme::for_window(window);
         let state = self.state.read(cx);
         if state.index_open_problem().is_some() {
-            return settings::index_unavailable(&self.state, theme, cx).into_any_element();
-        }
-        let settings_state = self.state.clone();
-        let choose_state = self.state.clone();
-        let start_state = self.state.clone();
-        let content = if state.settings_open() {
-            settings::settings(&self.state, cx).into_any_element()
-        } else if state.navigation() == crate::view_model::Navigation::NeedsAttention {
-            super::inbox_view::render(&self.state, theme, cx).into_any_element()
-        } else if state.roots().is_empty() {
-            div()
+            return div()
                 .size_full()
+                .track_focus(&self.focus)
                 .flex()
                 .flex_col()
-                .child(div().flex_1().child(empty::albums(state, theme)))
-                .child(
-                    div()
-                        .p_4()
-                        .flex()
-                        .flex_col()
-                        .gap_3()
-                        .items_center()
-                        .child(state.suggested_root().display().to_string())
-                        .child(
-                            div()
-                                .flex()
-                                .gap_4()
-                                .child(
-                                    div()
-                                        .id("choose-first-root")
-                                        .cursor_pointer()
-                                        .child("选择文件夹…")
-                                        .on_click(move |_, _, cx| {
-                                            settings::choose_root(choose_state.clone(), cx)
-                                        }),
-                                )
-                                .child(
-                                    div()
-                                        .id("scan-default-root")
-                                        .cursor_pointer()
-                                        .px_3()
-                                        .py_2()
-                                        .rounded_md()
-                                        .bg(rgb(theme.accent))
-                                        .text_color(rgb(theme.window))
-                                        .child("开始扫描")
-                                        .on_click(move |_, _, cx| {
-                                            start_state.update(cx, |state, cx| {
-                                                if let Err(error) = state.add_root(
-                                                    state.suggested_root().to_path_buf(),
-                                                    cx,
-                                                ) {
-                                                    state.report_error(error, cx);
-                                                }
-                                            })
-                                        }),
-                                ),
-                        ),
-                )
-                .into_any_element()
+                .when(cfg!(target_os = "linux"), |root| {
+                    root.child(self.menu_bar.clone())
+                })
+                .child(div().flex_1().min_h_0().child(settings::index_unavailable(
+                    &self.state,
+                    theme,
+                    cx,
+                )))
+                .into_any_element();
+        }
+        let content = if state.navigation() == crate::view_model::Navigation::NeedsAttention {
+            super::inbox_view::render(&self.state, theme, cx).into_any_element()
+        } else if state.roots().is_empty() {
+            startup::first_use(&self.state, theme, cx).into_any_element()
         } else {
             let browse = match state.view_mode() {
                 crate::view_model::browse::ViewMode::Grid => self.grid.clone().into_any_element(),
@@ -158,7 +126,7 @@ impl Render for VoonWindow {
                 )
                 .into_any_element()
         };
-        div()
+        let browser = div()
             .relative()
             .size_full()
             .flex()
@@ -176,19 +144,6 @@ impl Render for VoonWindow {
                     .flex()
                     .flex_col()
                     .child(self.toolbar.clone())
-                    .child(
-                        div().px_4().py_2().child(
-                            div()
-                                .id("open-settings")
-                                .cursor_pointer()
-                                .text_color(rgb(theme.accent))
-                                .child("设置 · 音乐库")
-                                .on_click(move |_, _, cx| {
-                                    settings_state
-                                        .update(cx, |state, cx| state.show_settings(true, cx))
-                                }),
-                        ),
-                    )
                     .child(scan_banner::scan_banner(&self.state, cx))
                     .child(super::collection_view::summary(state, theme))
                     .child(super::tags_view::organization_toolbar(
@@ -212,6 +167,22 @@ impl Render for VoonWindow {
             .child(self.cover_picker.clone())
             .child(self.organization.clone())
             .child(self.structure.clone())
+            .into_any_element();
+        div()
+            .size_full()
+            .track_focus(&self.focus)
+            .flex()
+            .flex_col()
+            .when(cfg!(target_os = "linux"), |root| {
+                root.child(self.menu_bar.clone())
+            })
+            .child(div().relative().flex_1().min_h_0().child(browser))
             .into_any_element()
+    }
+}
+
+impl Focusable for VoonWindow {
+    fn focus_handle(&self, _: &App) -> FocusHandle {
+        self.focus.clone()
     }
 }

@@ -30,7 +30,7 @@ pub fn index_unavailable(
         }))
         .children(
             snapshot
-                .error()
+                .settings_error()
                 .map(|error| div().text_color(rgb(theme.accent)).child(error.to_owned())),
         )
         .child(
@@ -44,6 +44,11 @@ pub fn index_unavailable(
 }
 
 fn choose_new_index(state: Entity<AppState>, cx: &mut App) {
+    if let Some(reason) = state.read(cx).new_index_blocked_reason() {
+        state.update(cx, |state, cx| state.report_settings_error(reason, cx));
+        return;
+    }
+    state.update(cx, |state, cx| state.clear_settings_error(cx));
     let snapshot = state.read(cx);
     let directory = snapshot
         .index_path()
@@ -55,19 +60,19 @@ fn choose_new_index(state: Entity<AppState>, cx: &mut App) {
         Ok(Ok(Some(path))) => {
             let _ = state.update(cx, |state, cx| {
                 if let Err(error) = state.create_new_index(path, cx) {
-                    state.report_error(error, cx);
+                    state.report_settings_error(format!("无法新建本地索引：{error}"), cx);
                 }
             });
         }
         Ok(Ok(None)) => {}
         Ok(Err(error)) => {
             let _ = state.update(cx, |state, cx| {
-                state.report_error(format!("无法选择索引位置：{error}"), cx)
+                state.report_settings_error(format!("无法选择索引位置：{error}"), cx)
             });
         }
         Err(error) => {
             let _ = state.update(cx, |state, cx| {
-                state.report_error(format!("索引位置选择器已关闭：{error}"), cx)
+                state.report_settings_error(format!("索引位置选择器已关闭：{error}"), cx)
             });
         }
     })
@@ -75,6 +80,11 @@ fn choose_new_index(state: Entity<AppState>, cx: &mut App) {
 }
 
 pub fn choose_root(state: Entity<AppState>, cx: &mut App) {
+    if let Some(reason) = state.read(cx).root_changes_blocked_reason() {
+        state.update(cx, |state, cx| state.report_settings_error(reason, cx));
+        return;
+    }
+    state.update(cx, |state, cx| state.clear_settings_error(cx));
     let choice = cx.prompt_for_paths(PathPromptOptions {
         files: false,
         directories: true,
@@ -86,7 +96,7 @@ pub fn choose_root(state: Entity<AppState>, cx: &mut App) {
             if let Some(path) = paths.into_iter().next() {
                 let _ = state.update(cx, |state, cx| {
                     if let Err(error) = state.add_root(path, cx) {
-                        state.report_error(error, cx);
+                        state.report_settings_error(format!("无法添加音乐目录：{error}"), cx);
                     }
                 });
             }
@@ -94,12 +104,12 @@ pub fn choose_root(state: Entity<AppState>, cx: &mut App) {
         Ok(Ok(None)) => {}
         Ok(Err(error)) => {
             let _ = state.update(cx, |state, cx| {
-                state.report_error(format!("无法选择文件夹：{error}"), cx)
+                state.report_settings_error(format!("无法选择文件夹：{error}"), cx)
             });
         }
         Err(error) => {
             let _ = state.update(cx, |state, cx| {
-                state.report_error(format!("文件夹选择器已关闭：{error}"), cx)
+                state.report_settings_error(format!("文件夹选择器已关闭：{error}"), cx)
             });
         }
     })
@@ -107,6 +117,7 @@ pub fn choose_root(state: Entity<AppState>, cx: &mut App) {
 }
 
 fn choose_ignored_folder(state: Entity<AppState>, root: PathBuf, cx: &mut App) {
+    state.update(cx, |state, cx| state.clear_settings_error(cx));
     let choice = cx.prompt_for_paths(PathPromptOptions {
         files: false,
         directories: true,
@@ -118,7 +129,7 @@ fn choose_ignored_folder(state: Entity<AppState>, root: PathBuf, cx: &mut App) {
             if let Some(path) = paths.into_iter().next() {
                 let _ = state.update(cx, |state, cx| {
                     if let Err(error) = state.add_ignored_path(&root, path, cx) {
-                        state.report_error(error, cx);
+                        state.report_settings_error(format!("无法保存忽略规则：{error}"), cx);
                     }
                 });
             }
@@ -126,12 +137,12 @@ fn choose_ignored_folder(state: Entity<AppState>, root: PathBuf, cx: &mut App) {
         Ok(Ok(None)) => {}
         Ok(Err(error)) => {
             let _ = state.update(cx, |state, cx| {
-                state.report_error(format!("无法选择文件夹：{error}"), cx)
+                state.report_settings_error(format!("无法选择文件夹：{error}"), cx)
             });
         }
         Err(error) => {
             let _ = state.update(cx, |state, cx| {
-                state.report_error(format!("文件夹选择器已关闭：{error}"), cx)
+                state.report_settings_error(format!("文件夹选择器已关闭：{error}"), cx)
             });
         }
     })
@@ -177,10 +188,14 @@ fn ignored_subfolders(
                                 .child("移除规则")
                                 .on_click(move |_, _, cx| {
                                     remove_state.update(cx, |state, cx| {
+                                        state.clear_settings_error(cx);
                                         if let Err(error) =
                                             state.remove_ignored_path(&remove_root, &path, cx)
                                         {
-                                            state.report_error(error, cx);
+                                            state.report_settings_error(
+                                                format!("无法移除忽略规则：{error}"),
+                                                cx,
+                                            );
                                         }
                                     })
                                 }),
@@ -251,9 +266,10 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
     let snapshot = state.read(cx);
     let roots = snapshot.roots().to_vec();
     let removal = snapshot.pending_root_removal().map(|p| p.to_path_buf());
-    let close_state = state.clone();
     let add_state = state.clone();
     let create_state = state.clone();
+    let root_blocked = snapshot.root_changes_blocked_reason();
+    let new_index_blocked = snapshot.new_index_blocked_reason();
     let mut panel = div()
         .id("library-settings")
         .flex()
@@ -273,9 +289,7 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
                         .id("close-settings")
                         .cursor_pointer()
                         .child("完成")
-                        .on_click(move |_, _, cx| {
-                            close_state.update(cx, |state, cx| state.show_settings(false, cx))
-                        }),
+                        .on_click(move |_, window, _| window.remove_window()),
                 ),
         )
         .child(
@@ -292,31 +306,75 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
         .child(
             div()
                 .id("create-separate-index")
-                .cursor_pointer()
-                .text_color(rgb(0xb4532a))
+                .text_color(rgb(if new_index_blocked.is_some() {
+                    0xa0a0a6
+                } else {
+                    0xb4532a
+                }))
                 .child("保留当前资料库，新建索引…")
-                .on_click(move |_, _, cx| choose_new_index(create_state.clone(), cx)),
+                .when(new_index_blocked.is_none(), |button| {
+                    button
+                        .cursor_pointer()
+                        .on_click(move |_, _, cx| choose_new_index(create_state.clone(), cx))
+                }),
+        )
+        .children(
+            new_index_blocked.map(|reason| div().text_sm().text_color(rgb(0x6e6e73)).child(reason)),
+        )
+        .children(
+            root_blocked.map(|reason| div().text_sm().text_color(rgb(0x6e6e73)).child(reason)),
+        )
+        .children(snapshot.settings_error().map(|error| {
+            div()
+                .text_sm()
+                .text_color(rgb(0xc0352b))
+                .child(error.to_owned())
+        }))
+        .children(
+            snapshot
+                .index_notice()
+                .map(|notice| div().text_sm().child(notice.to_owned())),
         );
+    if roots.is_empty() {
+        let suggested = snapshot.suggested_root().to_path_buf();
+        let suggested_state = state.clone();
+        panel = panel.child(
+            div()
+                .flex()
+                .flex_col()
+                .gap_2()
+                .child(
+                    div()
+                        .text_sm()
+                        .child(format!("建议音乐目录：{}", suggested.display())),
+                )
+                .child(
+                    div()
+                        .id("use-suggested-root")
+                        .text_color(rgb(if root_blocked.is_some() {
+                            0xa0a0a6
+                        } else {
+                            0xb4532a
+                        }))
+                        .child("使用建议目录并开始扫描")
+                        .when(root_blocked.is_none(), |button| {
+                            button.cursor_pointer().on_click(move |_, _, cx| {
+                                suggested_state.update(cx, |state, cx| {
+                                    state.clear_settings_error(cx);
+                                    if let Err(error) = state.add_root(suggested.clone(), cx) {
+                                        state.report_settings_error(
+                                            format!("无法添加音乐目录：{error}"),
+                                            cx,
+                                        );
+                                    }
+                                });
+                            })
+                        }),
+                ),
+        );
+    }
     for (position, root) in roots.into_iter().enumerate() {
         let remove_state = state.clone();
-        let scan_state = state.clone();
-        let root_path = root.path.clone();
-        let offline = snapshot.offline_roots().contains(&root.path);
-        let rescan = div()
-            .id(("rescan-root", position))
-            .text_color(rgb(if offline { 0xa0a0a6 } else { 0xb4532a }))
-            .child("增量重新扫描");
-        let rescan = if offline {
-            rescan
-        } else {
-            rescan.cursor_pointer().on_click(move |_, _, cx| {
-                scan_state.update(cx, |state, cx| {
-                    if let Err(error) = state.start_scan(root_path.clone(), cx) {
-                        state.report_error(error, cx);
-                    }
-                })
-            })
-        };
         panel = panel.child(
             div()
                 .flex()
@@ -329,15 +387,21 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
                 .child(div().text_sm().child(root.path.display().to_string()))
                 .child(ignored_subfolders(state, &root.path, position, cx))
                 .child(
-                    div().flex().gap_4().child(rescan).child(
+                    div().flex().gap_4().child(
                         div()
                             .id(("remove-root", position))
-                            .cursor_pointer()
-                            .text_color(rgb(0xc0352b))
+                            .text_color(rgb(if root_blocked.is_some() {
+                                0xa0a0a6
+                            } else {
+                                0xc0352b
+                            }))
                             .child("移除")
-                            .on_click(move |_, _, cx| {
-                                remove_state.update(cx, |state, cx| {
-                                    state.request_root_removal(Some(root.path.clone()), cx)
+                            .when(root_blocked.is_none(), |button| {
+                                button.cursor_pointer().on_click(move |_, _, cx| {
+                                    remove_state.update(cx, |state, cx| {
+                                        state.clear_settings_error(cx);
+                                        state.request_root_removal(Some(root.path.clone()), cx)
+                                    })
                                 })
                             }),
                     ),
@@ -347,14 +411,21 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
     panel = panel.child(
         div()
             .id("add-library-root")
-            .cursor_pointer()
             .px_4()
             .py_2()
             .rounded_lg()
-            .bg(rgb(0xb4532a))
+            .bg(rgb(if root_blocked.is_some() {
+                0xa0a0a6
+            } else {
+                0xb4532a
+            }))
             .text_color(rgb(0xffffff))
-            .child("添加根目录…")
-            .on_click(move |_, _, cx| choose_root(add_state.clone(), cx)),
+            .child("添加音乐目录…")
+            .when(root_blocked.is_none(), |button| {
+                button
+                    .cursor_pointer()
+                    .on_click(move |_, _, cx| choose_root(add_state.clone(), cx))
+            }),
     );
     if let Some(root) = removal {
         let confirm_state = state.clone();
@@ -364,7 +435,7 @@ pub fn settings(state: &Entity<AppState>, cx: &App) -> impl IntoElement {
             .child(div().text_sm().child(root.display().to_string()))
             .child(div().text_sm().child("专辑将从音乐库隐藏。字段编辑、标签和手动合集成员关系会保留；重新添加相同目录并扫描后恢复。不会删除音乐文件。"))
             .child(div().flex().gap_4()
-                .child(div().id("confirm-remove-root").cursor_pointer().text_color(rgb(0xc0352b)).child("确认移除").on_click(move |_, _, cx| confirm_state.update(cx, |state, cx| { if let Err(error) = state.confirm_root_removal(cx) { state.report_error(error, cx); } })))
+                .child(div().id("confirm-remove-root").text_color(rgb(if root_blocked.is_some() { 0xa0a0a6 } else { 0xc0352b })).child("确认移除").when(root_blocked.is_none(), |button| button.cursor_pointer().on_click(move |_, _, cx| confirm_state.update(cx, |state, cx| { state.clear_settings_error(cx); if let Err(error) = state.confirm_root_removal(cx) { state.report_settings_error(format!("无法移除音乐目录：{error}"), cx); } }))))
                 .child(div().id("cancel-remove-root").cursor_pointer().child("取消").on_click(move |_, _, cx| cancel_state.update(cx, |state, cx| state.request_root_removal(None, cx))))));
     }
     panel.child(built_in_ignore_rules()).child(div().h(px(1.0)))

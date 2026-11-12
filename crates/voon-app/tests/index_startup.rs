@@ -25,6 +25,7 @@ fn an_incompatible_index_stays_visible_with_a_chinese_explanation_and_keeps_its_
         assert!(problem.message.contains("原文件已保留"));
         assert!(problem.message.contains("新建索引重新扫描"));
         assert!(state.roots().is_empty());
+        assert_eq!(state.suggested_root(), library.path());
         assert_eq!(state.scan_state(), &ScanState::Idle);
     });
     state.update(cx, |state, cx| {
@@ -63,7 +64,17 @@ fn a_user_can_keep_an_incompatible_index_create_a_separate_one_and_reopen_after_
         assert!(state.index_open_problem().is_none());
         assert_eq!(state.index_path(), Some(new_path.as_path()));
         assert!(state.index_notice().unwrap().contains("原资料库文件已保留"));
-        state.add_root(root.clone(), cx).unwrap();
+        assert_eq!(state.suggested_root(), root);
+        assert!(state.roots().is_empty());
+        assert_eq!(state.scan_state(), &ScanState::Idle);
+        state
+            .add_root(state.suggested_root().to_path_buf(), cx)
+            .unwrap();
+        assert_eq!(state.roots()[0].path, root);
+        assert!(matches!(
+            state.scan_state(),
+            ScanState::Scanning { root: scanning_root, .. } if scanning_root == &root
+        ));
     });
     let deadline = Instant::now() + Duration::from_secs(3);
     loop {
@@ -81,15 +92,53 @@ fn a_user_can_keep_an_incompatible_index_create_a_separate_one_and_reopen_after_
         assert!(state.error().is_none(), "{:?}", state.error());
     });
 
-    let reopened = AppState::open_index(old_path.clone(), Some(selection), root).unwrap();
+    let reopened = AppState::open_index(old_path.clone(), Some(selection), root.clone()).unwrap();
     assert!(reopened.index_open_problem().is_none());
     assert_eq!(reopened.index_path(), Some(new_path.as_path()));
     assert_eq!(reopened.albums().len(), 1);
+    assert_eq!(reopened.roots()[0].path, root);
     assert_eq!(fs::read(&old_path).unwrap(), b"keep this old index");
     assert_eq!(
         fs::metadata(old_path).unwrap().modified().unwrap(),
         old_modified
     );
+}
+
+#[gpui::test]
+fn failed_recovery_keeps_the_saved_unavailable_index_for_retry(cx: &mut TestAppContext) {
+    let local = tempfile::tempdir().unwrap();
+    let directory = local.path().canonicalize().unwrap();
+    let old_path = directory.join("unavailable.sqlite3");
+    let occupied = directory.join("already-exists.sqlite3");
+    let selection = directory.join("current-index-path");
+    fs::write(&old_path, b"keep the unavailable index").unwrap();
+    fs::write(&occupied, b"keep the chosen file too").unwrap();
+    let saved_selection = old_path.to_str().unwrap();
+    fs::write(&selection, saved_selection).unwrap();
+    let library = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    let state = cx.new(|_| {
+        AppState::open_index(old_path.clone(), Some(selection.clone()), root.clone()).unwrap()
+    });
+    let problem = state.read_with(cx, |state, _| state.index_open_problem().unwrap().clone());
+
+    state.update(cx, |state, cx| {
+        assert!(state.create_new_index(occupied.clone(), cx).is_err());
+    });
+
+    state.read_with(cx, |state, _| {
+        assert_eq!(state.index_open_problem(), Some(&problem));
+        assert!(state.index_path().is_none());
+        assert_eq!(state.suggested_root(), root);
+        assert!(state.roots().is_empty());
+        assert_eq!(state.scan_state(), &ScanState::Idle);
+    });
+    assert_eq!(fs::read_to_string(&selection).unwrap(), saved_selection);
+    assert_eq!(fs::read(&old_path).unwrap(), b"keep the unavailable index");
+    assert_eq!(fs::read(&occupied).unwrap(), b"keep the chosen file too");
+    let reopened = AppState::open_index(old_path.clone(), Some(selection), root).unwrap();
+    assert_eq!(reopened.index_open_problem(), Some(&problem));
+    assert_eq!(reopened.index_open_problem().unwrap().path, Some(old_path));
 }
 
 #[gpui::test]

@@ -79,11 +79,118 @@ fn rescanning_reads_only_audio_files_whose_stamp_changed(cx: &mut TestAppContext
     assert_eq!(finish_scan(&state, cx), 1);
 }
 
+#[gpui::test]
+fn the_shared_rescan_command_reads_only_the_chosen_root(cx: &mut TestAppContext) {
+    let library = tempfile::tempdir().unwrap();
+    let local = tempfile::tempdir().unwrap();
+    let root = library.path().join("甲");
+    let other_root = library.path().join("乙");
+    for path in [&root, &other_root] {
+        std::fs::create_dir_all(path.join("Album")).unwrap();
+        write_wave(&path.join("Album/01.wav"), &[0, 0]);
+    }
+    let root = root.canonicalize().unwrap();
+    let other_root = other_root.canonicalize().unwrap();
+    let database = local.path().join("library.sqlite3");
+    let state = cx.new(|_| AppState::new(Index::open(&database).unwrap(), root.clone()).unwrap());
+    for path in [&root, &other_root] {
+        state.update(cx, |state, cx| state.add_root(path.clone(), cx).unwrap());
+        assert_eq!(finish_scan(&state, cx), 1);
+        write_wave(&path.join("Album/01.wav"), &[1, 2, 3, 4]);
+    }
+
+    cx.update(|cx| voon_app::application::rescan_root(state.clone(), root.clone(), cx));
+    assert_eq!(finish_scan(&state, cx), 1);
+    state.read_with(cx, |state, _| {
+        assert!(
+            matches!(state.scan_state(), ScanState::Done { root: scanned, .. } if scanned == &root)
+        );
+    });
+
+    // Its changed file still needs reading: the first command did not scan it.
+    cx.update(|cx| voon_app::application::rescan_root(state.clone(), other_root.clone(), cx));
+    assert_eq!(finish_scan(&state, cx), 1);
+    cx.update(|cx| voon_app::application::rescan_root(state.clone(), root.clone(), cx));
+    assert_eq!(finish_scan(&state, cx), 0);
+}
+
 struct ControlledScanner(Mutex<Option<Receiver<ScanUpdate>>>);
 impl Scanner for ControlledScanner {
     fn start(&self, _: PathBuf, _: Arc<AtomicBool>) -> Receiver<ScanUpdate> {
         self.0.lock().unwrap().take().unwrap()
     }
+}
+
+#[gpui::test]
+fn a_queued_rescan_for_a_removed_root_cannot_scan_a_different_root(cx: &mut TestAppContext) {
+    let music = tempfile::tempdir().unwrap();
+    let root = music.path().join("甲");
+    let other_root = music.path().join("乙");
+    for path in [&root, &other_root] {
+        std::fs::create_dir(path).unwrap();
+    }
+    let root = root.canonicalize().unwrap();
+    let other_root = other_root.canonicalize().unwrap();
+    let index = Index::open_in_memory().unwrap();
+    index.add_root(&root).unwrap();
+    index.add_root(&other_root).unwrap();
+    let state = cx.new(|_| AppState::new(index, root.clone()).unwrap());
+
+    cx.update(|cx| {
+        voon_app::application::rescan_root(state.clone(), root.clone(), cx);
+        state.update(cx, |state, cx| {
+            state.request_root_removal(Some(root.clone()), cx);
+            state.confirm_root_removal(cx).unwrap();
+        });
+    });
+
+    state.read_with(cx, |state, _| {
+        assert_eq!(state.roots().len(), 1);
+        assert_eq!(state.roots()[0].path, other_root);
+        assert_eq!(state.scan_state(), &ScanState::Idle);
+        assert!(state.error().unwrap().contains("根目录不存在"));
+    });
+}
+
+#[gpui::test]
+fn a_queued_rescan_cannot_replace_a_cancelled_worker_before_it_finishes(cx: &mut TestAppContext) {
+    let music = tempfile::tempdir().unwrap();
+    let root = music.path().join("甲");
+    let other_root = music.path().join("乙");
+    for path in [&root, &other_root] {
+        std::fs::create_dir(path).unwrap();
+    }
+    let root = root.canonicalize().unwrap();
+    let other_root = other_root.canonicalize().unwrap();
+    let index = Index::open_in_memory().unwrap();
+    index.add_root(&root).unwrap();
+    index.add_root(&other_root).unwrap();
+    let (sender, receiver) = mpsc::channel();
+    let state = cx.new(|_| {
+        AppState::new(index, root.clone())
+            .unwrap()
+            .with_scanner(Box::new(ControlledScanner(Mutex::new(Some(receiver)))))
+    });
+
+    cx.update(|cx| {
+        voon_app::application::rescan_root(state.clone(), other_root, cx);
+        state.update(cx, |state, cx| {
+            state.start_scan(root.clone(), cx).unwrap();
+            state.cancel_scan(cx);
+        });
+    });
+
+    state.read_with(cx, |state, _| {
+        assert!(matches!(state.scan_state(), ScanState::Scanning { root: scanning, .. } if scanning == &root));
+        assert!(state.error().unwrap().contains("扫描"));
+    });
+    sender
+        .send(ScanUpdate::Finished(voon_core::ScanResult::default(), 0))
+        .unwrap();
+    state.update(cx, |state, cx| {
+        state.poll_scan(cx);
+        assert!(state.root_changes_blocked_reason().is_none());
+    });
 }
 
 #[gpui::test]

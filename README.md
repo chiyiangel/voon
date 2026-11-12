@@ -107,9 +107,10 @@ See [ADR 0003](docs/adr/0003-macos-and-linux.md).
 
 ### Default library root
 
-The first-launch screen suggests the first command-line argument, else
-`VOON_ROOT`, else the following path. Choose **开始扫描** to add it, or choose
-another folder. Previously added libraries reload from the local index:
+On first launch, choose **添加音乐目录…** to open Settings. Settings suggests
+the first command-line argument, else `VOON_ROOT`, else the following path.
+Use the suggested folder or choose another folder; adding it immediately
+saves it and starts scanning. Previously added libraries reload from the local index:
 
 - macOS: `/Volumes/NAS1/Music`
 - Linux: `~/Music`

@@ -2,10 +2,11 @@
 //! roots and starting background scans are separate application operations.
 
 use gpui::{
-    App, Application, Bounds, TitlebarOptions, WindowBounds, WindowOptions, point, prelude::*, px,
-    size,
+    App, Application, Bounds, Focusable, TitlebarOptions, WindowBounds, WindowOptions, point,
+    prelude::*, px, size,
 };
 use voon_app::{
+    application::{self, APP_ID},
     platform::{index_location, library_root},
     ui::{Assets, VoonWindow},
     view_model::AppState,
@@ -31,21 +32,28 @@ fn main() {
         .run(move |cx: &mut App| {
             let bounds = Bounds::centered(None, size(px(1280.), px(800.)), cx);
             let state = cx.new(|_| state);
-            cx.open_window(
-                WindowOptions {
-                    window_bounds: Some(WindowBounds::Windowed(bounds)),
-                    window_min_size: Some(size(px(1100.), px(650.))),
-                    titlebar: Some(TitlebarOptions {
-                        title: Some("音乐库".into()),
-                        appears_transparent: true,
-                        traffic_light_position: Some(point(px(18.), px(20.))),
-                    }),
-                    ..Default::default()
-                },
-                move |_, cx| cx.new(|cx| VoonWindow::new(state, cx)),
-            )
-            .expect("打开音乐库窗口");
-            cx.on_window_closed(|cx| cx.quit()).detach();
+            let window_state = state.clone();
+            let main_window = cx
+                .open_window(
+                    WindowOptions {
+                        window_bounds: Some(WindowBounds::Windowed(bounds)),
+                        window_min_size: Some(size(px(1100.), px(650.))),
+                        titlebar: Some(TitlebarOptions {
+                            title: Some("音乐库".into()),
+                            appears_transparent: true,
+                            traffic_light_position: Some(point(px(18.), px(20.))),
+                        }),
+                        app_id: Some(APP_ID.into()),
+                        ..Default::default()
+                    },
+                    move |window, cx| {
+                        let view = cx.new(|cx| VoonWindow::new(window_state, cx));
+                        view.focus_handle(cx).focus(window);
+                        view
+                    },
+                )
+                .expect("打开音乐库窗口");
+            application::install(state, main_window.into(), cx);
             cx.activate(true);
         });
 }

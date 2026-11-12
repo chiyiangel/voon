@@ -1,21 +1,21 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 0003 菜单栏与独立设置窗口工单
 
-由[0003 规格](../../0003-settings-menubar.md)拆分。用户已于 2026-11-12 确认以下六张工单的颗粒度与直接阻塞关系，现按[项目本地 tracker 约定](../../README.md)一票一文件发布。父规格保持不变，尚未开始实现。
+由[0003 规格](../../0003-settings-menubar.md)拆分。用户已于 2026-11-12 确认以下六张工单并要求按依赖实施；01、02 的代码与定向回归先完成，再由三个 subagent 并行实现 03、04、05。各票的代码完成与窗口验收分别记录，完整结果见[验收记录](../acceptance.md)。
 
 ## 工单与依赖
 
 | # | 标题 | Blocked by | Status |
 | --- | --- | --- | --- |
-| [01](01-settings-operation-guards.md) | 设置操作保护与就地反馈 | — | ready-for-agent |
-| [02](02-separate-settings-window.md) | 独立设置窗口与共享命令 | [01](01-settings-operation-guards.md) | ready-for-agent |
-| [03](03-macos-native-menus.md) | macOS 原生菜单与目录重扫 | [02](02-separate-settings-window.md) | ready-for-agent |
-| [04](04-linux-visible-menus.md) | Linux 可见菜单与目录重扫 | [02](02-separate-settings-window.md) | ready-for-agent |
-| [05](05-startup-and-index-recovery.md) | 首次使用与索引故障引导 | [02](02-separate-settings-window.md) | ready-for-agent |
-| [06](06-end-to-end-acceptance.md) | 完整用户旅程与平台联验 | [03](03-macos-native-menus.md)、[04](04-linux-visible-menus.md)、[05](05-startup-and-index-recovery.md) | ready-for-agent |
+| [01](01-settings-operation-guards.md) | 设置操作保护与就地反馈 | — | in-progress |
+| [02](02-separate-settings-window.md) | 独立设置窗口与共享命令 | [01](01-settings-operation-guards.md) | in-progress |
+| [03](03-macos-native-menus.md) | macOS 原生菜单与目录重扫 | [02](02-separate-settings-window.md) | in-progress |
+| [04](04-linux-visible-menus.md) | Linux 可见菜单与目录重扫 | [02](02-separate-settings-window.md) | in-progress |
+| [05](05-startup-and-index-recovery.md) | 首次使用与索引故障引导 | [02](02-separate-settings-window.md) | in-progress |
+| [06](06-end-to-end-acceptance.md) | 完整用户旅程与平台联验 | [03](03-macos-native-menus.md)、[04](04-linux-visible-menus.md)、[05](05-startup-and-index-recovery.md) | in-progress |
 
 ## 实施前沿
 
@@ -41,6 +41,6 @@ status: ready-for-agent
 
 ## 发布记录
 
-本次仅发布工单及依赖索引，六张工单均为 ready-for-agent；未修改应用代码、未运行实际窗口或 NAS 验收。
+六张工单最初以 ready-for-agent 发布；现已按用户指令进入实施。01–05 功能代码已接通，204 项工作区测试及严格 Clippy 通过，macOS 已核对部分原生窗口链路；尚未取得的窗口与 Linux 证据明确保留待办。
 
 拆分审核历史见[已确认拆分记录](../../../research/2026-11-12-settings-ticket-breakdown.md)。实施状态以本索引及各票为准。

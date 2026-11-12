@@ -124,7 +124,7 @@ pub struct AppState {
     pending_empty_scan: Option<scanning::PendingEmptyScan>,
     availability: offline::RootAvailability,
     error: Option<String>,
-    settings_open: bool,
+    settings_error: Option<String>,
     pending_root_removal: Option<PathBuf>,
     attention: Vec<voon_core::db::AttentionItem>,
     attention_path: Option<PathBuf>,
@@ -172,7 +172,7 @@ impl AppState {
             pending_empty_scan: None,
             availability: offline::RootAvailability::default(),
             error: None,
-            settings_open: false,
+            settings_error: None,
             pending_root_removal: None,
         };
         state.refresh_browse();

@@ -247,15 +247,8 @@ impl AppState {
     }
 
     pub fn add_root(&mut self, root: PathBuf, cx: &mut Context<Self>) -> Result<()> {
-        if self.index_open_problem().is_some() {
-            return Err("请先新建可用的本地索引，再添加音乐库重新扫描".into());
-        }
-        if self
-            .scan_session
-            .as_ref()
-            .is_some_and(|session| !session.cancel.load(Ordering::Relaxed))
-        {
-            return Err("请等待当前扫描结束，或先取消扫描".into());
+        if let Some(reason) = self.root_changes_blocked_reason() {
+            return Err(reason.into());
         }
         let root = std::fs::canonicalize(root)?;
         if !root.is_dir() {
@@ -551,11 +544,15 @@ impl AppState {
         self.error = Some(error.to_string());
         cx.notify();
     }
-    pub fn settings_open(&self) -> bool {
-        self.settings_open
+    pub fn settings_error(&self) -> Option<&str> {
+        self.settings_error.as_deref()
     }
-    pub fn show_settings(&mut self, open: bool, cx: &mut Context<Self>) {
-        self.settings_open = open;
+    pub fn report_settings_error(&mut self, error: impl std::fmt::Display, cx: &mut Context<Self>) {
+        self.settings_error = Some(error.to_string());
+        cx.notify();
+    }
+    pub fn clear_settings_error(&mut self, cx: &mut Context<Self>) {
+        self.settings_error = None;
         cx.notify();
     }
     pub fn pending_root_removal(&self) -> Option<&Path> {
@@ -566,6 +563,9 @@ impl AppState {
         cx.notify();
     }
     pub fn confirm_root_removal(&mut self, cx: &mut Context<Self>) -> Result<()> {
+        if let Some(reason) = self.root_changes_blocked_reason() {
+            return Err(reason.into());
+        }
         if let Some(root) = self.pending_root_removal.take() {
             if self
                 .pending_empty_scan
@@ -575,18 +575,20 @@ impl AppState {
                 self.pending_empty_scan = None;
                 self.scan_state = ScanState::Idle;
             }
-            if self
-                .scan_session
-                .as_ref()
-                .is_some_and(|scan| scan.root == root)
-            {
-                self.scan_session = None;
-                self.scan_state = ScanState::Idle;
-            }
             self.index.remove_root(&root)?;
             self.forget_root_availability(&root);
             self.reload_library(cx)?;
         }
         Ok(())
+    }
+
+    pub fn root_changes_blocked_reason(&self) -> Option<&'static str> {
+        if self.index_open_problem().is_some() {
+            Some("请先新建可用的本地索引，再修改音乐目录")
+        } else if self.scan_session.is_some() {
+            Some("请等待当前扫描结束，再增删音乐目录")
+        } else {
+            None
+        }
     }
 }

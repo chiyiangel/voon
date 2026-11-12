@@ -225,7 +225,6 @@ impl AppState {
         self.error = None;
         self.reload_library(cx)?;
         self.navigate(Navigation::AllAlbums, cx);
-        self.settings_open = false;
         self.select_album(
             results
                 .into_iter()

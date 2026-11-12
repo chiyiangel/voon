@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 02: 独立设置窗口与共享命令
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** [01 设置操作保护与就地反馈](01-settings-operation-guards.md)
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 在本切片开始时局部整理应用命令与窗口协调；现有设置入口、关闭操作和设置内按目录重扫复用共享操作，为两平台菜单保留同一执行及可用性边界，不增加新的测试接缝。
 - [ ] 设置为非模态单实例；从现有入口或快捷键打开，重复打开聚焦已有窗口；关闭后可重新创建。主窗口仍可操作。

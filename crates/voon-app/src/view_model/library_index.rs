@@ -88,8 +88,8 @@ impl AppState {
     /// Switch only after a separate new Index is created successfully. The
     /// old file stays in place and no current scan can publish into the new one.
     pub fn create_new_index(&mut self, path: PathBuf, cx: &mut Context<Self>) -> Result<()> {
-        if self.scan_session.is_some() {
-            return Err("请先等待当前扫描结束，再新建索引".into());
+        if let Some(reason) = self.new_index_blocked_reason() {
+            return Err(reason.into());
         }
         let within_suggested_root = path.starts_with(&self.suggested_root);
         let path = normalized_path(&path)?;
@@ -123,6 +123,18 @@ impl AppState {
         *self = replacement;
         cx.notify();
         Ok(())
+    }
+
+    pub fn new_index_blocked_reason(&self) -> Option<&'static str> {
+        if self.scan_session.is_some() {
+            Some("请先等待当前扫描结束，再新建索引")
+        } else if self.album_edit_draft().is_some() {
+            Some("请先保存或取消专辑编辑，再新建索引")
+        } else if self.cover_picker().is_some() {
+            Some("请先保存或取消封面选择，再新建索引")
+        } else {
+            None
+        }
     }
 }
 

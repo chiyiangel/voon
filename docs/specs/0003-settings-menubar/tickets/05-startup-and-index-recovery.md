@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 05: 首次使用与索引故障引导
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** [02 独立设置窗口与共享命令](02-separate-settings-window.md)
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 空资料库页面提供“添加音乐目录…”引导，通过共享命令打开或聚焦同一个设置窗口，由设置完成添加；不保留并行的中央配置流程。
 - [ ] 继续使用既有启动参数或环境设置提供的建议目录；添加后即时保存并开始扫描，主窗口从空库进入相同资料库的浏览与进度状态。
@@ -22,3 +22,12 @@ status: ready-for-agent
 **User Stories:** 28–30、32、38、39。
 
 规格：[0003 菜单栏与独立设置窗口](../../0003-settings-menubar.md)。通用约束与实施前沿见[工单索引](README.md)。
+
+## 实施记录（2026-11-12）
+
+- 代码已将无 Library root 的主内容引导提取到 `ui/startup.rs`。按钮“添加音乐目录…”调用与菜单、快捷键共用的 `application::open_settings`；主内容不再直接选择目录或添加建议目录。
+- 建议目录继续由既有启动参数、`VOON_ROOT` 和平台默认路径解析，状态层保存该建议；设置内显示建议路径并负责添加，添加仍调用已受保护的 `AppState::add_root`，立即持久保存并启动扫描。README 已同步入口说明。
+- 索引故障页继续使用原有中文原因和已知路径，以及与设置共用的 `choose_new_index`。该入口复用 `create_new_index` 的扫描、Album/Cover 草稿、索引版本和位置保护；此票未增加恢复专用写入路径。
+- 在已确认的 AppState 公共接缝扩展语义保留回归：启动和恢复保留建议目录；恢复成功后添加该建议目录并进入扫描；已有文件导致新建失败时保留原故障、已保存索引选择及原文件，重新打开仍得到原故障。所有数据均来自临时目录和隔离索引，未访问真实 NAS 或正常用户索引。
+- `cargo test -p voon-app --test index_startup --test app_state`：8 项通过；`cargo check -p voon-app` 通过。新增测试针对保留的状态层语义，不为界面入口增加内部函数、SQL 或截图测试。
+- **实际窗口仍待验收。** 尚未以此票证据确认首次使用入口的单实例/聚焦、设置已打开时的添加与恢复、取消选择器及故障后就地反馈。macOS、Linux X11、Wayland 分别记录，不从状态层通过推断平台行为；本票保持 `in-progress`，上述验收条目保持未勾选。

@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 06: 完整用户旅程与平台联验
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** [03 macOS 原生菜单与目录重扫](03-macos-native-menus.md)；[04 Linux 可见菜单与目录重扫](04-linux-visible-menus.md)；[05 首次使用与索引故障引导](05-startup-and-index-recovery.md)
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 以前五票各自完成的验证为基线，联合检查菜单、快捷键和引导只打开一个设置窗口；正常浏览不再有常驻设置行、中央配置面板或设置内重扫入口。
 - [ ] 选中 Album、滚动、搜索和筛选并打开专辑或封面草稿，再打开、关闭和重新打开设置，浏览位置与草稿保持；尝试新建索引被阻止，明确保存或取消后才可继续。

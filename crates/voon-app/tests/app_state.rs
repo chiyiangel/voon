@@ -16,6 +16,10 @@ fn first_launch_is_an_empty_library_without_starting_a_scan(cx: &mut TestAppCont
     state.read_with(cx, |state, _| {
         assert!(state.roots().is_empty());
         assert!(state.albums().is_empty());
+        assert_eq!(
+            state.suggested_root(),
+            std::path::Path::new("/建议的音乐目录")
+        );
         assert_eq!(state.navigation(), Navigation::AllAlbums);
         assert_eq!(state.scan_state(), &ScanState::Idle);
         assert!(state.selected_album().is_none());

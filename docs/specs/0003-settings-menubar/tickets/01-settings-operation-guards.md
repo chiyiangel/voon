@@ -1,5 +1,5 @@
 ---
-status: ready-for-agent
+status: in-progress
 ---
 
 # 01: 设置操作保护与就地反馈
@@ -8,7 +8,7 @@ status: ready-for-agent
 
 **Blocked by:** None (can start immediately).
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] 普通扫描、失败重试和强读标签进行中，目录增删与新建索引均被应用操作拒绝，界面禁用并显示中文原因；查看设置和保存忽略规则仍可用。
 - [ ] 限制在提交前复查；先打开的目录选择器或移除确认不能绕过后来开始的扫描。
