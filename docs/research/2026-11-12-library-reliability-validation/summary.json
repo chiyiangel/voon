@@ -28,8 +28,8 @@
   },
   "logs": {
     "workspace-tests.log": {
-      "sha256": "cbd6b6fa1c23c8f6089e40ec6d4d9a1aa3b27cb8333e3f9a5434ebb5ce63b61a",
-      "bytes": 24229
+      "sha256": "6c681e16f67e45d9e4efbf52bbecc472a32882db15e4569fb81ade5871590ace",
+      "bytes": 24228
     },
     "clippy.log": {
       "sha256": "28b727c0c6c1a2bbf9ec58bdee4c21109c261dc985b07bf641439a8628d28386",
@@ -83,5 +83,6 @@
   "current_environment": {
     "nas_root_available": false,
     "original_temporary_acceptance_directory_available": false
-  }
+  },
+  "log_normalization": "Only terminal blank lines at EOF were normalized for repository whitespace checks; test output content is unchanged."
 }
