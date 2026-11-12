@@ -9,6 +9,12 @@ includes library scanning, browsing, metadata editing and local organization.
 See the [ticket index](docs/specs/0001-phase-1/tickets/README.md) for verification
 evidence and the remaining platform acceptance checks.
 
+The library reliability milestone is implemented, including failure recovery,
+metadata source comparisons and persistent cover thumbnails. See the
+[0002 ticket index](docs/specs/0002-library-reliability-and-protection/tickets/README.md)
+and its [acceptance record](docs/specs/0002-library-reliability-and-protection/acceptance.md)
+for completed checks and pending external verification.
+
 ## Phase 1 scope
 
 - **Read-only toward the library.** Voon indexes, browses and edits metadata

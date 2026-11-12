@@ -12,19 +12,19 @@ status: in-progress
 | --- | --- | --- | --- |
 | [01](01-preserve-complete-albums.md) | 局部扫描失败保留完整 Album | — | done |
 | [02](02-recover-tag-reads.md) | 标签失败分类与增量恢复 | — | done |
-| [03](03-cue-duration-and-performers.md) | CUE 时长与曲目演奏者完整呈现 | — | in-progress |
+| [03](03-cue-duration-and-performers.md) | CUE 时长与曲目演奏者完整呈现 | — | done |
 | [04](04-persistent-cover-thumbnails.md) | 当前 Cover 持久化与离线重开 | — | done |
 | [05](05-new-index-and-version-guard.md) | 新建索引与资料库版本保护 | — | in-progress |
 | [06](06-scan-interruption-and-organization.md) | 取消离线与结构整理保持一致 | [01](01-preserve-complete-albums.md) | done |
-| [07](07-retry-and-force-reread.md) | 重试失败项与强制重读标签 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | in-progress |
+| [07](07-retry-and-force-reread.md) | 重试失败项与强制重读标签 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | done |
 | [08](08-title-and-year-candidates.md) | 标题与年份的完整来源比较 | [01](01-preserve-complete-albums.md)、[02](02-recover-tag-reads.md) | done |
 | [09](09-all-field-candidates.md) | 全部现有字段的候选与编辑一致性 | [08](08-title-and-year-candidates.md) | done |
 | [10](10-library-cover-prefetch.md) | 全库封面预缓存与失败重试 | [04](04-persistent-cover-thumbnails.md) | done |
-| [11](11-end-to-end-acceptance.md) | 故障交错与真实样本联验 | [03](03-cue-duration-and-performers.md)、[05](05-new-index-and-version-guard.md)、[06](06-scan-interruption-and-organization.md)、[07](07-retry-and-force-reread.md)、[09](09-all-field-candidates.md)、[10](10-library-cover-prefetch.md) | ready-for-agent |
+| [11](11-end-to-end-acceptance.md) | 故障交错与真实样本联验 | [03](03-cue-duration-and-performers.md)、[05](05-new-index-and-version-guard.md)、[06](06-scan-interruption-and-organization.md)、[07](07-retry-and-force-reread.md)、[09](09-all-field-candidates.md)、[10](10-library-cover-prefetch.md) | in-progress |
 
-## 当前可开工前沿
+## 依赖执行记录
 
-**01、02、03、04、05** 没有前置工单，可以独立开始。其余票仅在 Blocked by 的票全部完成后进入前沿；ready-for-agent 表示工单已准备好，不免除依赖条件。
+初始前沿 **01、02、03、04、05** 没有前置工单，可以独立开始。其余票仅在 Blocked by 的票全部完成后进入前沿；ready-for-agent 表示工单已准备好，不免除依赖条件。
 
 - 01 完成后，06 可开始。
 - 01、02 完成后，07、08 可开始。
@@ -48,3 +48,5 @@ status: in-progress
 11 使用约 20 张用户认可的真实专辑；真实样本和读取位置在执行前确定。真实 NAS、实际窗口及相应平台环境可用后完成对应验收，不虚报结果，也不据此阻塞无外部依赖的功能票开工。
 
 2026-11-11 已按用户指令进入实施；功能票验收与最终外部验收分别记录，未验证的环境不计为通过。
+
+实施代码已提交；目前 05 与 11 保留外部验收待办，其余功能票已完成约定实现与验证。实际证据、环境中断及未确认项见[联验记录](../acceptance.md)，不以临时目录中的未确认结果计为通过。

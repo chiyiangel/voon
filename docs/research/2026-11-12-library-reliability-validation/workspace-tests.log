@@ -1,0 +1,473 @@
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.89s
+warning: the following packages contain code that will be rejected by a future version of Rust: block v0.1.6, proc-macro-error2 v2.0.1
+note: to see what the problems were, use the option `--future-incompat-report`, or run `cargo report future-incompatibilities --id 1`
+     Running unittests src/lib.rs (target/debug/deps/voon_app-d698f9a55676e904)
+
+running 1 test
+test platform::tests::argument_beats_env_beats_default ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running unittests src/main.rs (target/debug/deps/voon-3fc6230135e0a6bf)
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+     Running tests/album_detail.rs (target/debug/deps/album_detail-7f9c8deb62c60757)
+
+running 6 tests
+test selecting_an_album_loads_its_detail_and_changing_selection_replaces_it ... ok
+test a_new_album_can_be_inspected_before_the_first_scan_finishes ... ok
+test merged_album_images_respect_ignore_rules_in_every_source_root ... ok
+test reopened_cue_detail_keeps_each_performer_and_describes_opening_the_whole_image ... ok
+test a_structural_album_reveals_a_real_source_directory ... ok
+test attachment_images_can_be_viewed_and_the_album_can_be_revealed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/album_edits.rs (target/debug/deps/album_edits-5c2602f41c666db5)
+
+running 2 tests
+test invalid_years_stay_in_the_draft_and_switching_albums_discards_unsaved_edits ... ok
+test saving_a_draft_updates_detail_sources_and_restoring_uses_the_automatic_value ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/album_grid.rs (target/debug/deps/album_grid-34acb48a62cbab4a)
+
+running 3 tests
+test directory_cover_is_loaded_in_background_and_remains_cached ... ok
+test library_refresh_retries_failed_covers_and_decodes_updated_images ... ok
+test grid_exposes_every_indexed_album_in_responsive_rows_and_selects_by_path ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running tests/album_structure.rs (target/debug/deps/album_structure-ff1d2fc290d65fc5)
+
+running 2 tests
+test rescanning_a_structured_root_does_not_flash_physical_album_previews ... ok
+test structure_confirmation_updates_selection_and_undo_restores_the_library ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/app_state.rs (target/debug/deps/app_state-00be4bda2322eef7)
+
+running 4 tests
+test browse_controls_are_owned_by_state_across_navigation ... ok
+test every_navigation_destination_can_be_selected ... ok
+test first_launch_is_an_empty_library_without_starting_a_scan ... ok
+test an_injected_index_supplies_albums_and_selection_stays_in_the_state ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/attention.rs (target/debug/deps/attention-f587c5f660548fd4)
+
+running 4 tests
+test tag_failure_is_visible_after_reopen_and_links_to_the_preserved_album ... ok
+test each_split_detail_has_stale_status_even_when_attention_navigation_targets_another_album ... ok
+test confirming_a_rename_removes_the_candidate_and_refreshes_the_new_album ... ok
+test attention_items_link_to_album_details_or_expose_the_ungrouped_file ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/browse.rs (target/debug/deps/browse-1297e9fad32adfe7)
+
+running 4 tests
+test all_eight_list_columns_sort_using_album_values ... ok
+test clicking_a_column_sorts_albums_and_clicking_it_again_reverses_the_order ... ok
+test switching_view_preserves_search_filters_and_the_selected_album ... ok
+test search_matches_title_artist_composer_and_catalog_in_chinese_japanese_and_english ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/collection_browse.rs (target/debug/deps/collection_browse-437768fec8c25d5c)
+
+running 1 test
+test expanding_and_selecting_a_collection_scopes_the_shared_browse_result ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/composer_browse.rs (target/debug/deps/composer_browse-0c750429e8d64265)
+
+running 1 test
+test composer_names_are_sorted_and_selection_filters_the_shared_album_result ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/cover_picker.rs (target/debug/deps/cover_picker-9f684483812960aa)
+
+running 1 test
+test cover_drafts_apply_cancel_and_restore_without_changing_automatic_cover ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/cover_prefetch.rs (target/debug/deps/cover_prefetch-40abae2d3f8fe78e)
+
+running 4 tests
+test failed_cover_prefetch_can_be_retried_without_rescanning_the_library ... ok
+test accepted_disk_scans_prefetch_covers_and_removed_roots_retire_old_work ... ok
+test loading_the_library_prefetches_unbrowsed_automatic_and_selected_covers ... ok
+test whole_library_prefetch_is_bounded_and_memory_eviction_does_not_reset_asset_progress ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.59s
+
+     Running tests/facet_filters.rs (target/debug/deps/facet_filters-9af719bb1e9eb94a)
+
+running 1 test
+test facets_intersect_across_dimensions_and_counts_exclude_their_own_dimension ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/ignore_rules.rs (target/debug/deps/ignore_rules-1b8266257eedadeb)
+
+running 3 tests
+test a_saved_rule_can_be_removed_while_its_library_is_offline ... ok
+test folder_selection_rejects_the_root_files_and_folders_outside_the_library ... ok
+test ignoring_a_subfolder_updates_albums_after_rescan_and_can_be_undone ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.07s
+
+     Running tests/index_startup.rs (target/debug/deps/index_startup-86cb40399f584866)
+
+running 3 tests
+test an_incompatible_index_stays_visible_with_a_chinese_explanation_and_keeps_its_files ... ok
+test creating_a_new_index_cannot_write_inside_the_suggested_music_library ... ok
+test a_user_can_keep_an_incompatible_index_create_a_separate_one_and_reopen_after_scanning ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/library_scan.rs (target/debug/deps/library_scan-59d0e414a9499716)
+
+running 7 tests
+test a_library_cannot_include_voons_writable_index ... ok
+test cancelling_keeps_the_albums_already_found ... ok
+test cancellation_ignores_late_album_events_and_only_persists_completed_discoveries ... ok
+test an_interrupted_worker_preserves_completed_discoveries_on_reopen ... ok
+test adding_a_root_streams_albums_and_persists_the_completed_scan ... ok
+test a_cancelled_task_can_switch_roots_and_old_events_cannot_replace_new_edits ... ok
+test complete_loose_previews_survive_cancellation_switch_and_worker_disconnect ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.10s
+
+     Running tests/metadata_candidates.rs (target/debug/deps/metadata_candidates-f4d516d7451d7237)
+
+running 2 tests
+test details_compare_sources_and_blank_editor_restores_automatic_without_losing_evidence ... ok
+test all_fields_share_effective_values_with_details_and_composer_browsing ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/organization.rs (target/debug/deps/organization-d851d2cfa26783be)
+
+running 5 tests
+test shift_selection_uses_current_browse_order_and_modifier_click_can_remove_one_album ... ok
+test renaming_and_deleting_the_current_tag_refreshes_navigation_and_albums ... ok
+test manual_collection_reordering_is_reflected_by_the_shared_browse_query ... ok
+test multi_selected_albums_can_be_tagged_and_browsed_by_that_tag ... ok
+test navigation_clears_primary_multi_selection_and_detail_together ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/persistent_covers.rs (target/debug/deps/persistent_covers-2b839fec385e75ec)
+
+running 8 tests
+test thumbnail_write_failure_never_claims_ready_or_discards_the_album ... ok
+test superseded_background_work_cannot_publish_over_a_new_cover_choice ... ok
+test requested_cover_reopens_from_a_local_thumbnail_after_source_goes_offline ... ok
+test confirmed_source_changes_replace_the_thumbnail_and_missing_sources_keep_it ... ok
+test automatic_and_manually_selected_embedded_pictures_reopen_offline ... ok
+test a_corrupt_local_thumbnail_does_not_clear_selection_or_other_albums ... ok
+test switching_to_a_new_index_retires_old_cover_results_before_new_work_is_published ... ok
+test decoded_image_eviction_keeps_requested_thumbnails_available_after_reopen ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.05s
+
+     Running tests/player.rs (target/debug/deps/player-26675dde32fc2366)
+
+running 1 test
+test album_and_virtual_track_open_the_whole_disc_image ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/rescan.rs (target/debug/deps/rescan-f23572e10c423c66)
+
+running 9 tests
+test failed_album_observation_is_saved_as_attention_instead_of_an_empty_root_confirmation ... ok
+test losing_a_root_during_rescan_keeps_the_last_index ... ok
+test retrying_a_first_incomplete_location_publishes_the_recovered_album ... ok
+test cancelling_a_rescan_keeps_unseen_albums_and_does_not_propose_renames ... ok
+test an_incomplete_album_remains_browsable_with_a_persisted_stale_explanation ... ok
+test an_empty_root_after_a_cancelled_first_scan_still_requires_confirmation ... ok
+test an_empty_mountpoint_keeps_the_previous_index_until_the_user_confirms ... ok
+test rescanning_reads_only_audio_files_whose_stamp_changed ... ok
+test an_unmounted_root_keeps_local_albums_and_recovers_without_rescanning ... ok
+
+test result: ok. 9 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 5.12s
+
+     Running tests/tag_refresh.rs (target/debug/deps/tag_refresh-09e7fd03acd9c198)
+
+running 7 tests
+test cancelling_a_multi_root_force_stops_the_round_and_keeps_the_accepted_album ... ok
+test retrying_a_deleted_loose_member_keeps_the_remaining_group_and_unrelated_failure ... ok
+test forcing_a_loose_album_with_no_tags_removes_the_old_group_and_shows_attention ... ok
+test retrying_one_tag_failure_reads_only_that_source_and_clears_only_its_issue ... ok
+test retrying_a_recovered_directory_confirms_its_removed_album_without_touching_other_failures ... ok
+test forcing_one_album_reads_only_its_audio_and_preserves_unrelated_success_and_failure ... ok
+test forcing_a_merged_album_rereads_all_its_sources_across_library_roots ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.16s
+
+     Running unittests src/lib.rs (target/debug/deps/voon_core-ff2ba93ef7eac9a8)
+
+running 20 tests
+test facets::tests::languages ... ok
+test cue::tests::unquoted_file_and_multi_file ... ok
+test cue::tests::utf8_bom ... ok
+test cue::tests::parses_album_and_tracks ... ok
+test cue::tests::utf16le_bom ... ok
+test cue::tests::shift_jis_sheet ... ok
+test cue::tests::gbk_sheet ... ok
+test tags::tests::dsf_header ... ok
+test tags::tests::dsf_id3_tag ... ok
+test tags::tests::cover_bytes_are_read_from_a_directory_image_or_embedded_front_picture ... ok
+test tags::tests::dsf_without_tag ... ok
+test tags::tests::garbage_is_an_error_not_a_panic ... ok
+test folder_name::tests::plain_name ... ok
+test folder_name::tests::spec_outside_brackets ... ok
+test folder_name::tests::catalog_digits_are_not_a_spec ... ok
+test folder_name::tests::leading_year_and_rate_first ... ok
+test folder_name::tests::dsd_and_glued_spec ... ok
+test folder_name::tests::catalog_with_letters_and_cd_44 ... ok
+test folder_name::tests::full_name ... ok
+test folder_name::tests::unknown_groups_stay_in_title ... ok
+
+test result: ok. 20 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/album_detail.rs (target/debug/deps/album_detail-42f5ac987d49bef9)
+
+running 4 tests
+test cue_tracks_inherit_the_sheet_performer_and_keep_explicit_track_overrides ... ok
+test querying_an_album_keeps_shift_jis_cue_titles ... ok
+test querying_an_album_preserves_discs_virtual_tracks_properties_and_field_sources ... ok
+test cue_boundaries_and_performers_survive_reopening_when_dff_tags_are_unsupported ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/album_edits.rs (target/debug/deps/album_edits-2cebea2ba813f99f)
+
+running 2 tests
+test an_invalid_field_or_year_rejects_the_entire_edit_form ... ok
+test album_edits_save_together_survive_rescans_and_restore_automatic_values ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/album_structure.rs (target/debug/deps/album_structure-19c79dcc95f69f06)
+
+running 12 tests
+test removing_the_first_file_of_a_disc_keeps_the_same_split_result_and_user_data ... ok
+test selected_virtual_tracks_split_without_changing_the_image_or_cue_and_conflicting_edits_block_undo ... ok
+test rescanning_with_ignored_inputs_does_not_revive_their_audio_from_structure_snapshots ... ok
+test confirming_a_physical_rename_updates_the_merge_sources_and_cover_paths ... ok
+test distinct_cue_discs_in_one_directory_can_be_merged_and_reordered ... ok
+test a_cross_root_merge_is_retained_when_a_root_is_removed_and_readded ... ok
+test splitting_by_disc_survives_rescan_and_undo_restores_the_original_album ... ok
+test splitting_a_merge_keeps_each_real_source_and_later_tags_survive_both_undos ... ok
+test unresolved_rename_candidates_must_be_decided_before_merging_or_splitting ... ok
+test split_virtual_track_groups_can_be_merged_and_split_by_disc_without_duplicating_tracks ... ok
+test merged_albums_survive_restart_and_rescan_and_can_be_undone_without_touching_music ... ok
+test undo_after_rescan_restores_original_organization_and_keeps_later_result_edits ... ok
+
+test result: ok. 12 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.12s
+
+     Running tests/album_summary.rs (target/debug/deps/album_summary-25eb304135b13240)
+
+running 1 test
+test index_returns_album_card_summary_with_user_title_and_disc_and_track_counts ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+
+     Running tests/attention.rs (target/debug/deps/attention-8c5f7b6b3c648d61)
+
+running 6 tests
+test an_expired_rename_cannot_move_user_data_to_an_unrelated_album ... ok
+test indexed_attention_explains_cue_failures_and_links_the_related_album ... ok
+test completing_a_folder_only_title_resolves_attention_until_the_override_is_cleared ... ok
+test a_physical_issue_links_to_the_local_merge_result ... ok
+test every_attention_kind_is_queryable_after_real_scans ... ok
+test ancestor_failures_mark_every_affected_split_album_and_its_candidates_unconfirmed ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/browse.rs (target/debug/deps/browse-53e84dfea8d463a4)
+
+running 2 tests
+test browse_rows_expose_all_formats_and_album_resolution_from_tracks ... ok
+test album_addition_order_survives_rescans_and_reopening_the_index ... ok
+
+test result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/collections.rs (target/debug/deps/collections-bc9b2b928477b5f3)
+
+running 1 test
+test collection_tree_keeps_nested_parents_and_includes_descendant_albums ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/composers.rs (target/debug/deps/composers-175bcc06e23afc98)
+
+running 1 test
+test classical_metadata_uses_tag_or_cue_composers_and_distinct_track_performers ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/covers.rs (target/debug/deps/covers-faac76efaa10c15d)
+
+running 4 tests
+test image_discovery_honors_ignores_and_cancellation_and_skips_symbolic_links ... ok
+test confirming_a_rename_moves_the_user_cover_and_rebases_its_file_path ... ok
+test structurally_merged_albums_keep_directory_and_booklet_cover_candidates ... ok
+test every_directory_and_embedded_candidate_is_selectable_and_survives_rescans ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.03s
+
+     Running tests/facet_filters.rs (target/debug/deps/facet_filters-c99fcf0d7a279753)
+
+running 1 test
+test nas_shaped_album_facets_use_directory_specs_and_only_tag_genres ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/ignore_rules.rs (target/debug/deps/ignore_rules-22867360d17ecc28)
+
+running 5 tests
+test options_cannot_escape_the_root_and_subtree_names_have_component_boundaries ... ok
+test ignore_rules_cannot_exclude_the_root_or_escape_to_another_root ... ok
+test ignored_disc_and_attachment_subtrees_supply_neither_tracks_nor_covers ... ok
+test ignored_subfolders_are_saved_per_library_root_and_survive_reopening ... ok
+test ignoring_a_collection_removes_its_albums_on_rescan_and_removing_the_rule_restores_them ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/index_protection.rs (target/debug/deps/index_protection-3901ee974433f5db)
+
+running 6 tests
+test empty_and_foreign_files_are_kept_without_initialization ... ok
+test an_unrecognized_database_is_not_initialized_as_a_voon_index ... ok
+test opening_a_newer_index_preserves_the_database_and_existing_sidecars ... ok
+test a_newer_version_committed_in_wal_is_refused_without_touching_live_sidecars ... ok
+test opening_a_symlink_checks_the_targets_pending_version_without_touching_its_files ... ok
+test creating_a_new_index_never_replaces_an_existing_file_and_can_resume_scanning ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/library_roots.rs (target/debug/deps/library_roots-e0143975b65c2c2a)
+
+running 4 tests
+test same_size_audio_changed_within_one_second_is_read_again ... ok
+test partial_rescan_updates_found_albums_without_losing_unvisited_albums_or_proposing_renames ... ok
+test removing_one_root_hides_its_library_but_retains_user_work_when_readded ... ok
+test cancelled_scan_keeps_reported_albums_on_reopen_and_never_writes_the_library ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.04s
+
+     Running tests/metadata_candidates.rs (target/debug/deps/metadata_candidates-b055f2169288ab71)
+
+running 7 tests
+test alternate_cue_sources_remain_comparable_without_changing_the_first_sheet_winner ... ok
+test retained_candidates_expose_a_directory_failure_without_inventing_a_new_read_time ... ok
+test a_failed_source_keeps_its_candidate_and_original_time_without_marking_other_files_failed ... ok
+test alternate_cue_performers_keep_their_own_boundaries_and_follow_logical_splits ... ok
+test every_existing_field_keeps_minority_sources_without_inventing_genre_or_orchestra ... ok
+test merge_split_and_undo_keep_only_the_sources_of_each_result ... ok
+test title_and_year_keep_every_source_before_majority_and_survive_offline_reopen ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/migrations.rs (target/debug/deps/migrations-058bbe75cb99aac3)
+
+running 1 test
+test upgrading_a_populated_v2_index_preserves_offline_data_and_unrelated_roots ... ok
+
+test result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.05s
+
+     Running tests/organization.rs (target/debug/deps/organization-d19456448b41e8dc)
+
+running 4 tests
+test conflicting_renames_and_invalid_orders_leave_local_organization_intact ... ok
+test tags_can_be_applied_in_bulk_renamed_and_deleted_without_duplicate_membership ... ok
+test local_organization_survives_rescans_without_creating_or_changing_library_files ... ok
+test manual_collections_preserve_order_and_membership_across_rescan_and_reopening ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/rename_and_loose.rs (target/debug/deps/rename_and_loose-31d616fed95cc048)
+
+running 10 tests
+test an_unknown_root_audio_entry_never_reports_a_partial_loose_album_as_complete ... ok
+test nested_album_is_kept_and_flagged ... ok
+test confirming_a_child_retry_does_not_remove_unobserved_loose_audio ... ok
+test loose_root_audio_is_grouped_by_album_tags ... ok
+test scoped_structural_commits_preserve_outside_state_and_the_complete_rename_baseline ... ok
+test changed_content_or_duplicates_are_not_paired ... ok
+test candidate_expires_when_the_destination_content_changes_before_confirmation ... ok
+test dismissed_and_stale_candidates_go_away ... ok
+test rename_is_proposed_and_confirm_migrates_user_data ... ok
+test an_unrelated_failed_child_does_not_block_loose_audio_updates_or_new_groups ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+     Running tests/scan.rs (target/debug/deps/scan-2a1581783c0d228b)
+
+running 8 tests
+test index_on_disk_reopens ... ok
+test classifies_albums_discs_and_collections ... ok
+test cue_pairs_split_files_and_broken_sheets ... ok
+test whole_disc_image_becomes_virtual_tracks ... ok
+test junk_and_non_music_are_ignored ... ok
+test facets_from_structure ... ok
+test progress_and_cancel ... ok
+test index_round_trip_user_edits_and_incremental_tags ... ok
+
+test result: ok. 8 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.06s
+
+     Running tests/scan_integrity.rs (target/debug/deps/scan_integrity-0e2b44c848f4e2f1)
+
+running 10 tests
+test cancellation_before_a_child_is_observed_does_not_publish_its_parent_album ... ok
+test partial_retries_keep_each_current_cue_failure_without_accumulating_old_attempts ... ok
+test an_empty_cue_does_not_replace_previously_accepted_virtual_tracks ... ok
+test returning_some_albums_without_root_coverage_cannot_confirm_missing_content ... ok
+test a_cancelled_retry_clears_only_the_failures_of_albums_it_completely_reobserved ... ok
+test an_unavailable_album_link_does_not_block_an_independent_album_update ... ok
+test an_independently_removed_rename_destination_expires_even_when_another_album_fails ... ok
+test first_discovery_with_an_unreadable_cue_is_attention_without_a_partial_album ... ok
+test committing_a_cancelled_scan_preserves_unvisited_albums_and_the_complete_rename_baseline ... ok
+test unreadable_disc_preserves_the_complete_album_while_independent_albums_converge ... ok
+
+test result: ok. 10 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.09s
+
+     Running tests/tag_recovery.rs (target/debug/deps/tag_recovery-ece4f30dda7027a2)
+
+running 6 tests
+test unsupported_is_visible_and_unchanged_ordinary_scans_do_not_repeat_it ... ok
+test a_repaired_dsf_with_the_same_stamp_is_retried_after_a_header_parse_failure ... ok
+test forcing_selected_audio_rereads_it_without_changing_other_successful_observations ... ok
+test failed_observation_keeps_previous_success_and_read_time_until_recovered ... ok
+test a_late_older_read_cannot_replace_a_newer_successful_source_observation ... ok
+test ordinary_rescan_retries_same_stamp_failure_then_reuses_success_after_reopen ... ok
+
+test result: ok. 6 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.08s
+
+   Doc-tests voon_app
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+   Doc-tests voon_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -31,4 +31,6 @@ status: in-progress
 - 定向验证：core `index_protection` 6 项、既有 `migrations` 1 项；AppState `index_startup` 3 项及 `app_state` 4 项、`library_scan` 3 项。工作区离线编译、严格 Clippy、格式与差异检查通过。
 - 尚未启动实际 Voon 窗口、调用真实原生文件选择器或访问真实用户库/NAS；窗口和 Linux/Wayland 验收留给总任务，状态保留 `in-progress`。
 
+总任务补充（2026-11-12）：真实窗口验收包已准备；打开较新版本阻断窗口的工具调用挂起并被用户中断，没有取得可见结果。保留未选中的窗口验收项，详见[联验记录](../acceptance.md)。core 和 AppState 自动验证已通过，功能实现没有因此回退或改写用户原库。
+
 规格：[0002 资料库扫描可靠性与离线浏览](../../0002-library-reliability-and-protection.md)。通用约束与实施前沿见[工单索引](README.md)。

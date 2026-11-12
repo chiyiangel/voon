@@ -1,5 +1,5 @@
 ---
-status: in-progress
+status: done
 ---
 
 # 07: 重试失败项与强制重读标签
@@ -8,7 +8,7 @@ status: in-progress
 
 **Blocked by:** [01 局部扫描失败保留完整 Album](01-preserve-complete-albums.md)；[02 标签失败分类与增量恢复](02-recover-tag-reads.md)
 
-**Status:** in-progress
+**Status:** done
 
 - [x] 目录和标签失败记录提供匹配的重试入口，相关 Library root、Album 与阶段明确。
 - [x] 失败项重试不把整个资料库无差别重新读取，成功后对应状态解除。
@@ -31,6 +31,6 @@ status: in-progress
 - 追加 `tag_observation.read_started_at` 迁移，实际读取开始时分配顺序，条件写入拒绝旧任务迟到结果；来源 `observed_at` 仍为真实读取时间，未被缓存命中伪造。旧读取被拒绝后返回已保存的新观察。
 - GPUI 使用有效本地 PCM WAV 验证强读 1 文件、同 Album 单失败重试 1 文件且保留另一失败、跨 root 合并来源 2 文件、取消整轮、散音频失效分组及人工资料重现。原增量计数测试的损坏 FLAC 占位改为有效 WAV，继续断言首次 2、未变 0、单文件变化 1，避免把正确的解析失败重试误判为缓存回归。
 - 定向验证：core 标签恢复、散音频与改名、版本保护及历史迁移；AppState 标签刷新 5 项、重扫 9 项、待处理 3 项、详情 6 项。工作区 `check`、库/二进制及本票定向测试的严格 Clippy、格式与差异检查通过。此隔离基线的全目标 Clippy 被另票封面测试中两处旧 `Album` 构造缺少 `candidates` 阻断，已通知总任务在集成主分支处理，未混入本票。
-- 未启动真实 Voon 窗口、未访问真实 NAS、未修改用户数据库；实际可见行为和平台联验由总任务继续，因此状态仍为 `in-progress`。
+- 上述隔离实施阶段未访问真实 NAS。总任务后续在授权样本中验证选中多碟专辑实际重读 2 个来源，其余 153 条观察不变；全目标 Clippy 的集成 fixture 问题已修复。有限范围删除确认、取消保留 Loose 成果及剩余成员保护也已由 `e361cae`、`f2ac75b` 补齐回归并复核。本票标为 `done`，不替代[联验记录](../acceptance.md)中的实际窗口冷启动、源库后验或平台待办。
 
 规格：[0002 资料库扫描可靠性与离线浏览](../../0002-library-reliability-and-protection.md)。通用约束与实施前沿见[工单索引](README.md)。

@@ -1,0 +1,87 @@
+{
+  "record_date": "2026-11-12",
+  "code_commit": "f2ac75b2ce33da29fd0ad9bac92d3b75e203522c",
+  "platform": {
+    "macos": "27.2",
+    "architecture": "arm64",
+    "cargo": "cargo 1.99.1 (5f94df478 2026-08-27) (Homebrew)",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13) (Homebrew)"
+  },
+  "automatic": {
+    "workspace_tests": {
+      "suites": 46,
+      "passed": 194,
+      "failed": 0,
+      "ignored": 0
+    },
+    "clippy": "passed",
+    "fmt": "passed",
+    "diff_check": "passed",
+    "macos_debug_build": "passed",
+    "commands": [
+      "cargo test --workspace --locked --offline",
+      "cargo clippy --workspace --all-targets --locked --offline -- -D warnings",
+      "cargo fmt --all -- --check",
+      "git diff --check",
+      "cargo build -p voon-app --bin voon --locked --offline"
+    ]
+  },
+  "logs": {
+    "workspace-tests.log": {
+      "sha256": "cbd6b6fa1c23c8f6089e40ec6d4d9a1aa3b27cb8333e3f9a5434ebb5ce63b61a",
+      "bytes": 24229
+    },
+    "clippy.log": {
+      "sha256": "28b727c0c6c1a2bbf9ec58bdee4c21109c261dc985b07bf641439a8628d28386",
+      "bytes": 341
+    },
+    "build.log": {
+      "sha256": "30419c29bcf6e21f0b62d632614dd07d84455f9b7c4f9932a24e841e12c9ad88",
+      "bytes": 341
+    }
+  },
+  "session_observations_2026_11_11": {
+    "evidence_type": "Observed tool outputs and user confirmations retained in the chat; original temporary artifacts are no longer available",
+    "real_sample": {
+      "authorized_root": "/Volumes/NAS1/Music",
+      "albums": 20,
+      "files": 240,
+      "bytes": 13054104997,
+      "tracks": 246,
+      "first_actual_tag_reads": 155,
+      "second_actual_tag_reads": 0,
+      "second_source_observations_and_tag_candidate_times_unchanged": true,
+      "tag_results": {
+        "Tagged": 134,
+        "NoTags": 7,
+        "Unsupported": 14
+      },
+      "forced_album_audio_reads": 2,
+      "other_unchanged_source_observations": 153,
+      "before_hash_manifest_digest": "b08f292605252071d81dbf4870e8ddba2e1fd74c2515714ee938dbd9e4dd845f",
+      "after_hash_verification": "not confirmed",
+      "full_selection_and_hash_manifest_available": false
+    },
+    "actual_window": {
+      "online_albums": 20,
+      "online_covers_ready": 16,
+      "albums_without_cover": 4,
+      "online_cover_failures": 0,
+      "chinese_attention_reasons_and_paths_observed": true,
+      "user_confirmed_candidate_performer_duration_readability": true,
+      "cold_start_final_ready_state": "not confirmed",
+      "newer_version_block_window": "not confirmed",
+      "native_new_index_file_dialog": "not confirmed"
+    }
+  },
+  "external_pending": [
+    "Actual newer-version block window and native new-index file dialog",
+    "Final offline cover readiness after terminating and reopening the real process",
+    "Fresh before/after full real-library content, size and mtime verification",
+    "Linux X11 and Wayland platform validation"
+  ],
+  "current_environment": {
+    "nas_root_available": false,
+    "original_temporary_acceptance_directory_available": false
+  }
+}

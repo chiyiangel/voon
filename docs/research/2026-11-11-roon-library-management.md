@@ -8,7 +8,9 @@ source_commit: 2f847c3b8208db9bffe8cdab7ed109529e00d6e8
 
 Voon 下一阶段最值得投入的是扫描可信度、整理成果保护、可解释的元数据，以及更有效的检索。Roon 的参考价值集中在分层元数据、版本关联、作品与演奏关系、可保存的组合筛选和数据库备份；这些能力需要结合 Voon 的只读 NAS、CUE 整轨和离线使用目标取舍。
 
-本报告包含已核实的实现事实、三项临时假库复现，以及功能方案。**本轮已整理为 ready-for-agent 规格：从新库重新扫描，聚焦 F1–F5 及通用资料库版本检查；备份恢复延期，旧库迁移不在范围内。** 发行边界记录于 ADR 0005，备份相关 ADR 0006、0007 已标记实施延期。具体实现与验收以 [0002 资料库扫描可靠性与离线浏览](/Users/liujun/Private/Code/github/voon/docs/specs/0002-library-reliability-and-protection.md) 为准，研究报告中的后续方向不自动成为本轮开发要求。
+本报告包含已核实的实现事实、三项临时假库复现，以及功能方案。**本轮已依据规格实施：从新库重新扫描，聚焦 F1–F5 及通用资料库版本检查；备份恢复延期，旧库迁移不在范围内。** 发行边界记录于 ADR 0005，备份相关 ADR 0006、0007 已标记实施延期。具体实现与验收以 [0002 资料库扫描可靠性与离线浏览](/Users/liujun/Private/Code/github/voon/docs/specs/0002-library-reliability-and-protection.md) 为准，研究报告中的后续方向不自动成为本轮开发要求。
+
+2026-11-12 实施更新：功能代码及审查修正已提交到 `main`，完整工作区自动验证通过。已按用户授权只读采样 20 张真实专辑，并完成部分实际窗口核对；版本阻断窗口、离线冷启动最终状态、真实源库全量后验和 Linux/Wayland 尚未全部确认。详见[联验记录](../specs/0002-library-reliability-and-protection/acceptance.md)与[审查记录](2026-11-12-library-reliability-review.md)。下文版本和 123 项测试等数据保留为最初调研基线，不代表本轮最终验收。
 
 ## 分析对象与证据范围
 
