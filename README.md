@@ -115,6 +115,17 @@ saves it and starts scanning. Previously added libraries reload from the local i
 - macOS: `/Volumes/NAS1/Music`
 - Linux: `~/Music`
 
+### Settings and library operations
+
+On macOS, open **Voon → 设置…** in the screen's menu bar (`⌘,`). On Linux,
+use the menu bar at the top of the application window (`Ctrl+,`). Settings
+opens a separate window; closing it keeps the library and scans running.
+
+Use **资料库 → 重新扫描 → music folder** for a per-folder incremental scan.
+Failure retries and selected-album tag rereads remain beside the relevant
+library content. Settings contains library folders, ignore rules and local
+index information; ignore-rule changes take effect on the next scan.
+
 ### Linux build dependencies
 
 A C/C++ toolchain, `pkg-config`, and the development files GPUI links

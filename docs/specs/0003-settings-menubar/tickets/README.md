@@ -10,7 +10,7 @@ status: in-progress
 
 | # | 标题 | Blocked by | Status |
 | --- | --- | --- | --- |
-| [01](01-settings-operation-guards.md) | 设置操作保护与就地反馈 | — | in-progress |
+| [01](01-settings-operation-guards.md) | 设置操作保护与就地反馈 | — | done |
 | [02](02-separate-settings-window.md) | 独立设置窗口与共享命令 | [01](01-settings-operation-guards.md) | in-progress |
 | [03](03-macos-native-menus.md) | macOS 原生菜单与目录重扫 | [02](02-separate-settings-window.md) | in-progress |
 | [04](04-linux-visible-menus.md) | Linux 可见菜单与目录重扫 | [02](02-separate-settings-window.md) | in-progress |

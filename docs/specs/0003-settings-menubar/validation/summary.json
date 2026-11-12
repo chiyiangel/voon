@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-12",
+  "review_base": "155b47a90b69311d3b6871cadeb186a4881ceb6f",
+  "implementation_commit": "3bba6b05a01566f72d856430c85b25b53a8799ec",
+  "workspace_tests": {
+    "passed": 204,
+    "failed": 0
+  },
+  "strict_clippy": "passed",
+  "format_check": "passed",
+  "app_all_targets_check": "passed",
+  "macos_binary_build": "passed",
+  "review": {
+    "standards_findings": 0,
+    "spec_findings": 0
+  },
+  "isolated_music_integrity": {
+    "file_count": 1,
+    "before": {
+      "Album A/01.dff": {
+        "sha256": "f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d",
+        "mtime_ns": 1794458111222153019
+      }
+    },
+    "after": {
+      "Album A/01.dff": {
+        "sha256": "f16d05ec6b29248d2c61adb1e9263f78e4f7bace1b955014a2d17872cfe4064d",
+        "mtime_ns": 1794458111222153019
+      }
+    },
+    "unchanged": true
+  },
+  "macos_observed": [
+    "native settings menu",
+    "single settings window refocused",
+    "settings closed without exiting",
+    "quit shortcut",
+    "temporary directory selected and scanned",
+    "settings error shown inline",
+    "next-scan ignore explanation",
+    "per-directory menu rescan reused cached tags",
+    "old settings row and rescan button removed"
+  ],
+  "not_verified": [
+    "manual browse/draft preservation",
+    "settings close during active scan",
+    "complete native index recovery journey",
+    "menu refresh after native index switch",
+    "Linux X11 build and window",
+    "Linux Wayland build and window"
+  ],
+  "current_ui_blocker": "Mac locked; automatic unlock failed; user input pending"
+}
