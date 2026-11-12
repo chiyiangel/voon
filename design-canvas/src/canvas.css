@@ -1,0 +1,132 @@
+:root {
+  color-scheme: light;
+  --board: #e6e4df;
+  --ink: #2a312d;
+  --dim: #5c6560;
+  --line: #cfcbc3;
+  --paper: #f7f6f2;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--board); color: var(--ink); }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", sans-serif;
+}
+#viewport {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  cursor: default;
+  touch-action: none;
+}
+#viewport.is-pan, #viewport.is-space { cursor: grab; }
+#viewport.is-dragging { cursor: grabbing; }
+#world {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+  padding: 72px 80px 140px;
+  will-change: transform;
+}
+.c-section { margin: 0 0 72px; }
+.c-section h2 {
+  margin: 0 0 18px;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.c-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px 28px;
+  width: 5600px;
+  align-items: flex-start;
+}
+.c-frame { display: flex; flex-direction: column; gap: 8px; }
+.c-cap { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 26px; }
+.c-cap h3 { margin: 0; font-size: 14px; line-height: 20px; font-weight: 600; }
+.c-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.c-actions button, .hud-tools button, #jump {
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  height: 24px;
+  padding: 0 8px;
+  cursor: pointer;
+}
+.c-actions button { width: 24px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.c-actions button.play {
+  width: auto;
+  padding: 0 8px 0 7px;
+  gap: 4px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  font-weight: 600;
+}
+.c-actions button.is-on, .hud-tools button.is-on { background: #2a312d; color: #f7f6f2; border-color: #2a312d; }
+.c-note, .c-assume { margin: 0; max-width: 640px; font-size: 12px; line-height: 18px; color: var(--dim); }
+.c-assume {
+  color: #6d5224;
+  background: #f3eee3;
+  border-radius: 6px;
+  padding: 6px 8px;
+}
+.c-stage {
+  border-radius: 2px;
+  box-shadow: 0 10px 28px rgba(32, 38, 34, 0.12), 0 0 0 1px rgba(32, 38, 34, 0.06);
+}
+#hud {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 12px;
+  background: rgba(247, 246, 242, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(32, 38, 34, 0.08);
+  pointer-events: auto;
+}
+.hud-title { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.hud-title strong { font-size: 13px; line-height: 18px; }
+.hud-title span, #zoom-label, #index-link { font-size: 12px; line-height: 16px; color: var(--dim); }
+.hud-tools { display: flex; align-items: center; gap: 6px; flex: none; }
+.hud-gap { width: 8px; }
+.hud-jump { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--dim); }
+#jump { border-radius: 8px; max-width: 240px; height: 26px; }
+#index-link { margin-left: 4px; }
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%);
+  z-index: 30;
+  max-width: min(720px, calc(100vw - 32px));
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #202622;
+  color: #f7f6f2;
+  font-size: 12px;
+  line-height: 18px;
+  font-family: ui-monospace, Menlo, monospace;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+#toast[hidden] { display: none; }
+.product [data-el].is-hot { outline: 1.5px solid #3f6b52; outline-offset: 1px; }
+.product [data-el].is-picked, .desktop [data-el].is-picked, .flow [data-el].is-picked {
+  outline: 2px solid #23483a;
+  outline-offset: 1px;
+}
+.desktop [data-el].is-hot, .flow [data-el].is-hot { outline: 1.5px solid #3f6b52; outline-offset: 1px; }
+@media (max-width: 800px) {
+  #hud { flex-direction: column; align-items: stretch; }
+  .hud-title span { display: none; }
+}
