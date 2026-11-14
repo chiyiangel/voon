@@ -18,6 +18,10 @@ use crate::folder_name::{self, FolderHints};
 use crate::model::*;
 use crate::tags::{TagFailureKind, TagInfo, TagObservation, TagReadResult};
 mod candidates;
+mod retry;
+pub(crate) use retry::refresh_album_tags;
+pub(crate) use retry::regroup_cached_loose;
+pub use retry::{retry_tag_paths, scan_scopes_with_options};
 
 struct ObservedCue {
     path: PathBuf,
@@ -290,6 +294,8 @@ pub fn scan_root_with_options(
     options: &ScanOptions,
 ) -> ScanResult {
     let mut scanner = Scanner {
+        shallow_root: false,
+        cached_stamps: None,
         tags,
         cancel,
         progress,
@@ -440,6 +446,8 @@ fn list(dir: &Path) -> std::io::Result<Listing> {
 // ---------------------------------------------------------------------------
 
 struct Scanner<'a> {
+    shallow_root: bool,
+    cached_stamps: Option<BTreeMap<PathBuf, FileStamp>>,
     tags: &'a mut dyn TagReader,
     cancel: &'a AtomicBool,
     progress: &'a mut dyn FnMut(ScanEvent<'_>),
@@ -455,6 +463,13 @@ enum Found {
 }
 
 impl Scanner<'_> {
+    fn stamp(&self, path: &Path) -> Option<FileStamp> {
+        match &self.cached_stamps {
+            Some(stamps) => stamps.get(path).copied(),
+            None => FileStamp::of(path),
+        }
+    }
+
     fn list(&mut self, dir: &Path) -> std::io::Result<Listing> {
         let mut listing = match list(dir) {
             Ok(listing) => listing,
@@ -488,10 +503,11 @@ impl Scanner<'_> {
             }
         }
         listing.subdirs.retain(|path| {
-            !self
-                .ignored_paths
-                .iter()
-                .any(|ignored| path.starts_with(ignored))
+            !self.shallow_root
+                && !self
+                    .ignored_paths
+                    .iter()
+                    .any(|ignored| path.starts_with(ignored))
         });
         Ok(listing)
     }
@@ -696,7 +712,8 @@ impl Scanner<'_> {
                     continue;
                 }
             };
-            let sheet = cue::parse_bytes(&bytes);
+            let audio_paths: Vec<_> = l.audio.iter().map(|(path, _)| path.clone()).collect();
+            let sheet = cue::parse_bytes_with_audio(&bytes, &audio_paths);
             if sheet.track_count() == 0 {
                 self.out.issues.push(ScanIssue {
                     path: dir.to_path_buf(),
@@ -824,7 +841,7 @@ impl Scanner<'_> {
             for track in &mut disc.tracks {
                 let path = track.source.audio_path().clone();
                 let info = seen.entry(path.clone()).or_insert_with(|| {
-                    let stamp = FileStamp::of(&path)?;
+                    let stamp = self.stamp(&path)?;
                     self.out.stamps.push((path.clone(), stamp));
                     let rel = path.strip_prefix(&base).unwrap_or(&path);
                     sizes.push((rel.to_string_lossy().into_owned(), stamp.size));
@@ -901,7 +918,7 @@ impl Scanner<'_> {
             if self.cancel.load(Ordering::Relaxed) {
                 return;
             }
-            let Some(stamp) = FileStamp::of(path) else {
+            let Some(stamp) = self.stamp(path) else {
                 continue;
             };
             self.out.stamps.push((path.clone(), stamp));
@@ -1003,31 +1020,9 @@ fn resolve_cue_target(
     audio: &[(PathBuf, AudioFormat)],
     single_file: bool,
 ) -> Option<(PathBuf, AudioFormat)> {
-    // Some sheets carry a Windows path; only the last component matters.
-    let wanted = name
-        .rsplit(['\\', '/'])
-        .next()
-        .unwrap_or(name)
-        .to_lowercase();
-    let wanted_stem = Path::new(&wanted)
-        .file_stem()
-        .map(|s| s.to_string_lossy().to_lowercase())
-        .unwrap_or_default();
-    let by_name = audio
-        .iter()
-        .find(|(p, _)| name_of(p).to_lowercase() == wanted);
-    let by_stem = || audio.iter().find(|(p, _)| stem_of(p) == wanted_stem);
-    // `CDImage.ape.cue` or `CDImage.cue` next to `CDImage.ape`.
-    let by_cue_name = || {
-        if !single_file {
-            return None;
-        }
-        let cue_stem = stem_of(cue_path);
-        audio
-            .iter()
-            .find(|(p, _)| stem_of(p) == cue_stem || name_of(p).to_lowercase() == cue_stem)
-    };
-    by_name.or_else(by_stem).or_else(by_cue_name).cloned()
+    let paths: Vec<_> = audio.iter().map(|(path, _)| path.clone()).collect();
+    let resolved = cue::resolve_audio(cue_path, name, &paths, single_file)?;
+    audio.iter().find(|(path, _)| path == &resolved).cloned()
 }
 
 const COVER_STEMS: &[&str] = &["cover", "folder", "front", "albumart", "封面", "正面"];

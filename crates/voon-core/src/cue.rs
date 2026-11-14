@@ -4,11 +4,14 @@
 //! a legacy code page (GBK for Chinese releases, Shift-JIS for Japanese ones).
 //! Detection: BOM first, then strict UTF-8, then `chardetng` restricted to the
 //! CJK legacy encodings we expect. A short or ambiguous file can still be
-//! guessed wrong; the decoded text is what the rest of Voon sees.
+//! guessed wrong. When audio names are available, they can disambiguate a
+//! lossless legacy decoding before track resolution.
 
 use encoding_rs::{Encoding, GBK, SHIFT_JIS, UTF_8, UTF_16BE, UTF_16LE};
 
 use crate::model::CueFrames;
+use std::path::{Path, PathBuf};
+use unicode_normalization::UnicodeNormalization;
 
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct CueSheet {
@@ -105,6 +108,127 @@ pub fn parse_bytes(bytes: &[u8]) -> CueSheet {
     let mut sheet = parse_str(&text);
     sheet.encoding = enc.name();
     sheet
+}
+
+/// Prefer a legacy decoding only when every FILE can be uniquely matched to
+/// known audio names. A CUE's own name is deliberately not encoding evidence.
+/// UTF-8/BOM/UTF-16 inputs retain their explicit decoding.
+pub fn parse_bytes_with_audio(bytes: &[u8], audio: &[PathBuf]) -> CueSheet {
+    let original = parse_bytes(bytes);
+    if matches!(original.encoding, "UTF-8" | "UTF-16LE" | "UTF-16BE")
+        || files_match(&original, audio)
+    {
+        return original;
+    }
+    let mut alternatives = Vec::new();
+    for encoding in [
+        encoding_rs::WINDOWS_1252,
+        GBK,
+        encoding_rs::BIG5,
+        SHIFT_JIS,
+        encoding_rs::EUC_KR,
+        encoding_rs::WINDOWS_1251,
+    ] {
+        let Some(text) = encoding.decode_without_bom_handling_and_without_replacement(bytes) else {
+            continue;
+        };
+        let mut sheet = parse_str(&text);
+        sheet.encoding = encoding.name();
+        if files_match(&sheet, audio) && !alternatives.iter().any(|(prior, _)| prior == &text) {
+            alternatives.push((text, sheet));
+        }
+    }
+    if alternatives.len() == 1 {
+        alternatives.remove(0).1
+    } else {
+        original
+    }
+}
+
+fn files_match(sheet: &CueSheet, audio: &[PathBuf]) -> bool {
+    sheet.track_count() > 0
+        && !sheet.files.is_empty()
+        && sheet
+            .files
+            .iter()
+            .all(|file| resolve_named_audio(&file.name, audio).1.is_some())
+}
+
+fn normalized(name: &str) -> String {
+    name.nfc()
+        .collect::<String>()
+        .to_lowercase()
+        .nfc()
+        .collect()
+}
+
+fn filename(name: &str) -> &str {
+    name.rsplit(['\\', '/']).next().unwrap_or(name)
+}
+
+fn stem(name: &str) -> &str {
+    Path::new(name)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("")
+}
+
+fn unique(matches: Vec<&PathBuf>) -> Option<PathBuf> {
+    (matches.len() == 1).then(|| matches[0].clone())
+}
+
+// The boolean distinguishes absence from ambiguity, which must never fall
+// through to a weaker CUE-name heuristic.
+fn resolve_named_audio(name: &str, audio: &[PathBuf]) -> (bool, Option<PathBuf>) {
+    let wanted = filename(name);
+    for by_stem in [false, true] {
+        let key = normalized(if by_stem { stem(wanted) } else { wanted });
+        if key.is_empty() {
+            continue;
+        }
+        let matches: Vec<_> = audio
+            .iter()
+            .filter(|path| {
+                let name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+                normalized(if by_stem { stem(name) } else { name }) == key
+            })
+            .collect();
+        if !matches.is_empty() {
+            return (true, unique(matches));
+        }
+    }
+    (false, None)
+}
+
+/// Resolve CUE audio by canonical Unicode name, then pre-compression stem,
+/// then (single-image sheets only) the sheet's own name. Never pick arbitrarily
+/// between multiple equivalent files, and always return the actual disk path.
+pub fn resolve_audio(
+    cue_path: &Path,
+    name: &str,
+    audio: &[PathBuf],
+    single_file: bool,
+) -> Option<PathBuf> {
+    let (found, path) = resolve_named_audio(name, audio);
+    if found {
+        return path;
+    }
+    if !single_file {
+        return None;
+    }
+    let cue_stem = normalized(cue_path.file_stem()?.to_str()?);
+    if cue_stem.is_empty() {
+        return None;
+    }
+    unique(
+        audio
+            .iter()
+            .filter(|path| {
+                let name = path.file_name().and_then(|s| s.to_str()).unwrap_or("");
+                normalized(name) == cue_stem || normalized(stem(name)) == cue_stem
+            })
+            .collect(),
+    )
 }
 
 /// Parse already-decoded CUE text. Unknown commands are skipped.

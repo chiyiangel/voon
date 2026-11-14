@@ -152,6 +152,12 @@ impl SettingsWindow {
             .filter(|item| item.can_retry_read())
             .collect();
         let mut issues = card(theme).child(format!("读取问题 · {} 项可重试", failures.len()));
+        if !failures.is_empty() {
+            issues = issues.child(caption(
+                "定点重试失败文件；目录或分轨表问题仅检查对应范围。音乐源文件始终只读。",
+                theme,
+            ));
+        }
         if failures.is_empty() {
             issues = issues.child(caption("当前没有需要重试的读取问题。", theme));
         }

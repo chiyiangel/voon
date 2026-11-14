@@ -98,13 +98,38 @@ impl Scanner for DiskScanner {
                     inner: CachedTags::new(&index, DiskTags).with_forced_paths(forced),
                     request: &request,
                 };
-                let scan = voon_core::scan::scan_root_with_options(
-                    &root,
-                    &mut tags,
-                    &cancel,
-                    &mut progress,
-                    &options,
-                );
+                let scan = if request.operation == ScanOperation::Retry {
+                    if request.confirm_structure {
+                        let known = match index.scan_albums(&root) {
+                            Ok(albums) => albums,
+                            Err(error) => {
+                                let _ = sender.send(ScanUpdate::Failed(format!(
+                                    "无法读取本地专辑结构：{error}"
+                                )));
+                                return;
+                            }
+                        };
+                        voon_core::scan::scan_scopes_with_options(
+                            &root,
+                            &request.paths,
+                            &known,
+                            &mut tags,
+                            &cancel,
+                            &mut progress,
+                            &options,
+                        )
+                    } else {
+                        voon_core::scan::retry_tag_paths(&root, &request.paths, &mut tags, &cancel)
+                    }
+                } else {
+                    voon_core::scan::scan_root_with_options(
+                        &root,
+                        &mut tags,
+                        &cancel,
+                        &mut progress,
+                        &options,
+                    )
+                };
                 (scan, tags.inner.reads)
             } else {
                 let mut tags = CountingTags {
@@ -112,13 +137,29 @@ impl Scanner for DiskScanner {
                     reads: 0,
                     request: request.clone(),
                 };
-                let scan = voon_core::scan::scan_root_with_options(
-                    &root,
-                    &mut tags,
-                    &cancel,
-                    &mut progress,
-                    &options,
-                );
+                let scan = if request.operation == ScanOperation::Retry {
+                    if request.confirm_structure {
+                        voon_core::scan::scan_scopes_with_options(
+                            &root,
+                            &request.paths,
+                            &[],
+                            &mut tags,
+                            &cancel,
+                            &mut progress,
+                            &options,
+                        )
+                    } else {
+                        voon_core::scan::retry_tag_paths(&root, &request.paths, &mut tags, &cancel)
+                    }
+                } else {
+                    voon_core::scan::scan_root_with_options(
+                        &root,
+                        &mut tags,
+                        &cancel,
+                        &mut progress,
+                        &options,
+                    )
+                };
                 (scan, tags.reads)
             };
             request.retain_result(&mut scan);
@@ -415,6 +456,8 @@ impl AppState {
                     let scoped = session.request.scoped() && !session.request.full_root;
                     let incremental = session.request.operation == ScanOperation::Incremental;
                     let confirm_structure = session.request.confirm_structure;
+                    let tag_retry =
+                        session.request.operation == ScanOperation::Retry && !confirm_structure;
                     let scopes = session.request.paths.clone();
                     let mut remaining = session.remaining.clone();
                     let reads = session.reads_before + reads;
@@ -442,7 +485,10 @@ impl AppState {
                             }
                         }
                     }
-                    let stored = if !cancelled && confirm_structure {
+                    let stored = if tag_retry {
+                        scan.cancelled = cancelled;
+                        self.index.store_tag_retry(&root, &scan)
+                    } else if !cancelled && confirm_structure {
                         self.index.store_scoped_scan(&root, &scan, &scopes)
                     } else if cancelled || scoped {
                         self.index.store_partial_scan(&root, &scan)

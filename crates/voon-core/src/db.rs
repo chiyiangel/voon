@@ -14,6 +14,7 @@ use crate::scan::{FileStamp, ScanResult, TagReader};
 mod candidates;
 mod details;
 mod edits;
+mod retry;
 mod structure;
 mod tag_cache;
 pub use edits::EditError;
@@ -666,6 +667,11 @@ impl Index {
                 if scopes
                     .iter()
                     .any(|scope| path.starts_with(scope) || scope.starts_with(path))
+                    && scan
+                        .coverage
+                        .listed_directories
+                        .iter()
+                        .any(|listed| path.starts_with(listed))
                     && !scan
                         .collections
                         .iter()

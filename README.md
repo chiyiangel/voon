@@ -70,6 +70,23 @@ Formats: FLAC, APE, WavPack, WAV, AIFF, DSF, DFF, MP3, M4A/ALAC, AAC, Ogg
 Vorbis, Opus. Tags are read from all of them except DFF, which relies on the
 folder name and CUE sheet in phase 1.
 
+Legacy APEv1/v2 text is recovered only after a UTF-8 decoding failure and only
+when a lossless candidate exactly matches the corresponding field in a CUE
+sheet that references the same audio file. Missing or conflicting evidence
+keeps the original failure visible. Recovery uses a bounded in-memory tag
+replacement; the original APE, CUE and binary tag values are never rewritten.
+Ordinary rescans or failed-read retries can recover previously failed files.
+For APEv1, an invalid `Title` containing an absolute Windows ripping path
+can be omitted from that in-memory view when its image basename agrees with
+the associated single-image CUE. Other invalid fields still require evidence.
+Related CUEs resolve by unique audio name/stem, then a unique matching CUE
+basename, preventing renamed A/B images from being confused.
+
+CUE resolution compares canonical Unicode names (NFC/NFD) while retaining the
+actual filesystem path. For ambiguous legacy text, a different lossless
+decoding is accepted only when it uniquely matches all FILE names to known
+audio. No source files are renamed, normalized on disk, or rewritten.
+
 ## Phase 2
 
 - Online lookup (MusicBrainz, Discogs), including filling in the orchestra.
@@ -87,6 +104,9 @@ folder name and CUE sheet in phase 1.
   unchanged; an album moved to another root, or re-encoded, is not paired.
   Identical copies (same files, same sizes) are never paired automatically.
 - CUE encoding detection can still misjudge very short legacy sheets.
+- APE legacy-text recovery is limited to standard trailing APEv1/v2 tags (v2
+  may have an optional header; either may precede ID3v1), with CUE evidence.
+  Unsupported layouts, oversized metadata and uncertain fields remain errors.
 - `libc` is held below 0.2.190 because GPUI's `xattr 0.2` dependency does
   not build on Linux with newer versions (see `crates/voon-app/Cargo.toml`).
 
@@ -138,6 +158,15 @@ The **Voon → 设置…** menu opens Settings; maintenance links in the browser
 the corresponding page. **窗口 → 关闭窗口** handles window closing. The main browser shows scan/offline status; maintenance controls
 live in Settings. Opening Settings preserves the selected album and edits.
 Settings stays a single separate window; closing it does not stop scanning.
+
+**重试读取** is bounded recovery. An audio-tag failure reads only the selected
+file (and nearby CUE evidence when needed by the APE decoder), then updates
+metadata using indexed structure and cached sibling observations. It does not
+walk the music root, infer removals, or clear unrelated structural failures.
+Directory/CUE structure failures scan only the failed location or its containing
+physical album; a root-level audio failure uses a shallow root listing. Only an
+explicit failure of the root directory itself has root-wide scope. Source audio,
+CUE sheets and artwork are always read-only; only the local index changes.
 
 ### Linux build dependencies
 

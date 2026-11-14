@@ -30,6 +30,65 @@ fn write_wave(path: &Path) {
     fs::write(path, bytes).unwrap();
 }
 
+#[test]
+fn disk_tag_retry_does_not_emit_directory_events_or_inspect_new_cues() {
+    use std::sync::{Arc, atomic::AtomicBool};
+    use voon_app::view_model::scanning::{
+        DiskScanner, ScanOperation, ScanRequest, ScanUpdate, Scanner,
+    };
+    let library = tempfile::tempdir().unwrap();
+    let root = library.path().canonicalize().unwrap();
+    let album = root.join("Album");
+    fs::create_dir(&album).unwrap();
+    let audio = album.join("01.wav");
+    write_wave(&audio);
+    let local = tempfile::tempdir().unwrap();
+    let database = local.path().join("index.sqlite3");
+    let mut index = Index::open(&database).unwrap();
+    let original = scan_root(
+        &root,
+        &mut CachedTags::new(
+            &index,
+            SeedTags {
+                failed: vec![audio.clone()],
+            },
+        ),
+    );
+    index.store_scan(&root, &original).unwrap();
+    // A whole-directory scanner would read this new malformed CUE and reject
+    // the Album. File-level recovery must leave structural discovery alone.
+    fs::write(album.join("unrelated.cue"), b"invalid cue").unwrap();
+    let events = DiskScanner::new(Some(database)).start_request(
+        ScanRequest {
+            root: root.clone(),
+            operation: ScanOperation::Retry,
+            paths: vec![audio.clone()],
+            full_root: false,
+            confirm_structure: false,
+        },
+        Arc::new(AtomicBool::new(false)),
+    );
+    let result = events.recv_timeout(Duration::from_secs(10)).unwrap();
+    let ScanUpdate::Finished(scan, reads) = result else {
+        panic!("file retry must finish without entering directory traversal");
+    };
+    assert_eq!(reads, 1);
+    assert!(scan.coverage.listed_directories.is_empty());
+    assert_eq!(
+        scan.tag_observations.keys().collect::<Vec<_>>(),
+        vec![&audio]
+    );
+    index.store_tag_retry(&root, &scan).unwrap();
+    assert!(index.album(&album).unwrap().is_some());
+    assert!(
+        !index
+            .attention_items()
+            .unwrap()
+            .iter()
+            .any(|issue| issue.kind == "CueWithoutTracks" || issue.kind == "TagIoFailure")
+    );
+}
+
 struct SeedTags {
     failed: Vec<PathBuf>,
 }

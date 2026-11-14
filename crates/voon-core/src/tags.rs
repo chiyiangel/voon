@@ -11,6 +11,8 @@ use std::path::Path;
 
 use lofty::prelude::*;
 
+mod ape_compat;
+
 use crate::model::{AudioFormat, AudioProperties};
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
@@ -307,9 +309,10 @@ fn embedded_pictures(path: &Path) -> Result<Vec<(bool, Vec<u8>)>, TagError> {
             })
             .collect())
     } else {
-        let file = lofty::probe::Probe::open(path)?
-            .options(lofty::config::ParseOptions::new().read_properties(false))
-            .read()?;
+        let file = read_tagged_file(
+            path,
+            lofty::config::ParseOptions::new().read_properties(false),
+        )?;
         Ok(file
             .tags()
             .iter()
@@ -329,8 +332,28 @@ fn clean(s: Option<impl AsRef<str>>) -> Option<String> {
     (!s.is_empty()).then_some(s)
 }
 
+fn read_tagged_file(
+    path: &Path,
+    options: lofty::config::ParseOptions,
+) -> Result<lofty::file::TaggedFile, TagError> {
+    let probe = lofty::probe::Probe::open(path)?.options(options);
+    let is_ape = probe.file_type() == Some(lofty::file::FileType::Ape);
+    match probe.read() {
+        Ok(file) => Ok(file),
+        Err(error) => {
+            if is_ape
+                && ape_compat::is_utf8_error(&error)
+                && let Some(file) = ape_compat::read(path, options)
+            {
+                return Ok(file);
+            }
+            Err(error.into())
+        }
+    }
+}
+
 fn read_lofty(path: &Path) -> Result<TagInfo, TagError> {
-    let file = lofty::read_from_path(path)?;
+    let file = read_tagged_file(path, lofty::config::ParseOptions::new())?;
     let p = file.properties();
     let mut info = TagInfo {
         properties: AudioProperties {
