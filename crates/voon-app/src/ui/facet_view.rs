@@ -1,4 +1,5 @@
 use super::theme::{FACET_PANEL_WIDTH, Theme};
+use crate::motion;
 use crate::view_model::{AppState, facets::FacetDimension};
 use gpui::{AnyElement, Div, Entity, FontWeight, div, prelude::*, px, rgb};
 
@@ -108,28 +109,56 @@ pub fn chips(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> Div {
         .iter()
         .filter(|option| option.selected)
         .collect();
+    let leaving: Vec<_> = state
+        .leaving_facet_chips()
+        .filter(|option| active.iter().all(|live| live.value != option.value))
+        .collect();
     div()
-        .when(!active.is_empty(), |chips| {
+        .when(!active.is_empty() || !leaving.is_empty(), |chips| {
             chips.flex().flex_wrap().gap(px(6.)).px(px(18.)).pt(px(10.))
         })
-        .children(active.into_iter().map(|option| {
-            let value = option.value.clone();
-            let entity = entity.clone();
-            div()
-                .id(gpui::SharedString::from(format!("active:{value:?}")))
-                .flex()
-                .items_center()
-                .gap(px(5.))
-                .px(px(9.))
-                .h(px(22.))
-                .rounded_full()
-                .bg(rgb(theme.well))
-                .text_color(rgb(theme.selection))
-                .text_size(px(12.))
-                .cursor_pointer()
-                .child(format!("{}：{} ×", value.dimension().label(), option.label))
-                .on_click(move |_, _, cx| {
+        .children(
+            active
+                .into_iter()
+                .map(|option| chip(option, entity, theme, true)),
+        )
+        .children(
+            leaving
+                .into_iter()
+                .map(|option| chip(option, entity, theme, false)),
+        )
+}
+
+fn chip(
+    option: &crate::view_model::facets::FacetOption,
+    entity: &Entity<AppState>,
+    theme: Theme,
+    appearing: bool,
+) -> gpui::AnyElement {
+    let value = option.value.clone();
+    let entity = entity.clone();
+    let key = format!("{:?}:{}", value, if appearing { "in" } else { "out" });
+    motion::fade(
+        gpui::SharedString::from(key),
+        appearing,
+        motion::chip(),
+        div()
+            .id(gpui::SharedString::from(format!("active:{value:?}")))
+            .flex()
+            .items_center()
+            .gap(px(5.))
+            .px(px(9.))
+            .h(px(22.))
+            .rounded_full()
+            .bg(rgb(theme.well))
+            .text_color(rgb(theme.selection))
+            .text_size(px(12.))
+            .cursor_pointer()
+            .child(format!("{}：{} ×", value.dimension().label(), option.label))
+            .when(appearing, |chip| {
+                chip.on_click(move |_, _, cx| {
                     entity.update(cx, |state, cx| state.toggle_facet(value.clone(), cx))
                 })
-        }))
+            }),
+    )
 }

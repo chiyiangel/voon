@@ -1,4 +1,4 @@
-use gpui::{Context, Div, div, prelude::*, px, relative, rgb};
+use gpui::{Context, Div, Window, div, prelude::*, px, relative, rgb};
 
 use super::SettingsWindow;
 use crate::ui::{
@@ -7,7 +7,12 @@ use crate::ui::{
 };
 
 impl SettingsWindow {
-    pub(super) fn local_data(&self, theme: Theme, cx: &Context<Self>) -> Div {
+    pub(super) fn local_data(
+        &mut self,
+        theme: Theme,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> Div {
         let state = self.state.read(cx);
         let blocked = state.new_index_blocked_reason();
         let path = state
@@ -77,11 +82,14 @@ impl SettingsWindow {
                             .rounded_full()
                             .bg(rgb(theme.selected))
                             .child(div().h_full().rounded_full().bg(rgb(theme.accent)).w(
-                                relative(if total == 0 {
-                                    0.
-                                } else {
-                                    progress.ready as f32 / total as f32
-                                }),
+                                relative(self.advance_cache_bar(
+                                    if total == 0 {
+                                        0.
+                                    } else {
+                                        progress.ready as f32 / total as f32
+                                    },
+                                    window,
+                                )),
                             )),
                     )
                     .child(caption(

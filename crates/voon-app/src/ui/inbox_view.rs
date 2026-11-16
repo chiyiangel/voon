@@ -1,4 +1,5 @@
 use super::theme::Theme;
+use crate::motion;
 use crate::view_model::AppState;
 use gpui::{App, Entity, IntoElement, div, prelude::*, rgb};
 
@@ -10,10 +11,27 @@ pub fn render(entity: &Entity<AppState>, theme: Theme, cx: &App) -> impl IntoEle
         .overflow_y_scroll()
         .flex()
         .flex_col();
-    if state.attention_items().is_empty() {
+    let leaving: Vec<_> = state
+        .leaving_attention_items()
+        .filter(|item| {
+            !state
+                .attention_items()
+                .iter()
+                .any(|live| live.path == item.path && live.kind == item.kind)
+        })
+        .cloned()
+        .collect();
+    if state.attention_items().is_empty() && leaving.is_empty() {
         return list.items_center().justify_center().child("没有待处理项目");
     }
-    for (position, item) in state.attention_items().iter().enumerate() {
+    for (position, appearing, item) in state
+        .attention_items()
+        .iter()
+        .map(|item| (item, true))
+        .chain(leaving.iter().map(|item| (item, false)))
+        .enumerate()
+        .map(|(position, (item, appearing))| (position, appearing, item))
+    {
         let state = entity.clone();
         let path = item.path.clone();
         let kind = item.kind.clone();
@@ -107,7 +125,18 @@ pub fn render(entity: &Entity<AppState>, theme: Theme, cx: &App) -> impl IntoEle
                     ),
             );
         }
-        list = list.child(row);
+        let key = format!(
+            "{}:{}:{}",
+            item.path.display(),
+            item.kind,
+            if appearing { "in" } else { "out" }
+        );
+        list = list.child(motion::fade(
+            gpui::SharedString::from(key),
+            appearing,
+            motion::chip(),
+            row,
+        ));
     }
     list
 }

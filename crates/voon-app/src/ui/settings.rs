@@ -205,5 +205,6 @@ pub(super) fn button(
             button
                 .cursor_pointer()
                 .hover(move |style| style.bg(rgb(theme.well)))
+                .active(|style| style.opacity(0.85))
         })
 }

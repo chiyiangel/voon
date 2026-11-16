@@ -9,6 +9,7 @@ use super::{
     settings::{button, caption},
     theme::Theme,
 };
+use crate::motion;
 use crate::view_model::AppState;
 
 mod directories;
@@ -59,6 +60,12 @@ pub struct SettingsWindow {
     menu_bar: Entity<ApplicationMenuBar>,
     focus: FocusHandle,
     page: SettingsPage,
+    page_previous: Option<(SettingsPage, u64)>,
+    page_generation: u64,
+    cache_bar: f32,
+    cache_bar_from: f32,
+    cache_bar_to: f32,
+    cache_bar_started: Option<std::time::Instant>,
     confirm_new_index: bool,
     built_in_rules_open: bool,
     _subscription: Subscription,
@@ -80,6 +87,12 @@ impl SettingsWindow {
             menu_bar,
             focus,
             page,
+            page_previous: None,
+            page_generation: 0,
+            cache_bar: 0.,
+            cache_bar_from: 0.,
+            cache_bar_to: 0.,
+            cache_bar_started: None,
             confirm_new_index: false,
             built_in_rules_open: false,
             _subscription: subscription,
@@ -87,7 +100,27 @@ impl SettingsWindow {
     }
 
     pub fn set_page(&mut self, page: SettingsPage, cx: &mut Context<Self>) {
-        self.page = page;
+        if page != self.page {
+            self.page_generation = self.page_generation.wrapping_add(1);
+            let generation = self.page_generation;
+            let duration = motion::crossfade();
+            if duration.is_zero() {
+                self.page_previous = None;
+            } else {
+                self.page_previous = Some((self.page, generation));
+                motion::schedule(cx, duration, move |this, cx| {
+                    if this
+                        .page_previous
+                        .as_ref()
+                        .is_some_and(|(_, current)| *current == generation)
+                    {
+                        this.page_previous = None;
+                        cx.notify();
+                    }
+                });
+            }
+            self.page = page;
+        }
         self.confirm_new_index = false;
         cx.notify();
     }
@@ -155,16 +188,82 @@ impl SettingsWindow {
             .child(div().flex_1())
             .child(caption("VOON · 本地音乐资料库", theme).px_2().pb_2())
     }
+
+    pub(super) fn advance_cache_bar(&mut self, target: f32, window: &mut Window) -> f32 {
+        let duration = motion::progress();
+        if duration.is_zero() {
+            self.cache_bar = target;
+            self.cache_bar_from = target;
+            self.cache_bar_to = target;
+            self.cache_bar_started = None;
+            return target;
+        }
+        if (self.cache_bar_to - target).abs() > f32::EPSILON {
+            self.cache_bar_from = self.cache_bar;
+            self.cache_bar_to = target;
+            self.cache_bar_started = Some(std::time::Instant::now());
+        }
+        let progress = match self.cache_bar_started {
+            Some(started) if duration.as_secs_f32() > 0. => {
+                (started.elapsed().as_secs_f32() / duration.as_secs_f32()).clamp(0., 1.)
+            }
+            _ => 1.,
+        };
+        self.cache_bar = self.cache_bar_from
+            + (self.cache_bar_to - self.cache_bar_from) * motion::eased(progress);
+        if progress < 1. {
+            window.request_animation_frame();
+        }
+        self.cache_bar
+    }
+
+    fn paint_settings_page(
+        &mut self,
+        page: SettingsPage,
+        theme: Theme,
+        window: &mut Window,
+        cx: &mut Context<Self>,
+    ) -> gpui::Div {
+        match page {
+            SettingsPage::Directories => self.directories(theme, cx),
+            SettingsPage::Scanning => self.scanning(theme, cx),
+            SettingsPage::Ignore => self.ignore(theme, cx),
+            SettingsPage::LocalData => self.local_data(theme, window, cx),
+        }
+    }
 }
 
 impl Render for SettingsWindow {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = Theme::for_window(window);
-        let page = match self.page {
-            SettingsPage::Directories => self.directories(theme, cx),
-            SettingsPage::Scanning => self.scanning(theme, cx),
-            SettingsPage::Ignore => self.ignore(theme, cx),
-            SettingsPage::LocalData => self.local_data(theme, cx),
+        let previous = self.page_previous;
+        let current_page = self.page;
+        let current_generation = self.page_generation;
+        let current = self.paint_settings_page(current_page, theme, window, cx);
+        let page = if let Some((previous, generation)) = previous {
+            div()
+                .relative()
+                .w_full()
+                .child(motion::fade(
+                    ("settings-from", generation as usize),
+                    false,
+                    motion::crossfade(),
+                    self.paint_settings_page(previous, theme, window, cx),
+                ))
+                .child(motion::fade(
+                    ("settings-to", current_generation as usize),
+                    true,
+                    motion::crossfade(),
+                    current,
+                ))
+                .into_any_element()
+        } else {
+            motion::fade(
+                ("settings-to", current_generation as usize),
+                true,
+                motion::crossfade(),
+                current,
+            )
         };
         let state = self.state.read(cx);
         let content = div()

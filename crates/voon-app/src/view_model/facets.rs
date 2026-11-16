@@ -106,6 +106,7 @@ impl FacetValue {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct FacetOption {
     pub value: FacetValue,
     pub label: String,
@@ -187,6 +188,7 @@ impl AppState {
     }
 
     pub fn toggle_facet(&mut self, value: FacetValue, cx: &mut Context<Self>) {
+        let previously_selected = self.selected_facet_options();
         match value {
             FacetValue::Format(value) => toggle(&mut self.filters.formats, value),
             FacetValue::Encoding(value) => toggle(&mut self.filters.encodings, value),
@@ -204,6 +206,7 @@ impl AppState {
             }
         }
         self.refresh_browse();
+        self.remember_leaving_chips(previously_selected, cx);
         cx.notify();
     }
 

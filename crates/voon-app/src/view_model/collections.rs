@@ -19,6 +19,7 @@ pub(super) struct CollectionState {
     members: Option<HashSet<PathBuf>>,
 }
 
+#[derive(Clone, Debug)]
 pub struct CollectionRow {
     pub path: PathBuf,
     pub name: String,
@@ -74,7 +75,16 @@ impl AppState {
     pub fn toggle_collections_sidebar(&mut self, cx: &mut Context<Self>) {
         self.collections.sidebar_collapsed = !self.collections.sidebar_collapsed;
         if !self.collections.sidebar_collapsed {
+            self.collections_tree_linger.cancel();
             self.navigate(Navigation::Collections, cx);
+        } else if let Some((generation, duration)) = self
+            .collections_tree_linger
+            .begin((), crate::motion::chip())
+        {
+            crate::motion::schedule(cx, duration, move |this, cx| {
+                this.collections_tree_linger.finish(generation);
+                cx.notify();
+            });
         }
         cx.notify();
     }
@@ -126,9 +136,11 @@ impl AppState {
     }
 
     pub fn toggle_collection(&mut self, path: &Path, cx: &mut Context<Self>) {
+        let previous = self.collection_rows();
         if !self.collections.expanded.remove(path) {
             self.collections.expanded.insert(path.into());
         }
+        self.remember_leaving_collections(&previous, cx);
         cx.notify();
     }
 

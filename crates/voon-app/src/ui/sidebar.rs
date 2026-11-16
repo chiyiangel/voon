@@ -4,6 +4,7 @@ use super::{
     icons::icon,
     theme::{SIDEBAR_WIDTH, TOOLBAR_HEIGHT, Theme},
 };
+use crate::motion;
 use crate::view_model::{AppState, Navigation};
 
 pub fn navigation_label(navigation: Navigation) -> &'static str {
@@ -18,7 +19,12 @@ pub fn navigation_label(navigation: Navigation) -> &'static str {
     }
 }
 
-pub fn render(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> Div {
+pub fn render(
+    state: &AppState,
+    entity: &Entity<AppState>,
+    theme: Theme,
+    leaving_navigation: Option<Navigation>,
+) -> Div {
     let group = |label| {
         div()
             .mt(px(10.))
@@ -31,8 +37,11 @@ pub fn render(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> Div 
     };
     let row = |destination, glyph| {
         let entity = entity.clone();
+        let selected = state.navigation() == destination;
+        let leaving = leaving_navigation == Some(destination);
         div()
             .id(navigation_label(destination))
+            .relative()
             .flex()
             .items_center()
             .gap(px(8.))
@@ -40,10 +49,30 @@ pub fn render(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> Div 
             .px(px(8.))
             .rounded(px(6.))
             .cursor_pointer()
-            .when(state.navigation() == destination, |row| {
-                row.bg(rgb(theme.selected)).font_weight(FontWeight::MEDIUM)
-            })
+            .when(selected, |row| row.font_weight(FontWeight::MEDIUM))
             .hover(|row| row.bg(rgb(theme.selected)))
+            .when(selected || leaving, |row| {
+                row.child(
+                    div()
+                        .absolute()
+                        .inset_0()
+                        .rounded(px(6.))
+                        .child(motion::fade(
+                            gpui::SharedString::from(format!(
+                                "{}:{}",
+                                if selected {
+                                    "nav-select"
+                                } else {
+                                    "nav-deselect"
+                                },
+                                navigation_label(destination)
+                            )),
+                            selected,
+                            motion::selection(),
+                            div().size_full().rounded(px(6.)).bg(rgb(theme.selected)),
+                        )),
+                )
+            })
             .child(icon(glyph, 16., theme.accent))
             .child(
                 div()
@@ -98,9 +127,14 @@ pub fn render(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> Div 
         .child(group("资料库"))
         .child(row(Navigation::AllAlbums, "library"))
         .child(row(Navigation::Collections, "box"))
-        .when(state.collections_sidebar_expanded(), |sidebar| {
-            sidebar.child(super::collection_view::navigation_tree(
-                state, entity, theme,
+        .when(state.collections_tree_view().is_some(), |sidebar| {
+            sidebar.child(motion::fade(
+                "collection-tree-shell",
+                state.collections_tree_view() == Some(true),
+                motion::chip(),
+                div().child(super::collection_view::navigation_tree(
+                    state, entity, theme,
+                )),
             ))
         })
         .child(row(Navigation::Composers, "composer"))
