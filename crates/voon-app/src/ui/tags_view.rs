@@ -11,6 +11,7 @@ use super::{
     text_input::{TextChanged, TextInput},
     theme::Theme,
 };
+use crate::motion;
 use crate::view_model::{
     AppState, Navigation,
     organization::{OrganizationDialog as Dialog, OrganizationScope as Scope},
@@ -69,6 +70,7 @@ fn button(
         .cursor_pointer()
         .text_size(px(11.5))
         .text_color(rgb(theme.accent))
+        .active(|style| style.opacity(0.85))
         .child(label)
         .on_click(move |_, _, cx| open(&state, dialog, cx))
 }
@@ -435,11 +437,11 @@ impl Render for TagsView {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = Theme::for_window(window);
         let state = self.state.read(cx);
-        let Some(dialog) = state.organization_dialog() else {
+        let Some((dialog, closing)) = state.organization_view() else {
             self.last_dialog = None;
             return div().into_any_element();
         };
-        if self.last_dialog != Some(dialog) {
+        if !closing && self.last_dialog != Some(dialog) {
             if !matches!(dialog, Dialog::Delete(_)) {
                 window.focus(&self.input.read(cx).focus_handle(cx));
             }
@@ -604,7 +606,14 @@ impl Render for TagsView {
                             }),
                     ),
             );
-        deferred(
+        deferred(motion::fade(
+            if closing {
+                "organization-exit"
+            } else {
+                "organization-enter"
+            },
+            !closing,
+            motion::overlay(),
             div()
                 .absolute()
                 .inset_0()
@@ -614,7 +623,7 @@ impl Render for TagsView {
                 .justify_center()
                 .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
                 .child(sheet),
-        )
+        ))
         .with_priority(20)
         .into_any_element()
     }

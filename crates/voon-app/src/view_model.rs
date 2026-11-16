@@ -1,7 +1,11 @@
 //! Application state is a GPUI entity. Views read it and forward operations;
 //! library access stays here, behind the injected local Index.
 
-use std::path::{Path, PathBuf};
+use std::{
+    collections::HashMap,
+    path::{Path, PathBuf},
+    time::Instant,
+};
 
 use gpui::Context;
 use voon_core::{
@@ -107,6 +111,7 @@ pub struct AppState {
     selected_album: Option<PathBuf>,
     detail: detail::DetailState,
     edit_draft: Option<edit::AlbumEditDraft>,
+    edit_linger: crate::motion::Linger<edit::AlbumEditDraft>,
     search: String,
     filters: FilterState,
     sort_order: SortOrder,
@@ -128,6 +133,11 @@ pub struct AppState {
     pending_root_removal: Option<PathBuf>,
     attention: Vec<voon_core::db::AttentionItem>,
     attention_path: Option<PathBuf>,
+    appearances: HashMap<PathBuf, Instant>,
+    leaving_chips: crate::motion::Leaving<facets::FacetOption>,
+    leaving_attention: crate::motion::Leaving<voon_core::db::AttentionItem>,
+    leaving_collections: crate::motion::Leaving<collections::CollectionRow>,
+    collections_tree_linger: crate::motion::Linger<()>,
 }
 
 impl AppState {
@@ -155,6 +165,7 @@ impl AppState {
             selected_album: None,
             detail: detail::DetailState::default(),
             edit_draft: None,
+            edit_linger: crate::motion::Linger::default(),
             search: String::new(),
             filters: FilterState::default(),
             sort_order: SortOrder::RecentlyAdded,
@@ -174,6 +185,11 @@ impl AppState {
             error: None,
             settings_error: None,
             pending_root_removal: None,
+            appearances: HashMap::new(),
+            leaving_chips: crate::motion::Leaving::default(),
+            leaving_attention: crate::motion::Leaving::default(),
+            leaving_collections: crate::motion::Leaving::default(),
+            collections_tree_linger: crate::motion::Linger::default(),
         };
         state.refresh_browse();
         Ok(state)
@@ -232,8 +248,10 @@ impl AppState {
     }
 
     pub fn set_filters(&mut self, filters: FilterState, cx: &mut Context<Self>) {
+        let previously_selected = self.selected_facet_options();
         self.filters = filters;
         self.refresh_browse();
+        self.remember_leaving_chips(previously_selected, cx);
         cx.notify();
     }
 
@@ -279,10 +297,14 @@ impl AppState {
         let albums = self.index.albums()?;
         let collections = self.index.collection_tree()?;
         let attention = self.index.attention_items()?;
+        let previous_attention = self.attention.clone();
+        let previous_collections = self.collection_rows();
         self.roots = roots;
         self.albums = albums;
         self.collections.replace_tree(collections);
         self.attention = attention;
+        self.remember_leaving_attention(&previous_attention, cx);
+        self.remember_leaving_collections(&previous_collections, cx);
         self.structure.last = self.index.last_structure_operation()?;
         self.refresh_organization()?;
         self.refresh_browse();
@@ -295,5 +317,134 @@ impl AppState {
         self.prefetch_covers(cx);
         cx.notify();
         Ok(())
+    }
+}
+
+impl AppState {
+    /// Instant when this Album first appeared in the current process during a scan.
+    pub fn album_appeared_at(&self, path: &Path) -> Option<std::time::Instant> {
+        self.appearances.get(path).copied()
+    }
+
+    pub fn leaving_facet_chips(&self) -> impl Iterator<Item = &facets::FacetOption> {
+        self.leaving_chips.iter()
+    }
+
+    pub fn leaving_attention_items(&self) -> impl Iterator<Item = &voon_core::db::AttentionItem> {
+        self.leaving_attention.iter()
+    }
+
+    pub fn leaving_collection_rows(&self) -> impl Iterator<Item = &collections::CollectionRow> {
+        self.leaving_collections.iter()
+    }
+
+    /// `Some(true)` when the collection tree is expanded, `Some(false)` while
+    /// it is finishing its exit animation, `None` when it should stay hidden.
+    pub fn collections_tree_view(&self) -> Option<bool> {
+        if self.collections_sidebar_expanded() {
+            Some(true)
+        } else {
+            self.collections_tree_linger.present(None).map(|_| false)
+        }
+    }
+
+    fn selected_facet_options(&self) -> Vec<facets::FacetOption> {
+        self.facet_options()
+            .iter()
+            .filter(|option| option.selected)
+            .cloned()
+            .collect()
+    }
+
+    fn remember_leaving_chips(
+        &mut self,
+        previously_selected: Vec<facets::FacetOption>,
+        cx: &mut Context<Self>,
+    ) {
+        let selected: Vec<_> = self
+            .facet_options()
+            .iter()
+            .filter(|option| option.selected)
+            .map(|option| option.value.clone())
+            .collect();
+        self.leaving_chips
+            .retain(|chip| !selected.contains(&chip.value));
+        let gone = previously_selected
+            .into_iter()
+            .filter(|chip| {
+                !self
+                    .facet_options()
+                    .iter()
+                    .any(|option| option.value == chip.value && option.selected)
+            })
+            .collect::<Vec<_>>();
+        if let Some((generation, duration)) = self.leaving_chips.push(gone, crate::motion::chip()) {
+            crate::motion::schedule(cx, duration, move |this, cx| {
+                this.leaving_chips.finish(generation);
+                cx.notify();
+            });
+        }
+    }
+
+    fn remember_leaving_attention(
+        &mut self,
+        previous: &[voon_core::db::AttentionItem],
+        cx: &mut Context<Self>,
+    ) {
+        let live_keys: Vec<_> = self
+            .attention
+            .iter()
+            .map(|item| (item.path.clone(), item.kind.clone()))
+            .collect();
+        self.leaving_attention.retain(|item| {
+            !live_keys
+                .iter()
+                .any(|(path, kind)| path == &item.path && kind == &item.kind)
+        });
+        let gone = previous
+            .iter()
+            .filter(|item| {
+                !self
+                    .attention
+                    .iter()
+                    .any(|live| live.path == item.path && live.kind == item.kind)
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        if let Some((generation, duration)) =
+            self.leaving_attention.push(gone, crate::motion::chip())
+        {
+            crate::motion::schedule(cx, duration, move |this, cx| {
+                this.leaving_attention.finish(generation);
+                cx.notify();
+            });
+        }
+    }
+
+    fn remember_leaving_collections(
+        &mut self,
+        previous: &[collections::CollectionRow],
+        cx: &mut Context<Self>,
+    ) {
+        let live: std::collections::HashSet<_> = self
+            .collection_rows()
+            .into_iter()
+            .map(|row| row.path)
+            .collect();
+        self.leaving_collections
+            .retain(|row| !live.contains(&row.path));
+        let gone = previous
+            .iter()
+            .filter(|row| !live.contains(&row.path))
+            .cloned()
+            .collect::<Vec<_>>();
+        if let Some((generation, duration)) =
+            self.leaving_collections.push(gone, crate::motion::chip())
+        {
+            crate::motion::schedule(cx, duration, move |this, cx| {
+                this.leaving_collections.finish(generation);
+                cx.notify();
+            });
+        }
     }
 }

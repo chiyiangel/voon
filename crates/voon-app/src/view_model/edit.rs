@@ -58,7 +58,30 @@ impl AppState {
         self.edit_draft.as_ref()
     }
 
+    /// Live draft, or the copy still on screen during the close animation.
+    pub fn album_edit_view(&self) -> Option<(&AlbumEditDraft, bool)> {
+        self.edit_linger.present(self.edit_draft.as_ref())
+    }
+
+    pub fn album_edit_is_closing(&self) -> bool {
+        self.edit_linger.is_closing()
+    }
+
+    fn dismiss_album_edit(&mut self, cx: &mut Context<Self>) {
+        if let Some(draft) = self.edit_draft.take()
+            && let Some((generation, duration)) =
+                self.edit_linger.begin(draft, crate::motion::overlay())
+        {
+            crate::motion::schedule(cx, duration, move |this, cx| {
+                this.edit_linger.finish(generation);
+                cx.notify();
+            });
+        }
+        cx.notify();
+    }
+
     pub fn begin_album_edit(&mut self, cx: &mut Context<Self>) -> Result<()> {
+        self.edit_linger.cancel();
         let album = self.album_detail().ok_or("请先选择专辑")?;
         let automatic = self
             .index
@@ -144,16 +167,14 @@ impl AppState {
     }
 
     pub fn cancel_album_edit(&mut self, cx: &mut Context<Self>) {
-        self.edit_draft = None;
-        cx.notify();
+        self.dismiss_album_edit(cx);
     }
 
     pub fn save_album_edit(&mut self, cx: &mut Context<Self>) -> Result<()> {
         let draft = self.edit_draft.as_ref().ok_or("没有正在编辑的专辑")?;
         let path = draft.album.clone();
         if self.selected_album.as_deref() != Some(path.as_path()) {
-            self.edit_draft = None;
-            cx.notify();
+            self.dismiss_album_edit(cx);
             return Err("专辑选择已变化，请重新打开编辑".into());
         }
         let changes = draft
@@ -166,7 +187,7 @@ impl AppState {
             cx.notify();
             return Err(error.into());
         }
-        self.edit_draft = None;
+        self.dismiss_album_edit(cx);
         self.reload_library(cx)
     }
 }

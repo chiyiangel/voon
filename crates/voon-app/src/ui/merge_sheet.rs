@@ -1,4 +1,5 @@
 use super::theme::Theme;
+use crate::motion;
 use crate::view_model::{AppState, Navigation, Result, structure::StructureDraft};
 use gpui::{
     App, Context, Entity, FocusHandle, FontWeight, KeyBinding, MouseButton, Render, Subscription,
@@ -104,11 +105,16 @@ impl MergeSheet {
 
 impl Render for MergeSheet {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let Some(draft) = self.state.read(cx).structure_draft().cloned() else {
+        let Some((draft, closing)) = self
+            .state
+            .read(cx)
+            .structure_view()
+            .map(|(draft, closing)| (draft.clone(), closing))
+        else {
             self.was_open = false;
             return div().into_any_element();
         };
-        if !self.was_open {
+        if !closing && !self.was_open {
             window.focus(&self.focus);
             self.was_open = true;
         }
@@ -280,7 +286,14 @@ impl Render for MergeSheet {
         if let Some(error) = self.state.read(cx).error() {
             contents = contents.child(div().text_color(rgb(0xc0352b)).child(error.to_string()));
         }
-        deferred(
+        deferred(motion::fade(
+            if closing {
+                "structure-exit"
+            } else {
+                "structure-enter"
+            },
+            !closing,
+            motion::overlay(),
             div()
                 .absolute()
                 .inset_0()
@@ -357,7 +370,7 @@ impl Render for MergeSheet {
                                 ),
                         ),
                 ),
-        )
+        ))
         .with_priority(25)
         .into_any_element()
     }

@@ -27,6 +27,12 @@ pub enum OrganizationDialog {
     Delete(OrganizationScope),
 }
 
+#[derive(Clone, Debug)]
+struct OrganizationSheet {
+    dialog: OrganizationDialog,
+    draft: String,
+}
+
 #[derive(Default)]
 pub(super) struct OrganizationState {
     selected: BTreeSet<PathBuf>,
@@ -38,6 +44,7 @@ pub(super) struct OrganizationState {
     pub(super) rank: HashMap<PathBuf, usize>,
     dialog: Option<OrganizationDialog>,
     draft: String,
+    linger: crate::motion::Linger<OrganizationSheet>,
 }
 
 impl OrganizationState {
@@ -93,8 +100,37 @@ impl AppState {
     pub fn organization_dialog(&self) -> Option<OrganizationDialog> {
         self.organization.dialog
     }
+
+    pub fn organization_view(&self) -> Option<(OrganizationDialog, bool)> {
+        if let Some(dialog) = self.organization.dialog {
+            Some((dialog, false))
+        } else {
+            self.organization
+                .linger
+                .closing_value()
+                .map(|sheet| (sheet.dialog, true))
+        }
+    }
+
+    pub fn organization_is_closing(&self) -> bool {
+        self.organization.linger.is_closing()
+    }
+
+    fn organization_sheet(&self) -> Option<OrganizationSheet> {
+        self.organization.dialog.map(|dialog| OrganizationSheet {
+            dialog,
+            draft: self.organization.draft.clone(),
+        })
+    }
+
     pub fn organization_draft(&self) -> &str {
-        &self.organization.draft
+        if self.organization.dialog.is_some() {
+            &self.organization.draft
+        } else if let Some(sheet) = self.organization.linger.closing_value() {
+            sheet.draft.as_str()
+        } else {
+            &self.organization.draft
+        }
     }
     pub fn set_organization_draft(&mut self, value: String, cx: &mut Context<Self>) {
         self.organization.draft = value;
@@ -106,6 +142,9 @@ impl AppState {
         dialog: OrganizationDialog,
         cx: &mut Context<Self>,
     ) -> Result<()> {
+        if self.organization.linger.is_closing() {
+            self.organization.linger.cancel();
+        }
         self.organization.draft = match dialog {
             OrganizationDialog::Rename(scope) => self
                 .organization_name(scope)
@@ -120,8 +159,23 @@ impl AppState {
     }
 
     pub fn close_organization_dialog(&mut self, cx: &mut Context<Self>) {
-        self.organization.dialog = None;
-        self.organization.draft.clear();
+        if let Some(sheet) = self.organization_sheet() {
+            self.organization.dialog = None;
+            self.organization.draft.clear();
+            if let Some((generation, duration)) = self
+                .organization
+                .linger
+                .begin(sheet, crate::motion::overlay())
+            {
+                crate::motion::schedule(cx, duration, move |this, cx| {
+                    this.organization.linger.finish(generation);
+                    cx.notify();
+                });
+            }
+        } else {
+            self.organization.dialog = None;
+            self.organization.draft.clear();
+        }
         cx.notify();
     }
 

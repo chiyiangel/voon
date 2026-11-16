@@ -9,6 +9,7 @@ use super::{
     text_input::{TextChanged, TextInput},
     theme::{TOOLBAR_HEIGHT, Theme},
 };
+use crate::motion::{self, Linger};
 use crate::view_model::{
     AppState, SortOrder,
     browse::{SortDirection, ViewMode},
@@ -18,6 +19,7 @@ pub struct Toolbar {
     state: Entity<AppState>,
     search: Entity<TextInput>,
     sort_open: bool,
+    sort_linger: Linger<()>,
     _subscriptions: Vec<Subscription>,
 }
 
@@ -44,6 +46,7 @@ impl Toolbar {
             state,
             search,
             sort_open: false,
+            sort_linger: Linger::default(),
             _subscriptions: subscriptions,
         }
     }
@@ -143,7 +146,20 @@ impl Render for Toolbar {
                     ))
                     .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
                     .on_click(cx.listener(|this, _, _, cx| {
-                        this.sort_open = !this.sort_open;
+                        if this.sort_open {
+                            this.sort_open = false;
+                            if let Some((generation, duration)) =
+                                this.sort_linger.begin((), motion::menu())
+                            {
+                                motion::schedule(cx, duration, move |this, cx| {
+                                    this.sort_linger.finish(generation);
+                                    cx.notify();
+                                });
+                            }
+                        } else {
+                            this.sort_linger.cancel();
+                            this.sort_open = true;
+                        }
                         cx.notify();
                     })),
             )
@@ -164,7 +180,8 @@ impl Render for Toolbar {
                     .child(icon("search", 14., theme.tertiary))
                     .child(div().flex_1().min_w_0().child(self.search.clone())),
             );
-        if self.sort_open {
+        let sort_closing = self.sort_linger.is_closing();
+        if self.sort_open || sort_closing {
             let mut menu = div()
                 .id("album-sort-menu")
                 .absolute()
@@ -179,8 +196,18 @@ impl Render for Toolbar {
                 .shadow_lg()
                 .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
                 .on_mouse_down_out(cx.listener(|this, _, _, cx| {
-                    this.sort_open = false;
-                    cx.notify();
+                    if this.sort_open {
+                        this.sort_open = false;
+                        if let Some((generation, duration)) =
+                            this.sort_linger.begin((), motion::menu())
+                        {
+                            motion::schedule(cx, duration, move |this, cx| {
+                                this.sort_linger.finish(generation);
+                                cx.notify();
+                            });
+                        }
+                        cx.notify();
+                    }
                 }));
             for order in SortOrder::ALL {
                 if order == SortOrder::Manual && !(state.navigation() == crate::view_model::Navigation::ManualCollections && matches!(state.organization_scope(), Some(crate::view_model::organization::OrganizationScope::ManualCollection(_)))) { continue; }
@@ -203,11 +230,31 @@ impl Render for Toolbar {
                             this.state
                                 .update(cx, |state, cx| state.set_sort_order(order, cx));
                             this.sort_open = false;
+                            if let Some((generation, duration)) =
+                                this.sort_linger.begin((), motion::menu())
+                            {
+                                motion::schedule(cx, duration, move |this, cx| {
+                                    this.sort_linger.finish(generation);
+                                    cx.notify();
+                                });
+                            }
                             cx.notify();
                         })),
                 );
             }
-            toolbar = toolbar.child(deferred(menu).with_priority(2));
+            toolbar = toolbar.child(
+                deferred(motion::fade(
+                    if sort_closing {
+                        "album-sort-exit"
+                    } else {
+                        "album-sort-enter"
+                    },
+                    !sort_closing,
+                    motion::menu(),
+                    menu,
+                ))
+                .with_priority(2),
+            );
         }
         toolbar
     }

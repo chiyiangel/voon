@@ -63,6 +63,7 @@ impl Drop for Session {
 
 pub(super) struct CoverPickerState {
     draft: Option<CoverPickerDraft>,
+    linger: crate::motion::Linger<CoverPickerDraft>,
     pending: Option<Session>,
     loader: Box<dyn CoverLoader>,
 }
@@ -70,6 +71,7 @@ impl Default for CoverPickerState {
     fn default() -> Self {
         Self {
             draft: None,
+            linger: crate::motion::Linger::default(),
             pending: None,
             loader: Box::new(DiskCoverLoader),
         }
@@ -85,7 +87,34 @@ impl AppState {
         self.cover_picker.draft.as_ref()
     }
 
+    pub fn cover_picker_view(&self) -> Option<(&CoverPickerDraft, bool)> {
+        self.cover_picker
+            .linger
+            .present(self.cover_picker.draft.as_ref())
+    }
+
+    pub fn cover_picker_is_closing(&self) -> bool {
+        self.cover_picker.linger.is_closing()
+    }
+
+    fn dismiss_cover_picker(&mut self, cx: &mut Context<Self>) {
+        self.cover_picker.pending = None;
+        if let Some(draft) = self.cover_picker.draft.take()
+            && let Some((generation, duration)) = self
+                .cover_picker
+                .linger
+                .begin(draft, crate::motion::overlay())
+        {
+            crate::motion::schedule(cx, duration, move |this, cx| {
+                this.cover_picker.linger.finish(generation);
+                cx.notify();
+            });
+        }
+        cx.notify();
+    }
+
     pub fn begin_cover_picker(&mut self, cx: &mut Context<Self>) -> Result<()> {
+        self.cover_picker.linger.cancel();
         let album = self.album_detail().cloned().ok_or("请先选择专辑")?;
         let ignored = self.ignored_image_paths()?;
         self.cover_picker.draft = Some(CoverPickerDraft {
@@ -127,9 +156,7 @@ impl AppState {
     }
 
     pub fn cancel_cover_picker(&mut self, cx: &mut Context<Self>) {
-        self.cover_picker.pending = None;
-        self.cover_picker.draft = None;
-        cx.notify();
+        self.dismiss_cover_picker(cx);
     }
 
     pub fn apply_cover_choice(&mut self, cx: &mut Context<Self>) -> Result<()> {

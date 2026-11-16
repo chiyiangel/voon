@@ -7,6 +7,7 @@ use gpui::{
 
 use super::theme::Theme;
 use crate::application::{CloseCurrentWindow, OpenSettings, Quit};
+use crate::motion::{self, Linger};
 
 const MENU_HEIGHT: f32 = 32.;
 
@@ -18,6 +19,7 @@ enum Menu {
 
 pub struct ApplicationMenuBar {
     open: Option<Menu>,
+    linger: Linger<Menu>,
     focus: FocusHandle,
     previous_focus: Option<FocusHandle>,
 }
@@ -26,6 +28,7 @@ impl ApplicationMenuBar {
     pub fn new(cx: &mut Context<Self>) -> Self {
         Self {
             open: None,
+            linger: Linger::default(),
             focus: cx.focus_handle(),
             previous_focus: None,
         }
@@ -36,6 +39,7 @@ impl ApplicationMenuBar {
             self.close(window, cx);
             return;
         }
+        self.linger.cancel();
         if self.open.is_none() {
             self.previous_focus = window.focused(cx);
             self.focus.focus(window);
@@ -45,7 +49,14 @@ impl ApplicationMenuBar {
     }
 
     fn close(&mut self, window: &mut Window, cx: &mut Context<Self>) {
-        self.open = None;
+        if let Some(menu) = self.open.take()
+            && let Some((generation, duration)) = self.linger.begin(menu, motion::menu())
+        {
+            motion::schedule(cx, duration, move |this, cx| {
+                this.linger.finish(generation);
+                cx.notify();
+            });
+        }
         if let Some(focus) = self.previous_focus.take() {
             focus.focus(window);
         }
@@ -140,7 +151,11 @@ impl Render for ApplicationMenuBar {
                     ),
             );
         }
-        if let Some(open) = self.open {
+        if let Some((open, closing)) = self
+            .linger
+            .present(self.open.as_ref())
+            .map(|(menu, closing)| (*menu, closing))
+        {
             let contents = match open {
                 Menu::Application => menu_panel("application-menu", theme)
                     .w(px(250.))
@@ -174,7 +189,14 @@ impl Render for ApplicationMenuBar {
                     .into_any_element(),
             };
             bar = bar.child(
-                deferred(
+                deferred(motion::fade(
+                    if closing {
+                        "application-menu-exit"
+                    } else {
+                        "application-menu-enter"
+                    },
+                    !closing,
+                    motion::menu(),
                     div()
                         .id("application-menu-popup")
                         .absolute()
@@ -190,7 +212,7 @@ impl Render for ApplicationMenuBar {
                                 }
                             },
                         )),
-                )
+                ))
                 .with_priority(3),
             );
         }

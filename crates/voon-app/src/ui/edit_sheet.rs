@@ -11,6 +11,7 @@ use super::{
     text_input::{TextChanged, TextInput},
     theme::Theme,
 };
+use crate::motion;
 use crate::view_model::AppState;
 
 actions!(album_edit, [CancelAlbumEdit]);
@@ -43,13 +44,18 @@ impl EditSheet {
 
 impl Render for EditSheet {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
-        let Some(draft) = self.state.read(cx).album_edit_draft().cloned() else {
+        let Some((draft, closing)) = self
+            .state
+            .read(cx)
+            .album_edit_view()
+            .map(|(draft, closing)| (draft.clone(), closing))
+        else {
             self.album = None;
             self.inputs.clear();
             self._input_subscriptions.clear();
             return div().into_any_element();
         };
-        if self.album.as_deref() != Some(draft.album_path()) {
+        if !closing && self.album.as_deref() != Some(draft.album_path()) {
             self.inputs.clear();
             self._input_subscriptions.clear();
             for field in draft.fields() {
@@ -175,7 +181,11 @@ impl Render for EditSheet {
         if let Some(error) = draft.error() {
             fields = fields.child(div().text_color(rgb(0xc0352b)).child(error.to_owned()));
         }
-        div().id("album-edit-overlay").absolute().inset_0().size_full().occlude().bg(rgba(0x00000066))
+        motion::fade(
+            if closing { "album-edit-exit" } else { "album-edit-enter" },
+            !closing,
+            motion::overlay(),
+            div().id("album-edit-overlay").absolute().inset_0().size_full().occlude().bg(rgba(0x00000066))
             .flex().items_center().justify_center().key_context("VoonAlbumEdit")
             .on_mouse_down(MouseButton::Left, |_, _, cx| cx.stop_propagation())
             .on_action(cx.listener(|this, _: &CancelAlbumEdit, _, cx| this.state.update(cx, |state, cx| state.cancel_album_edit(cx))))
@@ -189,6 +199,6 @@ impl Render for EditSheet {
                 .child(div().flex_none().p_4().border_t_1().border_color(rgb(theme.line)).flex().justify_end().gap_4()
                     .child(div().id("cancel-album-edit").cursor_pointer().px_3().py_2().child("取消").on_click(move |_, _, cx| cancel.update(cx, |state, cx| state.cancel_album_edit(cx))))
                     .child(div().id("save-album-edit").cursor_pointer().px_4().py_2().rounded_md().bg(rgb(theme.accent)).text_color(rgb(theme.window)).child("保存").on_click(move |_, _, cx| save.update(cx, |state, cx| { if let Err(error) = state.save_album_edit(cx) && state.album_edit_draft().is_none() { state.report_error(error, cx); } })))))
-            .into_any_element()
+            ).into_any_element()
     }
 }

@@ -24,6 +24,7 @@ pub enum StructureDraft {
 
 pub(super) struct StructureState {
     pub draft: Option<StructureDraft>,
+    linger: crate::motion::Linger<StructureDraft>,
     pub last: Option<StructureOperation>,
 }
 
@@ -31,6 +32,7 @@ impl StructureState {
     pub fn load(index: &Index) -> Result<Self> {
         Ok(Self {
             draft: None,
+            linger: crate::motion::Linger::default(),
             last: index.last_structure_operation()?,
         })
     }
@@ -39,6 +41,27 @@ impl StructureState {
 impl AppState {
     pub fn structure_draft(&self) -> Option<&StructureDraft> {
         self.structure.draft.as_ref()
+    }
+
+    pub fn structure_view(&self) -> Option<(&StructureDraft, bool)> {
+        self.structure.linger.present(self.structure.draft.as_ref())
+    }
+
+    pub fn structure_is_closing(&self) -> bool {
+        self.structure.linger.is_closing()
+    }
+
+    fn dismiss_structure(&mut self, cx: &mut Context<Self>) {
+        if let Some(draft) = self.structure.draft.take()
+            && let Some((generation, duration)) =
+                self.structure.linger.begin(draft, crate::motion::overlay())
+        {
+            crate::motion::schedule(cx, duration, move |this, cx| {
+                this.structure.linger.finish(generation);
+                cx.notify();
+            });
+        }
+        cx.notify();
     }
     pub fn last_structure_operation(&self) -> Option<&StructureOperation> {
         self.structure.last.as_ref()
@@ -53,6 +76,7 @@ impl AppState {
     }
 
     pub fn begin_merge(&mut self, cx: &mut Context<Self>) -> Result<()> {
+        self.structure.linger.cancel();
         self.ensure_structure_idle()?;
         let paths = self.selected_album_paths();
         if paths.len() < 2 {
@@ -120,6 +144,7 @@ impl AppState {
     }
 
     pub fn begin_split(&mut self, cx: &mut Context<Self>) -> Result<()> {
+        self.structure.linger.cancel();
         self.ensure_structure_idle()?;
         let path = self.selected_album.as_ref().ok_or("请先选择要拆分的专辑")?;
         let album = self.index.album(path)?.ok_or("专辑已不存在")?;
@@ -162,6 +187,7 @@ impl AppState {
     }
 
     pub fn begin_structure_undo(&mut self, cx: &mut Context<Self>) -> Result<()> {
+        self.structure.linger.cancel();
         self.ensure_structure_idle()?;
         let last = self
             .index
@@ -174,9 +200,8 @@ impl AppState {
     }
 
     pub fn cancel_structure(&mut self, cx: &mut Context<Self>) {
-        self.structure.draft = None;
         self.error = None;
-        cx.notify();
+        self.dismiss_structure(cx);
     }
 
     pub fn confirm_structure(&mut self, cx: &mut Context<Self>) -> Result<()> {
@@ -221,8 +246,8 @@ impl AppState {
                 self.index.undo_structure()?.unwrap_or_default()
             }
         };
-        self.structure.draft = None;
         self.error = None;
+        self.dismiss_structure(cx);
         self.reload_library(cx)?;
         self.navigate(Navigation::AllAlbums, cx);
         self.select_album(
