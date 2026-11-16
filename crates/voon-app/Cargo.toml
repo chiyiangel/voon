@@ -27,3 +27,6 @@ gpui = { version = "0.2", features = ["test-support"] }
 # on Linux; libc 0.2.190 dropped it. Remove once the chain moves on.
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "<0.2.190"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+objc = "0.2"

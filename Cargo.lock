@@ -6129,6 +6129,7 @@ dependencies = [
  "id3",
  "image",
  "libc",
+ "objc",
  "serde_json",
  "tempfile",
  "unicode-segmentation",
