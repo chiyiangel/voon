@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use gpui::{
     Context, Entity, FontWeight, Render, Subscription, UniformListScrollHandle, Window, div,
     prelude::*, px, rgb, uniform_list,
@@ -8,6 +10,7 @@ use super::{
     cover,
     theme::{COMPOSER_PANEL_WIDTH, DETAIL_WIDTH, FACET_PANEL_WIDTH, SIDEBAR_WIDTH, Theme},
 };
+use crate::motion;
 use crate::view_model::{
     AppState,
     grid::{CoverCache, GRID_GAP, GRID_PADDING},
@@ -78,16 +81,23 @@ impl Render for AlbumGrid {
         }
         let state = self.state.clone();
         let covers = self.covers.clone();
-        uniform_list("album-grid", layout.rows, move |range, _, cx| {
+        uniform_list("album-grid", layout.rows, move |range, window, cx| {
             range
                 .map(|row_index| {
-                    let albums = {
+                    let (albums, appeared) = {
                         let state = state.read(cx);
-                        state.grid_row(row_index, layout).to_vec()
+                        let albums = state.grid_row(row_index, layout).to_vec();
+                        let appeared = albums
+                            .iter()
+                            .map(|album| state.album_appeared_at(&album.path))
+                            .collect::<Vec<_>>();
+                        (albums, appeared)
                     };
+                    let mut animating = false;
                     let cards = albums
                         .into_iter()
-                        .map(|album| {
+                        .zip(appeared)
+                        .map(|(album, appeared_at)| {
                             let status = album.cover.clone().map(|cover| {
                                 covers.update(cx, |cache, cx| cache.request(cover, cx))
                             });
@@ -98,10 +108,14 @@ impl Render for AlbumGrid {
                                 state.clone(),
                                 layout.card_width,
                                 is_selected,
+                                card_motion(appeared_at, &mut animating),
                                 theme,
                             )
                         })
                         .collect::<Vec<_>>();
+                    if animating {
+                        window.request_animation_frame();
+                    }
                     div()
                         .id(row_index)
                         .flex()
@@ -127,9 +141,12 @@ fn card(
     state: Entity<AppState>,
     edge: f32,
     selected: bool,
+    pop: (f32, f32),
     theme: Theme,
 ) -> impl IntoElement {
     let path = album.path.clone();
+    let (opacity, scale) = pop;
+    let cover_edge = edge * scale;
     let artist = album
         .metadata
         .album_artist
@@ -145,7 +162,23 @@ fn card(
         .flex()
         .flex_col()
         .cursor_pointer()
-        .child(cover::render(status, edge, selected, theme))
+        .child(
+            div()
+                .size(px(edge))
+                .flex_none()
+                .flex()
+                .items_center()
+                .justify_center()
+                .overflow_hidden()
+                .opacity(opacity)
+                .child(cover::render(
+                    status,
+                    cover_edge,
+                    selected,
+                    theme,
+                    gpui::SharedString::from(format!("cover:{}", path.display())),
+                )),
+        )
         .child(
             div()
                 .mt(px(6.))
@@ -189,4 +222,20 @@ fn card(
                 )
             })
         })
+}
+
+fn card_motion(appeared_at: Option<Instant>, animating: &mut bool) -> (f32, f32) {
+    let duration = motion::new_card();
+    if duration.is_zero() {
+        return (1.0, 1.0);
+    }
+    let Some(appeared) = appeared_at else {
+        return (1.0, 1.0);
+    };
+    let t = (appeared.elapsed().as_secs_f32() / duration.as_secs_f32()).clamp(0.0, 1.0);
+    if t < 1.0 {
+        *animating = true;
+    }
+    let eased = motion::eased(t);
+    (0.2 + 0.8 * eased, 0.96 + 0.04 * eased)
 }

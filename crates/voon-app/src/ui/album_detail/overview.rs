@@ -1,4 +1,5 @@
 use super::*;
+use crate::motion;
 
 impl AlbumDetail {
     pub(super) fn overview(
@@ -48,14 +49,18 @@ impl AlbumDetail {
                 })),
         );
         if self.sources_open {
-            match self.state.read(cx).album_metadata_comparison() {
+            let sources = match self.state.read(cx).album_metadata_comparison() {
                 Ok(comparison) => {
-                    body = body.child(crate::ui::metadata_sources::render(&comparison, theme))
+                    div().child(crate::ui::metadata_sources::render(&comparison, theme))
                 }
-                Err(_) => {
-                    body = body.child(div().p_4().child("无法读取本地字段来源，请重新打开专辑"))
-                }
-            }
+                Err(_) => div().p_4().child("无法读取本地字段来源，请重新打开专辑"),
+            };
+            body = body.child(motion::fade(
+                "detail-sources",
+                true,
+                motion::detail(),
+                sources,
+            ));
         }
 
         let state = self.state.read(cx);

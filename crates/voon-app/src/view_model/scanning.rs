@@ -442,6 +442,8 @@ impl AppState {
                             .iter()
                             .any(|existing| existing.path == album.path)
                     {
+                        self.appearances
+                            .insert(album.path.clone(), std::time::Instant::now());
                         self.albums.push(AlbumRow::from_album(&album));
                         self.refresh_browse();
                     }

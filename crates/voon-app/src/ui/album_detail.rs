@@ -4,6 +4,7 @@ use gpui::{Context, Entity, FontWeight, Render, Subscription, Window, div, prelu
 use voon_core::{Album, Track, TrackSource};
 
 use super::{cover, empty, theme::Theme};
+use crate::motion;
 use crate::view_model::{AppState, grid::CoverCache};
 
 mod files;
@@ -52,6 +53,9 @@ pub struct AlbumDetail {
     reading_open: bool,
     open_discs: HashSet<usize>,
     open_tracks: HashSet<(usize, usize)>,
+    shown_album: Option<voon_core::Album>,
+    leaving_album: Option<(voon_core::Album, u64)>,
+    leaving_generation: u64,
 }
 
 impl AlbumDetail {
@@ -67,6 +71,7 @@ impl AlbumDetail {
                     .album_detail()
                     .map(|album| album.path.clone());
                 if this.album_path != path {
+                    this.stash_shown_album(cx);
                     this.album_path = path;
                     this.sources_open = false;
                     this.metadata_open = false;
@@ -78,11 +83,9 @@ impl AlbumDetail {
             }),
             cx.observe(&covers, |_, _, cx| cx.notify()),
         ];
+        let shown_album = state.read(cx).album_detail().cloned();
         Self {
-            album_path: state
-                .read(cx)
-                .album_detail()
-                .map(|album| album.path.clone()),
+            album_path: shown_album.as_ref().map(|album| album.path.clone()),
             state,
             covers,
             _subscriptions: subscriptions,
@@ -92,6 +95,35 @@ impl AlbumDetail {
             reading_open: false,
             open_discs: HashSet::from([0]),
             open_tracks: HashSet::new(),
+            shown_album,
+            leaving_album: None,
+            leaving_generation: 0,
+        }
+    }
+
+    fn stash_shown_album(&mut self, cx: &mut Context<Self>) {
+        self.leaving_generation = self.leaving_generation.wrapping_add(1);
+        let generation = self.leaving_generation;
+        let duration = motion::detail();
+        if duration.is_zero() {
+            self.leaving_album = None;
+            self.shown_album = None;
+            return;
+        }
+        if let Some(album) = self.shown_album.take() {
+            self.leaving_album = Some((album, generation));
+            motion::schedule(cx, duration, move |this, cx| {
+                if this
+                    .leaving_album
+                    .as_ref()
+                    .is_some_and(|(_, current)| *current == generation)
+                {
+                    this.leaving_album = None;
+                    cx.notify();
+                }
+            });
+        } else {
+            self.leaving_album = None;
         }
     }
 }
@@ -99,10 +131,30 @@ impl AlbumDetail {
 impl Render for AlbumDetail {
     fn render(&mut self, window: &mut Window, cx: &mut Context<Self>) -> impl IntoElement {
         let theme = Theme::for_window(window);
+        let album = self.state.read(cx).album_detail().cloned();
+        match (album, self.leaving_album.clone()) {
+            (None, None) => empty::detail(theme).into_any_element(),
+            (None, Some((previous, generation))) => motion::fade(
+                ("detail-from", generation as usize),
+                false,
+                motion::detail(),
+                div()
+                    .size_full()
+                    .child(self.paint_album(previous, theme, cx)),
+            ),
+            (Some(album), _) => self.wrap_album(album, theme, cx),
+        }
+    }
+}
+
+impl AlbumDetail {
+    fn paint_album(
+        &mut self,
+        album: voon_core::Album,
+        theme: Theme,
+        cx: &mut Context<Self>,
+    ) -> gpui::AnyElement {
         let state = self.state.read(cx);
-        let Some(album) = state.album_detail().cloned() else {
-            return empty::detail(theme).into_any_element();
-        };
         let offline = album.physical_directories().iter().any(|path| {
             state
                 .offline_roots()
@@ -130,6 +182,7 @@ impl Render for AlbumDetail {
                     .rounded_md()
                     .bg(rgb(theme.accent))
                     .text_color(rgb(theme.window))
+                    .active(|button| button.opacity(0.85))
                     .child(player_label)
                     .on_click(move |_, _, cx| {
                         player_state.update(cx, |state, cx| {
@@ -180,7 +233,16 @@ impl Render for AlbumDetail {
                             .id("choose-album-cover")
                             .cursor_pointer()
                             .flex_none()
-                            .child(cover::render(status, 72., false, theme))
+                            .child(cover::render(
+                                status,
+                                72.,
+                                false,
+                                theme,
+                                gpui::SharedString::from(format!(
+                                    "detail-cover:{}",
+                                    album.path.display()
+                                )),
+                            ))
                             .on_click(move |_, _, cx| {
                                 cover_state.update(cx, |state, cx| {
                                     if let Err(error) = state.begin_cover_picker(cx) {
@@ -299,7 +361,6 @@ impl Render for AlbumDetail {
             }
             DetailPage::Files => self.files(&album, offline, theme, cx),
         };
-        // Page-specific scroll identity keeps long file/track views from scrolling the summary away.
         let scroll_id = DetailPage::ALL
             .iter()
             .find(|(page, _, _)| *page == self.page)
@@ -312,9 +373,48 @@ impl Render for AlbumDetail {
                     .flex_1()
                     .min_h_0()
                     .overflow_y_scroll()
-                    .child(content),
+                    .child(motion::fade(
+                        ("detail-tab", self.page as usize),
+                        true,
+                        motion::detail(),
+                        div().child(content),
+                    )),
             )
             .into_any_element()
+    }
+
+    fn wrap_album(
+        &mut self,
+        album: voon_core::Album,
+        theme: Theme,
+        cx: &mut Context<Self>,
+    ) -> gpui::AnyElement {
+        self.shown_album = Some(album.clone());
+        let current = motion::fade(
+            gpui::SharedString::from(format!("detail-to:{}", album.path.display())),
+            true,
+            motion::detail(),
+            div().size_full().child(self.paint_album(album, theme, cx)),
+        );
+        if let Some((previous, generation)) = self.leaving_album.clone() {
+            div()
+                .relative()
+                .size_full()
+                .child(
+                    div().absolute().inset_0().child(motion::fade(
+                        ("detail-from", generation as usize),
+                        false,
+                        motion::detail(),
+                        div()
+                            .size_full()
+                            .child(self.paint_album(previous, theme, cx)),
+                    )),
+                )
+                .child(current)
+                .into_any_element()
+        } else {
+            current
+        }
     }
 }
 

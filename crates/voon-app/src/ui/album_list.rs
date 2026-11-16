@@ -184,7 +184,13 @@ fn row(
                     theme.secondary
                 }))
                 .when(column == SortOrder::Title, |cell| {
-                    cell.child(cover::render(status.clone(), 24., false, theme))
+                    cell.child(cover::render(
+                        status.clone(),
+                        24.,
+                        false,
+                        theme,
+                        gpui::SharedString::from(format!("list-cover:{}", path.display())),
+                    ))
                 })
                 .child(
                     div()

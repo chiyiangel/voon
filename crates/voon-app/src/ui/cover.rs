@@ -1,9 +1,16 @@
-use gpui::{AnyElement, ObjectFit, div, img, prelude::*, px, rgb};
+use gpui::{AnyElement, ElementId, ObjectFit, div, img, prelude::*, px, rgb};
 
 use super::{icons::icon, theme::Theme};
+use crate::motion;
 use crate::view_model::grid::CoverStatus;
 
-pub fn render(status: Option<CoverStatus>, edge: f32, selected: bool, theme: Theme) -> AnyElement {
+pub fn render(
+    status: Option<CoverStatus>,
+    edge: f32,
+    selected: bool,
+    theme: Theme,
+    id: impl Into<ElementId>,
+) -> AnyElement {
     let placeholder = match &status {
         Some(CoverStatus::Pending) => "尚未缓存封面",
         Some(CoverStatus::Loading) => "正在缓存封面",
@@ -11,10 +18,12 @@ pub fn render(status: Option<CoverStatus>, edge: f32, selected: bool, theme: The
         _ => "无封面",
     };
     let picture = match status {
-        Some(CoverStatus::Ready(image)) => img(image)
-            .size_full()
-            .object_fit(ObjectFit::Cover)
-            .into_any_element(),
+        Some(CoverStatus::Ready(image)) => motion::fade(
+            id,
+            true,
+            motion::crossfade(),
+            img(image).size_full().object_fit(ObjectFit::Cover),
+        ),
         _ => div()
             .size_full()
             .flex()

@@ -1,4 +1,5 @@
 use super::*;
+use crate::motion;
 
 impl AlbumDetail {
     pub(super) fn files(
@@ -39,8 +40,9 @@ impl AlbumDetail {
                 })),
         );
         if self.reading_open {
+            let mut section = div();
             for issue in scan_issues {
-                body = body.child(
+                section = section.child(
                     div()
                         .px_4()
                         .py_2()
@@ -107,9 +109,9 @@ impl AlbumDetail {
                 }
                 Err(_) => tag_status = tag_status.child("无法读取本地标签状态，请重新打开专辑"),
             }
-            body = body.child(tag_status);
+            section = section.child(tag_status);
             if let Some(notice) = self.state.read(cx).album_tag_refresh_notice() {
-                body = body.child(
+                section = section.child(
                     div()
                         .px_4()
                         .py_2()
@@ -120,7 +122,7 @@ impl AlbumDetail {
             }
             if !offline {
                 let state = self.state.clone();
-                body = body.child(
+                section = section.child(
                     div()
                         .id("force-album-tags")
                         .debug_selector(|| "detail-force-tags".into())
@@ -143,7 +145,7 @@ impl AlbumDetail {
                 .as_ref()
                 .and_then(|cover| self.state.read(cx).cover_thumbnail_state(cover))
             {
-                body = body.child(
+                section = section.child(
                     div()
                         .px_4()
                         .py_2()
@@ -152,6 +154,12 @@ impl AlbumDetail {
                         .child(error.clone()),
                 );
             }
+            body = body.child(motion::fade(
+                "detail-reading",
+                true,
+                motion::detail(),
+                section,
+            ));
         }
         let mut attachments = div()
             .id("detail-attachments")
