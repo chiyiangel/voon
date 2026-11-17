@@ -112,9 +112,13 @@ pub fn render(
     };
 
     div()
+        .debug_selector(|| "library-sidebar".into())
         .w(px(SIDEBAR_WIDTH))
+        .max_w(px(SIDEBAR_WIDTH))
+        .min_w_0()
         .h_full()
         .flex_none()
+        .overflow_hidden()
         .flex()
         .flex_col()
         .bg(rgb(theme.sidebar))
@@ -132,9 +136,9 @@ pub fn render(
                 "collection-tree-shell",
                 state.collections_tree_view() == Some(true),
                 motion::chip(),
-                div().child(super::collection_view::navigation_tree(
-                    state, entity, theme,
-                )),
+                div().w_full().min_w_0().overflow_x_hidden().child(
+                    super::collection_view::navigation_tree(state, entity, theme),
+                ),
             ))
         })
         .child(row(Navigation::Composers, "composer"))

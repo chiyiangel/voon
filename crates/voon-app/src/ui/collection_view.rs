@@ -10,7 +10,10 @@ pub fn navigation_tree(
 ) -> impl IntoElement {
     div()
         .id("collection-tree")
+        .w_full()
+        .min_w_0()
         .max_h(px(280.))
+        .overflow_x_hidden()
         .overflow_y_scroll()
         .children({
             let live = state.collection_rows();
@@ -32,67 +35,84 @@ pub fn navigation_tree(
                         row.path.display(),
                         if appearing { "in" } else { "out" }
                     );
-                    motion::fade(
-                        gpui::SharedString::from(key),
-                        appearing,
-                        motion::chip(),
-                        div()
-                            .id(gpui::SharedString::from(format!(
-                                "collection:{}",
-                                row.path.display()
-                            )))
-                            .flex()
-                            .items_center()
-                            .gap(px(5.))
-                            .h(px(26.))
-                            .pl(px(8. + row.depth as f32 * 14.))
-                            .pr(px(8.))
-                            .rounded(px(6.))
-                            .cursor_pointer()
-                            .when(row.selected, |item| item.bg(rgb(theme.selected)))
-                            .hover(|item| item.bg(rgb(theme.selected)))
-                            .child(
-                                div()
-                                    .id("expand")
-                                    .w(px(12.))
-                                    .text_color(rgb(theme.tertiary))
-                                    .child(if row.has_children {
-                                        if row.expanded { "⌄" } else { "›" }
-                                    } else {
-                                        ""
+                    div()
+                        .w_full()
+                        .min_w_0()
+                        .overflow_hidden()
+                        .child(motion::fade(
+                            gpui::SharedString::from(key),
+                            appearing,
+                            motion::chip(),
+                            div()
+                                .id(gpui::SharedString::from(format!(
+                                    "collection:{}",
+                                    row.path.display()
+                                )))
+                                .w_full()
+                                .min_w_0()
+                                .overflow_hidden()
+                                .flex()
+                                .items_center()
+                                .gap(px(5.))
+                                .h(px(26.))
+                                .pl(px(8. + row.depth as f32 * 14.))
+                                .pr(px(8.))
+                                .rounded(px(6.))
+                                .cursor_pointer()
+                                .when(row.selected, |item| item.bg(rgb(theme.selected)))
+                                .hover(|item| item.bg(rgb(theme.selected)))
+                                .child(
+                                    div()
+                                        .id("expand")
+                                        .w(px(12.))
+                                        .text_color(rgb(theme.tertiary))
+                                        .child(if row.has_children {
+                                            if row.expanded { "⌄" } else { "›" }
+                                        } else {
+                                            ""
+                                        })
+                                        .on_click(move |_, _, cx| {
+                                            cx.stop_propagation();
+                                            toggle_state.update(cx, |state, cx| {
+                                                state.toggle_collection(&toggle_path, cx)
+                                            });
+                                        }),
+                                )
+                                .child(icon("box", 13., theme.accent))
+                                .child(
+                                    div()
+                                        .id(gpui::SharedString::from(format!(
+                                            "collection-label:{}",
+                                            row.name
+                                        )))
+                                        .debug_selector({
+                                            let name = row.name.clone();
+                                            move || format!("collection-label:{name}")
+                                        })
+                                        .flex_1()
+                                        .min_w_0()
+                                        .line_clamp(1)
+                                        .text_ellipsis()
+                                        .text_size(px(12.5))
+                                        .child(row.name),
+                                )
+                                .child(
+                                    div()
+                                        .flex_none()
+                                        .text_size(px(11.5))
+                                        .text_color(rgb(theme.tertiary))
+                                        .child(row.album_count.to_string()),
+                                )
+                                .on_click(move |_, _, cx| {
+                                    select_state.update(cx, |state, cx| {
+                                        if let Err(error) =
+                                            state.select_collection(Some(select_path.clone()), cx)
+                                        {
+                                            state.report_error(error, cx);
+                                        }
                                     })
-                                    .on_click(move |_, _, cx| {
-                                        cx.stop_propagation();
-                                        toggle_state.update(cx, |state, cx| {
-                                            state.toggle_collection(&toggle_path, cx)
-                                        });
-                                    }),
-                            )
-                            .child(icon("box", 13., theme.accent))
-                            .child(
-                                div()
-                                    .flex_1()
-                                    .min_w_0()
-                                    .truncate()
-                                    .text_size(px(12.5))
-                                    .child(row.name),
-                            )
-                            .child(
-                                div()
-                                    .text_size(px(11.5))
-                                    .text_color(rgb(theme.tertiary))
-                                    .child(row.album_count.to_string()),
-                            )
-                            .on_click(move |_, _, cx| {
-                                select_state.update(cx, |state, cx| {
-                                    if let Err(error) =
-                                        state.select_collection(Some(select_path.clone()), cx)
-                                    {
-                                        state.report_error(error, cx);
-                                    }
-                                })
-                            }),
-                    )
+                                }),
+                        ))
                 })
         })
 }
@@ -112,6 +132,10 @@ pub fn summary(state: &AppState, theme: Theme) -> Div {
         .child(icon("box", 22., theme.accent))
         .child(
             div()
+                .flex_1()
+                .min_w_0()
+                .line_clamp(1)
+                .text_ellipsis()
                 .font_weight(FontWeight::SEMIBOLD)
                 .child(collection.name.clone()),
         )

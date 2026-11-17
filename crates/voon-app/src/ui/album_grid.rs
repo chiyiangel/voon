@@ -153,12 +153,20 @@ fn card(
         .as_ref()
         .map(|field| field.value.clone())
         .unwrap_or_else(|| "未知艺术家".into());
+    let title = album.display_title().to_owned();
     div()
         .id(gpui::SharedString::from(
             album.path.to_string_lossy().into_owned(),
         ))
+        .debug_selector({
+            let title = title.clone();
+            move || format!("album-card:{title}")
+        })
         .w(px(edge))
+        .max_w(px(edge))
+        .min_w_0()
         .flex_none()
+        .overflow_hidden()
         .flex()
         .flex_col()
         .cursor_pointer()
@@ -181,19 +189,34 @@ fn card(
         )
         .child(
             div()
+                .id(gpui::SharedString::from(format!("album-title:{title}")))
+                .debug_selector({
+                    let title = title.clone();
+                    move || format!("album-title:{title}")
+                })
+                .w_full()
+                .min_w_0()
                 .mt(px(6.))
                 .h(px(32.))
                 .text_size(px(12.5))
                 .line_height(px(16.))
                 .line_clamp(2)
                 .font_weight(FontWeight::MEDIUM)
-                .child(album.display_title().to_owned()),
+                .child(title.clone()),
         )
         .child(
             div()
+                .id(gpui::SharedString::from(format!("album-artist:{title}")))
+                .debug_selector({
+                    let title = title.clone();
+                    move || format!("album-artist:{title}")
+                })
+                .w_full()
+                .min_w_0()
                 .mt(px(3.))
                 .h(px(15.))
-                .truncate()
+                .line_clamp(1)
+                .text_ellipsis()
                 .text_size(px(11.5))
                 .line_height(px(15.))
                 .text_color(rgb(theme.secondary))
