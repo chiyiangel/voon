@@ -1,4 +1,4 @@
-use super::{icons::icon, theme::Theme};
+use super::{icons::icon, theme::Theme, truncating_label::truncating_label};
 use crate::motion;
 use crate::view_model::AppState;
 use gpui::{Div, Entity, FontWeight, div, prelude::*, px, rgb};
@@ -91,10 +91,9 @@ pub fn navigation_tree(
                                         })
                                         .flex_1()
                                         .min_w_0()
-                                        .line_clamp(1)
-                                        .text_ellipsis()
+                                        .overflow_hidden()
                                         .text_size(px(12.5))
-                                        .child(row.name),
+                                        .child(truncating_label(row.name)),
                                 )
                                 .child(
                                     div()
@@ -134,10 +133,9 @@ pub fn summary(state: &AppState, theme: Theme) -> Div {
             div()
                 .flex_1()
                 .min_w_0()
-                .line_clamp(1)
-                .text_ellipsis()
+                .overflow_hidden()
                 .font_weight(FontWeight::SEMIBOLD)
-                .child(collection.name.clone()),
+                .child(truncating_label(collection.name.clone())),
         )
         .child(
             div()

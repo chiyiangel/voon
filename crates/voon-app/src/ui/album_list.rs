@@ -6,7 +6,7 @@ use gpui::{
 };
 use voon_core::db::AlbumRow;
 
-use super::{cover, theme::Theme};
+use super::{cover, theme::Theme, truncating_label::truncating_label};
 use crate::view_model::grid::{CoverCache, CoverStatus};
 use crate::view_model::{AppState, SortOrder, browse::SortDirection};
 
@@ -79,7 +79,7 @@ impl Render for AlbumList {
                     .min_w_0()
                     .px(px(8.))
                     .cursor_pointer()
-                    .truncate()
+                    .overflow_hidden()
                     .text_size(px(11.))
                     .font_weight(FontWeight::MEDIUM)
                     .text_color(rgb(if snapshot.sort_order() == column {
@@ -87,7 +87,7 @@ impl Render for AlbumList {
                     } else {
                         theme.secondary
                     }))
-                    .child(format!("{}{arrow}", column.label()))
+                    .child(truncating_label(format!("{}{arrow}", column.label())))
                     .on_click(move |_, _, cx| {
                         state.update(cx, |state, cx| state.toggle_sort(column, cx))
                     }),
@@ -196,8 +196,8 @@ fn row(
                     div()
                         .flex_1()
                         .min_w_0()
-                        .truncate()
-                        .child(column.cell_text(&album)),
+                        .overflow_hidden()
+                        .child(truncating_label(column.cell_text(&album))),
                 ),
         );
     }

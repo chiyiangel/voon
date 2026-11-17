@@ -24,9 +24,13 @@ mod tags_view;
 pub mod text_input;
 mod theme;
 mod toolbar;
+mod truncating_label;
 mod window;
 
 pub use album_grid::AlbumGrid;
 pub use icons::Assets;
 pub use settings_window::{SettingsPage, SettingsWindow};
+pub use truncating_label::{
+    LabelSnapshot, capture_labels, ellipsize_to_width, snapshots, truncating_label,
+};
 pub use window::VoonWindow;

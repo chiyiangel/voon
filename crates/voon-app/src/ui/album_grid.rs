@@ -9,6 +9,7 @@ use voon_core::db::AlbumRow;
 use super::{
     cover,
     theme::{COMPOSER_PANEL_WIDTH, DETAIL_WIDTH, FACET_PANEL_WIDTH, SIDEBAR_WIDTH, Theme},
+    truncating_label::truncating_label,
 };
 use crate::motion;
 use crate::view_model::{
@@ -215,12 +216,11 @@ fn card(
                 .min_w_0()
                 .mt(px(3.))
                 .h(px(15.))
-                .line_clamp(1)
-                .text_ellipsis()
+                .overflow_hidden()
                 .text_size(px(11.5))
                 .line_height(px(15.))
                 .text_color(rgb(theme.secondary))
-                .child(artist),
+                .child(truncating_label(artist)),
         )
         .child(
             div()

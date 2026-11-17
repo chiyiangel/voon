@@ -3,6 +3,7 @@ use gpui::{Div, Entity, FontWeight, div, prelude::*, px, rgb};
 use super::{
     icons::icon,
     theme::{SIDEBAR_WIDTH, TOOLBAR_HEIGHT, Theme},
+    truncating_label::truncating_label,
 };
 use crate::motion;
 use crate::view_model::{AppState, Navigation};
@@ -78,8 +79,8 @@ pub fn render(
                 div()
                     .flex_1()
                     .min_w_0()
-                    .truncate()
-                    .child(navigation_label(destination)),
+                    .overflow_hidden()
+                    .child(truncating_label(navigation_label(destination))),
             )
             .when(destination == Navigation::Collections, |row| {
                 row.child(div().flex_none().flex().items_center().child(icon(

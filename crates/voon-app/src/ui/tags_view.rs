@@ -10,6 +10,7 @@ use gpui::{
 use super::{
     text_input::{TextChanged, TextInput},
     theme::Theme,
+    truncating_label::truncating_label,
 };
 use crate::motion;
 use crate::view_model::{
@@ -139,9 +140,16 @@ pub fn navigation_tags(
                     theme.sidebar
                 }))
                 .text_size(px(11.5))
-                .child(div().min_w_0().truncate().child(name))
                 .child(
                     div()
+                        .flex_1()
+                        .min_w_0()
+                        .overflow_hidden()
+                        .child(truncating_label(name)),
+                )
+                .child(
+                    div()
+                        .flex_none()
                         .text_color(rgb(theme.secondary))
                         .child(state.organization_album_count(scope).to_string()),
                 )

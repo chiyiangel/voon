@@ -1,4 +1,7 @@
-use super::theme::{COMPOSER_PANEL_WIDTH, Theme};
+use super::{
+    theme::{COMPOSER_PANEL_WIDTH, Theme},
+    truncating_label::truncating_label,
+};
 use crate::view_model::AppState;
 use gpui::{Entity, FontWeight, div, prelude::*, px, rgb};
 
@@ -60,12 +63,13 @@ pub fn panel(state: &AppState, entity: &Entity<AppState>, theme: Theme) -> impl 
                     div()
                         .flex_1()
                         .min_w_0()
-                        .truncate()
+                        .overflow_hidden()
                         .text_size(px(13.))
-                        .child(name.clone()),
+                        .child(truncating_label(name.clone())),
                 )
                 .child(
                     div()
+                        .flex_none()
                         .text_size(px(12.))
                         .text_color(rgb(theme.tertiary))
                         .child(format!("{} 张", composer.count)),
