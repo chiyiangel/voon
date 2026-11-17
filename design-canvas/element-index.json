@@ -1,0 +1,6757 @@
+{
+  "copyFormat": "[voon-design] frame=<frame> > el=<id> | label=\"<label>\" | src=<planned module>",
+  "idConvention": "ids are stable ascii paths unique inside a frame; the same control keeps the same id across frames. label is the visible copy. src is the planned GPUI module under crates/voon-app/src/ui (not written yet).",
+  "frameCount": 21,
+  "elementCount": 1100,
+  "frames": [
+    {
+      "id": "1-welcome",
+      "number": "1",
+      "title": "首次启动 · 添加音乐库根目录",
+      "section": "开始",
+      "assumption": null
+    },
+    {
+      "id": "2-first-scan",
+      "number": "2",
+      "title": "首次扫描进行中",
+      "section": "开始",
+      "assumption": "「约 6 分钟」按 SMB 千兆、首扫读标签头估算，仅示意。"
+    },
+    {
+      "id": "3-main-grid",
+      "number": "3",
+      "title": "主界面 · 网格视图（默认）",
+      "section": "主界面",
+      "assumption": null
+    },
+    {
+      "id": "4-main-list",
+      "number": "4",
+      "title": "主界面 · 列表视图",
+      "section": "主界面",
+      "assumption": null
+    },
+    {
+      "id": "5-detail-multidisc",
+      "number": "5",
+      "title": "专辑详情 · 多碟套装（CUE 虚拟音轨）",
+      "section": "专辑详情",
+      "assumption": null
+    },
+    {
+      "id": "6-detail-classical",
+      "number": "6",
+      "title": "专辑详情 · 古典字段",
+      "section": "专辑详情",
+      "assumption": null
+    },
+    {
+      "id": "7-edit-sheet",
+      "number": "7",
+      "title": "编辑专辑信息",
+      "section": "整理操作",
+      "assumption": null
+    },
+    {
+      "id": "8-merge",
+      "number": "8",
+      "title": "合并专辑",
+      "section": "整理操作",
+      "assumption": null
+    },
+    {
+      "id": "8b-split",
+      "number": "8b",
+      "title": "拆分专辑",
+      "section": "整理操作",
+      "assumption": "41 组、37 个无标签文件是示意数字，真实值要扫描后才知道。"
+    },
+    {
+      "id": "9-cover-picker",
+      "number": "9",
+      "title": "选择封面",
+      "section": "整理操作",
+      "assumption": "这张专辑的 APE 是否带内嵌封面，扫描报告看不出来，两张内嵌候选是示意。"
+    },
+    {
+      "id": "10-collection",
+      "number": "10",
+      "title": "套装 · Philips Duo",
+      "section": "浏览",
+      "assumption": "除前三张外，其余 Philips Duo 成员是示意数据，扫描报告只展开到前几张。"
+    },
+    {
+      "id": "11-composers",
+      "number": "11",
+      "title": "作曲家",
+      "section": "浏览",
+      "assumption": null
+    },
+    {
+      "id": "12-facets",
+      "number": "12",
+      "title": "分面筛选",
+      "section": "浏览",
+      "assumption": "各分面计数是按扫描报告的文件数估算到专辑级的示意值。"
+    },
+    {
+      "id": "13-tags",
+      "number": "13",
+      "title": "标签与合集管理",
+      "section": "整理",
+      "assumption": null
+    },
+    {
+      "id": "14-inbox",
+      "number": "14",
+      "title": "待处理",
+      "section": "整理",
+      "assumption": null
+    },
+    {
+      "id": "15-offline",
+      "number": "15",
+      "title": "NAS 未挂载（离线）",
+      "section": "状态",
+      "assumption": null
+    },
+    {
+      "id": "16-settings",
+      "number": "16",
+      "title": "设置 · 音乐库",
+      "section": "状态",
+      "assumption": null
+    },
+    {
+      "id": "3-main-grid-dark",
+      "number": "3d",
+      "title": "主界面 · 网格视图（默认）（深色）",
+      "section": "深色模式",
+      "assumption": null
+    },
+    {
+      "id": "4-main-list-dark",
+      "number": "4d",
+      "title": "主界面 · 列表视图（深色）",
+      "section": "深色模式",
+      "assumption": null
+    },
+    {
+      "id": "5-detail-multidisc-dark",
+      "number": "5d",
+      "title": "专辑详情 · 多碟套装（CUE 虚拟音轨）（深色）",
+      "section": "深色模式",
+      "assumption": null
+    },
+    {
+      "id": "14-inbox-dark",
+      "number": "14d",
+      "title": "待处理（深色）",
+      "section": "深色模式",
+      "assumption": null
+    }
+  ],
+  "elements": [
+    {
+      "frame": "1-welcome",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "sidebar.library-status",
+      "label": "尚未添加音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "onboarding.path",
+      "label": "/Volumes/NAS1/Music",
+      "src": "crates/voon-app/src/ui/onboarding.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "onboarding.choose",
+      "label": "选择文件夹…",
+      "src": "crates/voon-app/src/ui/onboarding.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "onboarding.start",
+      "label": "开始扫描",
+      "src": "crates/voon-app/src/ui/onboarding.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "onboarding.drop",
+      "label": "把文件夹拖到这里，或点选择文件夹",
+      "src": "crates/voon-app/src/ui/onboarding.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "onboarding.readonly-note",
+      "label": "只读：不会修改 NAS 上的任何文件",
+      "src": "crates/voon-app/src/ui/onboarding.rs"
+    },
+    {
+      "frame": "1-welcome",
+      "id": "onboarding.more-roots",
+      "label": "之后可在设置里添加更多根目录",
+      "src": "crates/voon-app/src/ui/onboarding.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "scan.headline",
+      "label": "正在扫描 /Volumes/NAS1/Music",
+      "src": "crates/voon-app/src/ui/scan_banner.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "scan.progress",
+      "label": "扫描进度 36%",
+      "src": "crates/voon-app/src/ui/scan_banner.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "scan.current",
+      "label": "当前：Philips Duo/[438323-2]Mozart Complete Violin Concertos [Graumiaux]/CD2",
+      "src": "crates/voon-app/src/ui/scan_banner.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "scan.cancel",
+      "label": "取消",
+      "src": "crates/voon-app/src/ui/scan_banner.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.brahms",
+      "label": "Brahms: Complete Piano Concertos & Overtures",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.grumiaux",
+      "label": "Mozart: Complete Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.placeholder.0",
+      "label": "扫描中占位",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.placeholder.1",
+      "label": "扫描中占位",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.placeholder.2",
+      "label": "扫描中占位",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.placeholder.3",
+      "label": "扫描中占位",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.placeholder.4",
+      "label": "扫描中占位",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.placeholder.5",
+      "label": "扫描中占位",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "grid.placeholder.6",
+      "label": "扫描中占位",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "2-first-scan",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.title.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.title",
+      "label": "标题：J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.artist.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.artist",
+      "label": "艺术家：諏訪内晶子 Akiko Suwanai",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.composer.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.year.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.year",
+      "label": "年份：2022",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.genre.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.genre",
+      "label": "流派：古典",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.tags.source",
+      "label": "来源：手动（你手动改过）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.field.tags",
+      "label": "标签：睡前小提琴 · 独奏",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.track.d1.1",
+      "label": "Sonata No. 1 in G minor, BWV 1001 — I. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.track.d1.2",
+      "label": "— II. Fuga. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.track.d1.3",
+      "label": "— III. Siciliana",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.track.d1.5",
+      "label": "Partita No. 1 in B minor, BWV 1002 — I. Allemanda",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.path",
+      "label": "Akiko Suwanai - J.S. Bach_Sonatas and Partitas for Solo Violin (2022) [24-192]",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.title",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.artist",
+      "label": "諏訪内晶子 Akiko Suwanai",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.meta",
+      "label": "2022 · FLAC 24/192 · 2 碟 · 31 轨 · 3.9 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "toolbar.view",
+      "label": "视图：列表（可切换为网格）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.jade",
+      "label": "皎月云间之梦 Jade Moon Upon a Sea of Clouds",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.row.minnaar",
+      "label": "Beethoven: Piano Concertos Nos. 1 and 2",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "list.header",
+      "label": "列标题（点击排序）",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.disc.1.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.disc.1",
+      "label": "CD1 · CD1/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d1.1",
+      "label": "Brandenburg Concerto No. 1 in F, BWV 1046 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d1.2",
+      "label": "— II. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Menuetto – Trio – Polacca",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d1.5",
+      "label": "Brandenburg Concerto No. 2 in F, BWV 1047 — I. (Allegro)",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.disc.2.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.disc.2",
+      "label": "CD2 · CD2/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d2.1",
+      "label": "Brandenburg Concerto No. 4 in G, BWV 1049 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d2.2",
+      "label": "— II. Andante",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.track.d2.3",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.title.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.title",
+      "label": "标题：Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.artist.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.artist",
+      "label": "演奏者：I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.composer.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.catalog.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.catalog",
+      "label": "唱片编号：438 317-2",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.collection.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.field.collection",
+      "label": "套装：Philips Duo（193 张）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.cover-change",
+      "label": "更换",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.cover-source",
+      "label": "封面来自 cover.jpg（目录图片）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.title",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.artist",
+      "label": "I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.meta",
+      "label": "1993 · APE 16/44.1 · 2 碟 · 27 轨（虚拟）· 1.2 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.disc.1.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.disc.1",
+      "label": "CD1 · CD1/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d1.1",
+      "label": "Brandenburg Concerto No. 1 in F, BWV 1046 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d1.2",
+      "label": "— II. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Menuetto – Trio – Polacca",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d1.5",
+      "label": "Brandenburg Concerto No. 2 in F, BWV 1047 — I. (Allegro)",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.disc.2.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.disc.2",
+      "label": "CD2 · CD2/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d2.1",
+      "label": "Brandenburg Concerto No. 4 in G, BWV 1049 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d2.2",
+      "label": "— II. Andante",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.track.d2.3",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.title.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.title",
+      "label": "标题：Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.artist.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.artist",
+      "label": "演奏者：I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.composer.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.catalog.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.catalog",
+      "label": "唱片编号：438 317-2",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.collection.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.field.collection",
+      "label": "套装：Philips Duo（193 张）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.cover-change",
+      "label": "更换",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.cover-source",
+      "label": "封面来自 cover.jpg（目录图片）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.title",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.artist",
+      "label": "I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.meta",
+      "label": "1993 · APE 16/44.1 · 2 碟 · 27 轨（虚拟）· 1.2 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.composer.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.composer",
+      "label": "作曲家：Ludwig van Beethoven",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.work.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.work",
+      "label": "作品：Symphony No. 5, Op. 67 · No. 7, Op. 92",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.conductor.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.conductor",
+      "label": "指挥：Carlos Kleiber",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.orchestra.source",
+      "label": "来源：手动（你手动改过）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.orchestra",
+      "label": "乐团：Wiener Philharmoniker",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.performer",
+      "label": "演奏者：—",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.title.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.title",
+      "label": "标题：Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.year.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.year",
+      "label": "年份：1996",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.genre.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.field.genre",
+      "label": "流派：古典 · 交响曲",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.1",
+      "label": "Symphony No. 5 in C minor, Op. 67 — I. Allegro con brio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.2",
+      "label": "— II. Andante con moto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.5",
+      "label": "Symphony No. 7 in A, Op. 92 — I. Poco sostenuto – Vivace",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.6",
+      "label": "— II. Allegretto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.7",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.track.d1.8",
+      "label": "— IV. Allegro con brio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.title",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.artist",
+      "label": "Carlos Kleiber, Wiener Philharmoniker",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.meta",
+      "label": "1996 · FLAC 24/88.2 · 1 碟 · 8 轨 · 1.4 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "6-detail-classical",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.composer.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.composer",
+      "label": "作曲家：Ludwig van Beethoven",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.work.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.work",
+      "label": "作品：Symphony No. 5, Op. 67 · No. 7, Op. 92",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.conductor.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.conductor",
+      "label": "指挥：Carlos Kleiber",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.orchestra.source",
+      "label": "来源：手动（你手动改过）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.orchestra",
+      "label": "乐团：Wiener Philharmoniker",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.performer",
+      "label": "演奏者：—",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.title.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.title",
+      "label": "标题：Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.year.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.year",
+      "label": "年份：1996",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.genre.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.field.genre",
+      "label": "流派：古典 · 交响曲",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.1",
+      "label": "Symphony No. 5 in C minor, Op. 67 — I. Allegro con brio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.2",
+      "label": "— II. Andante con moto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.5",
+      "label": "Symphony No. 7 in A, Op. 92 — I. Poco sostenuto – Vivace",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.6",
+      "label": "— II. Allegretto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.7",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.track.d1.8",
+      "label": "— IV. Allegro con brio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.title",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.artist",
+      "label": "Carlos Kleiber, Wiener Philharmoniker",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.meta",
+      "label": "1996 · FLAC 24/88.2 · 1 碟 · 8 轨 · 1.4 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.title.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.title.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.title",
+      "label": "标题：Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.artist.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.artist.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.artist",
+      "label": "艺术家：Carlos Kleiber, Wiener Philharmoniker",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.composer.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.composer.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.composer",
+      "label": "作曲家：Ludwig van Beethoven",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.performer.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.performer.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.performer",
+      "label": "演奏者：（无）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.conductor.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.conductor.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.conductor",
+      "label": "指挥：Carlos Kleiber",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.orchestra.source",
+      "label": "来源：手动（你手动改过）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.orchestra.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.orchestra",
+      "label": "乐团：Wiener Philharmoniker",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.year.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.year.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.year",
+      "label": "年份：1996",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.genre.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.genre.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.genre",
+      "label": "流派：古典",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.tags.source",
+      "label": "来源：手动（你手动改过）",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.tags.restore",
+      "label": "恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.field.tags",
+      "label": "标签：",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.restore-all",
+      "label": "全部恢复自动值",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.cancel",
+      "label": "取消",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.save",
+      "label": "存储",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "edit.sheet",
+      "label": "编辑专辑信息",
+      "src": "crates/voon-app/src/ui/edit_sheet.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "7-edit-sheet",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.mode",
+      "label": "模式：合并 / 拆分",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.source.1",
+      "label": "MAI KURAKI BEST 151A -LOVE & HOPE- Disc 1",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.source.2",
+      "label": "MAI KURAKI BEST 151A -LOVE & HOPE- Disc 2",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.result",
+      "label": "合并结果预览",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.disc.1",
+      "label": "碟 1 ← Disc 1 目录",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.disc.2",
+      "label": "碟 2 ← Disc 2 目录",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.primary.1",
+      "label": "以 Disc 1 为准",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.primary.2",
+      "label": "以 Disc 2 为准",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.cover.1",
+      "label": "封面用 Disc 1 的 cover.jpg",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.cover.2",
+      "label": "封面用 Disc 2 的 cover.jpg",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.cancel",
+      "label": "取消",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.confirm",
+      "label": "合并",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "merge.sheet",
+      "label": "合并专辑",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.filter.all",
+      "label": "全部 23",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.filter.untagged",
+      "label": "无标签 4",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.filter.cue-encoding",
+      "label": "CUE 乱码 3",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.filter.unmerged",
+      "label": "多碟未合并 5",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.filter.no-cover",
+      "label": "无封面 9",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.filter.cue-mismatch",
+      "label": "CUE 不匹配 2",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.numeric.edit",
+      "label": "手动填写",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.numeric.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.numeric",
+      "label": "Unknown_Artist/[未命名] — 文件名全是数字，且没有内嵌标签",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.group2007.encoding",
+      "label": "选择编码…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.group2007.skip",
+      "label": "忽略",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.group2007",
+      "label": "群星.-.[2007十大流行发烧唱片].专辑.(APE) — CUE 编码无法识别，曲目名显示为乱码",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.kuraki.merge",
+      "label": "合并为 2 碟",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.kuraki.skip",
+      "label": "不是同一张",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.kuraki",
+      "label": "[Hires]倉木麻衣 - MAI KURAKI BEST 151A -LOVE & HOPE- Disc 1[24bit 96khz FLAC] — 疑似同一张专辑的两张碟被识别成两张专辑",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.hires.split",
+      "label": "拆分…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.hires.cover",
+      "label": "选择封面…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.hires",
+      "label": "Hi-res Selection — 没有找到封面图片，音频也没有内嵌封面",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.sens.relink",
+      "label": "改用 SENS.ape",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.sens.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "inbox.item.sens",
+      "label": "SENS — CUE 引用的音频文件不存在",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8-merge",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.mode",
+      "label": "模式：合并 / 拆分",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.by.album",
+      "label": "按标签 ALBUM",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.by.artist",
+      "label": "按标签 ALBUMARTIST",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.by.manual",
+      "label": "手动选择曲目",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.group.g1",
+      "label": "Sarah Àlainn - Anima",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.group.g2",
+      "label": "宮本笑里 - Life",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.group.g3",
+      "label": "Yoonie Han - Hollywood Romance",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.group.g4",
+      "label": "（无专辑标签）",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.cancel",
+      "label": "取消",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.confirm",
+      "label": "拆分为 41 张",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "split.sheet",
+      "label": "拆分专辑",
+      "src": "crates/voon-app/src/ui/merge_sheet.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.filter.all",
+      "label": "全部 23",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.filter.untagged",
+      "label": "无标签 4",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.filter.cue-encoding",
+      "label": "CUE 乱码 3",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.filter.unmerged",
+      "label": "多碟未合并 5",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.filter.no-cover",
+      "label": "无封面 9",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.filter.cue-mismatch",
+      "label": "CUE 不匹配 2",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.numeric.edit",
+      "label": "手动填写",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.numeric.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.numeric",
+      "label": "Unknown_Artist/[未命名] — 文件名全是数字，且没有内嵌标签",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.group2007.encoding",
+      "label": "选择编码…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.group2007.skip",
+      "label": "忽略",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.group2007",
+      "label": "群星.-.[2007十大流行发烧唱片].专辑.(APE) — CUE 编码无法识别，曲目名显示为乱码",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.kuraki.merge",
+      "label": "合并为 2 碟",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.kuraki.skip",
+      "label": "不是同一张",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.kuraki",
+      "label": "[Hires]倉木麻衣 - MAI KURAKI BEST 151A -LOVE & HOPE- Disc 1[24bit 96khz FLAC] — 疑似同一张专辑的两张碟被识别成两张专辑",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.hires.split",
+      "label": "拆分…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.hires.cover",
+      "label": "选择封面…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.hires",
+      "label": "Hi-res Selection — 没有找到封面图片，音频也没有内嵌封面",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.sens.relink",
+      "label": "改用 SENS.ape",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.sens.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "inbox.item.sens",
+      "label": "SENS — CUE 引用的音频文件不存在",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "8b-split",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.disc.1.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.disc.1",
+      "label": "CD1 · CD1/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d1.1",
+      "label": "Brandenburg Concerto No. 1 in F, BWV 1046 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d1.2",
+      "label": "— II. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Menuetto – Trio – Polacca",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d1.5",
+      "label": "Brandenburg Concerto No. 2 in F, BWV 1047 — I. (Allegro)",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.disc.2.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.disc.2",
+      "label": "CD2 · CD2/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d2.1",
+      "label": "Brandenburg Concerto No. 4 in G, BWV 1049 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d2.2",
+      "label": "— II. Andante",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.track.d2.3",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.title.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.title",
+      "label": "标题：Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.artist.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.artist",
+      "label": "演奏者：I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.composer.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.catalog.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.catalog",
+      "label": "唱片编号：438 317-2",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.collection.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.field.collection",
+      "label": "套装：Philips Duo（193 张）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.cover-change",
+      "label": "更换",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.cover-source",
+      "label": "封面来自 cover.jpg（目录图片）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.title",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.artist",
+      "label": "I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.meta",
+      "label": "1993 · APE 16/44.1 · 2 碟 · 27 轨（虚拟）· 1.2 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.candidate.cover-jpg",
+      "label": "cover.jpg",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.candidate.back-jpg",
+      "label": "back.jpg",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.candidate.embedded-cd1",
+      "label": "CD1/CDImage.ape 内嵌",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.candidate.embedded-cd2",
+      "label": "CD2/CDImage.ape 内嵌",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.from-file",
+      "label": "从其他文件选择…",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.cancel",
+      "label": "取消",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.confirm",
+      "label": "使用这张",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "cover.sheet",
+      "label": "选择封面",
+      "src": "crates/voon-app/src/ui/cover_picker.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "9-cover-picker",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.cover",
+      "label": "套装：Philips Duo",
+      "src": "crates/voon-app/src/ui/collection_view.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.title",
+      "label": "Philips Duo",
+      "src": "crates/voon-app/src/ui/collection_view.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.meta",
+      "label": "193 张专辑 · 386 碟 · 118 GB · 套装由外层目录识别",
+      "src": "crates/voon-app/src/ui/collection_view.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.sort",
+      "label": "排序：唱片编号",
+      "src": "crates/voon-app/src/ui/collection_view.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.brahms",
+      "label": "Brahms: Complete Piano Concertos & Overtures",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.grumiaux",
+      "label": "Mozart: Complete Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438326",
+      "label": "Schubert: Piano Sonatas",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438329",
+      "label": "Vivaldi: L'estro armonico",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438332",
+      "label": "Haydn: Symphonies Nos. 94, 100, 101",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438335",
+      "label": "Mendelssohn: Symphonies 3 & 4",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438338",
+      "label": "Dvořák: Symphonies 7–9",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438341",
+      "label": "Liszt: Piano Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438344",
+      "label": "Chopin: Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438347",
+      "label": "Mozart: Requiem · Masses",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "collection.album.pd-438350",
+      "label": "Debussy · Ravel: Orchestral Works",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.disc.1.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.disc.1",
+      "label": "CD1 · CD1/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d1.1",
+      "label": "Brandenburg Concerto No. 1 in F, BWV 1046 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d1.2",
+      "label": "— II. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Menuetto – Trio – Polacca",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d1.5",
+      "label": "Brandenburg Concerto No. 2 in F, BWV 1047 — I. (Allegro)",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.disc.2.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.disc.2",
+      "label": "CD2 · CD2/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d2.1",
+      "label": "Brandenburg Concerto No. 4 in G, BWV 1049 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d2.2",
+      "label": "— II. Andante",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.track.d2.3",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.title.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.title",
+      "label": "标题：Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.artist.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.artist",
+      "label": "演奏者：I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.composer.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.catalog.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.catalog",
+      "label": "唱片编号：438 317-2",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.collection.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.field.collection",
+      "label": "套装：Philips Duo（193 张）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.cover-change",
+      "label": "更换",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.cover-source",
+      "label": "封面来自 cover.jpg（目录图片）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.title",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.artist",
+      "label": "I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.meta",
+      "label": "1993 · APE 16/44.1 · 2 碟 · 27 轨（虚拟）· 1.2 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "10-collection",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.mozart",
+      "label": "W.A. Mozart（214 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.beethoven",
+      "label": "L. van Beethoven（61 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.bach",
+      "label": "J.S. Bach（23 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.chopin",
+      "label": "F. Chopin（9 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.brahms",
+      "label": "J. Brahms（8 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.tchaikovsky",
+      "label": "P.I. Tchaikovsky（7 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.schubert",
+      "label": "F. Schubert（5 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.kreisler",
+      "label": "F. Kreisler（3 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.mahler",
+      "label": "G. Mahler（2 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.item.hisaishi",
+      "label": "久石让（2 张）",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.filter",
+      "label": "筛选作曲家",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.group.chamber",
+      "label": "钢琴与室内乐",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.chamber.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.chamber.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.chamber.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.group.concerto",
+      "label": "协奏曲",
+      "src": "crates/voon-app/src/ui/composer_view.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.concerto.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "composers.concerto.album.grumiaux",
+      "label": "Mozart: Complete Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "11-composers",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.kind.pcm",
+      "label": "PCM（541）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.kind.dsd",
+      "label": "DSD（45）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.format.flac",
+      "label": "FLAC（389）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.format.ape",
+      "label": "APE（142）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.format.dsf",
+      "label": "DSF（41）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.format.dff",
+      "label": "DFF（4）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.format.wv",
+      "label": "WV（3）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.format.wav",
+      "label": "WAV（7）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.spec.cd",
+      "label": "CD 16/44.1（311）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.spec.hr96",
+      "label": "Hi-Res 24/96（148）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.spec.hr192",
+      "label": "24/192（22）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.spec.dxd",
+      "label": "DXD 352.8k（3）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.spec.dsd64",
+      "label": "DSD64（12）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.spec.dsd128",
+      "label": "DSD128（6）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.spec.dsd256",
+      "label": "DSD256（27）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.lang.inst",
+      "label": "器乐（402）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.lang.zh",
+      "label": "国语（46）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.lang.yue",
+      "label": "粤语（29）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.lang.ja",
+      "label": "日语（38）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.lang.en",
+      "label": "英语（61）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.era.1990",
+      "label": "1990 年代（214）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.era.2000",
+      "label": "2000 年代（88）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.era.2010",
+      "label": "2010 年代（171）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.era.2020",
+      "label": "2020 年代（63）",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.active.dsd",
+      "label": "已选：类型 DSD",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.active.format",
+      "label": "已选：格式 DSF、DFF",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.clear",
+      "label": "清除筛选",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.save-smart",
+      "label": "存为合集",
+      "src": "crates/voon-app/src/ui/facet_view.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.result.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.result.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.result.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.result.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "facets.result.album.minnaar",
+      "label": "Beethoven: Piano Concertos Nos. 1 and 2",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "12-facets",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.night.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.night",
+      "label": "标签：睡前小提琴（24）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.solo.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.solo",
+      "label": "标签：独奏（41）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.symphony.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.symphony",
+      "label": "标签：交响曲（37）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.great.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.great",
+      "label": "标签：名演（19）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.test.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.test",
+      "label": "标签：试音（17）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.yue.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.yue",
+      "label": "标签：粤语（29）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.ost.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.ost",
+      "label": "标签：原声（11）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.todo-check.more",
+      "label": "重命名、改颜色、删除",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.tag.todo-check",
+      "label": "标签：待核对（6）",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.stack.night",
+      "label": "合集：睡前小提琴",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.stack.dsd",
+      "label": "合集：DSD 试音碟",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.stack.car",
+      "label": "合集：车载 · 粤语",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.stack.kempff",
+      "label": "合集：Kempff 贝多芬奏鸣曲全集",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.stack.gift",
+      "label": "合集：送爸妈的",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.new-tag",
+      "label": "新建标签",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.new-stack",
+      "label": "新建合集",
+      "src": "crates/voon-app/src/ui/tags_view.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.preview.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.preview.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.preview.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "tags.preview.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "13-tags",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.filter.all",
+      "label": "全部 23",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.filter.untagged",
+      "label": "无标签 4",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.filter.cue-encoding",
+      "label": "CUE 乱码 3",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.filter.unmerged",
+      "label": "多碟未合并 5",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.filter.no-cover",
+      "label": "无封面 9",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.filter.cue-mismatch",
+      "label": "CUE 不匹配 2",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.numeric.edit",
+      "label": "手动填写",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.numeric.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.numeric",
+      "label": "Unknown_Artist/[未命名] — 文件名全是数字，且没有内嵌标签",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.group2007.encoding",
+      "label": "选择编码…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.group2007.skip",
+      "label": "忽略",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.group2007",
+      "label": "群星.-.[2007十大流行发烧唱片].专辑.(APE) — CUE 编码无法识别，曲目名显示为乱码",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.kuraki.merge",
+      "label": "合并为 2 碟",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.kuraki.skip",
+      "label": "不是同一张",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.kuraki",
+      "label": "[Hires]倉木麻衣 - MAI KURAKI BEST 151A -LOVE & HOPE- Disc 1[24bit 96khz FLAC] — 疑似同一张专辑的两张碟被识别成两张专辑",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.hires.split",
+      "label": "拆分…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.hires.cover",
+      "label": "选择封面…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.hires",
+      "label": "Hi-res Selection — 没有找到封面图片，音频也没有内嵌封面",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.sens.relink",
+      "label": "改用 SENS.ape",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.sens.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "inbox.item.sens",
+      "label": "SENS — CUE 引用的音频文件不存在",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "offline.banner",
+      "label": "NAS1 未挂载",
+      "src": "crates/voon-app/src/ui/offline_banner.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "offline.reconnect",
+      "label": "重新连接",
+      "src": "crates/voon-app/src/ui/offline_banner.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.title.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.title",
+      "label": "标题：J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.artist.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.artist",
+      "label": "艺术家：諏訪内晶子 Akiko Suwanai",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.composer.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.year.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.year",
+      "label": "年份：2022",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.genre.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.genre",
+      "label": "流派：古典",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.tags.source",
+      "label": "来源：手动（你手动改过）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.field.tags",
+      "label": "标签：睡前小提琴 · 独奏",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.track.d1.1",
+      "label": "Sonata No. 1 in G minor, BWV 1001 — I. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.track.d1.2",
+      "label": "— II. Fuga. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.track.d1.3",
+      "label": "— III. Siciliana",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.track.d1.5",
+      "label": "Partita No. 1 in B minor, BWV 1002 — I. Allemanda",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.path",
+      "label": "Akiko Suwanai - J.S. Bach_Sonatas and Partitas for Solo Violin (2022) [24-192]",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.title",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.artist",
+      "label": "諏訪内晶子 Akiko Suwanai",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.meta",
+      "label": "2022 · FLAC 24/192 · 2 碟 · 31 轨 · 3.9 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "15-offline",
+      "id": "sidebar.library-status",
+      "label": "NAS1 未挂载",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.tab.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.tab.scan",
+      "label": "扫描",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.tab.ignore",
+      "label": "忽略规则",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.tab.general",
+      "label": "通用",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.root.nas1.more",
+      "label": "重新扫描此目录、在访达中显示、移除",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.root.nas1",
+      "label": "/Volumes/NAS1/Music",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.root.local.more",
+      "label": "重新扫描此目录、在访达中显示、移除",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.root.local",
+      "label": "~/Music/待整理",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.add-root",
+      "label": "添加根目录…",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.rescan",
+      "label": "增量重新扫描",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.full-rescan",
+      "label": "完整重建索引",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.ignore.eadir",
+      "label": "@eaDir/ — 群晖缩略图目录",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.ignore.recycle",
+      "label": "#recycle/ — NAS 回收站",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.ignore.dotfiles",
+      "label": ".* · ._* — 隐藏文件与 macOS 资源分叉（.DS_Store 等）",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.ignore.video",
+      "label": "*.m4v · *.mp4 · *.mkv — 视频（例如 Latin Music Video Collection）",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.ignore.docs",
+      "label": "*.log · *.pdf · *.txt · *.url — 抓轨日志、小册子、说明与广告链接",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.ignore.booklet",
+      "label": "Booklet/ · Scans/ · scan/ — 小册子扫描目录（不参与封面候选）",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.add-rule",
+      "label": "添加规则…",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "16-settings",
+      "id": "settings.index-location",
+      "label": "索引位置",
+      "src": "crates/voon-app/src/ui/settings.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.title.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.title",
+      "label": "标题：J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.artist.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.artist",
+      "label": "艺术家：諏訪内晶子 Akiko Suwanai",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.composer.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.year.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.year",
+      "label": "年份：2022",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.genre.source",
+      "label": "来源：标签（来自文件内嵌标签）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.genre",
+      "label": "流派：古典",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.tags.source",
+      "label": "来源：手动（你手动改过）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.field.tags",
+      "label": "标签：睡前小提琴 · 独奏",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.track.d1.1",
+      "label": "Sonata No. 1 in G minor, BWV 1001 — I. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.track.d1.2",
+      "label": "— II. Fuga. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.track.d1.3",
+      "label": "— III. Siciliana",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.track.d1.5",
+      "label": "Partita No. 1 in B minor, BWV 1002 — I. Allemanda",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.path",
+      "label": "Akiko Suwanai - J.S. Bach_Sonatas and Partitas for Solo Violin (2022) [24-192]",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.title",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.artist",
+      "label": "諏訪内晶子 Akiko Suwanai",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.meta",
+      "label": "2022 · FLAC 24/192 · 2 碟 · 31 轨 · 3.9 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "3-main-grid-dark",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "toolbar.view",
+      "label": "视图：列表（可切换为网格）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.jade",
+      "label": "皎月云间之梦 Jade Moon Upon a Sea of Clouds",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.row.minnaar",
+      "label": "Beethoven: Piano Concertos Nos. 1 and 2",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "list.header",
+      "label": "列标题（点击排序）",
+      "src": "crates/voon-app/src/ui/album_list.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.disc.1.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.disc.1",
+      "label": "CD1 · CD1/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d1.1",
+      "label": "Brandenburg Concerto No. 1 in F, BWV 1046 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d1.2",
+      "label": "— II. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Menuetto – Trio – Polacca",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d1.5",
+      "label": "Brandenburg Concerto No. 2 in F, BWV 1047 — I. (Allegro)",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.disc.2.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.disc.2",
+      "label": "CD2 · CD2/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d2.1",
+      "label": "Brandenburg Concerto No. 4 in G, BWV 1049 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d2.2",
+      "label": "— II. Andante",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.track.d2.3",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.title.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.title",
+      "label": "标题：Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.artist.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.artist",
+      "label": "演奏者：I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.composer.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.catalog.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.catalog",
+      "label": "唱片编号：438 317-2",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.collection.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.field.collection",
+      "label": "套装：Philips Duo（193 张）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.cover-change",
+      "label": "更换",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.cover-source",
+      "label": "封面来自 cover.jpg（目录图片）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.title",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.artist",
+      "label": "I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.meta",
+      "label": "1993 · APE 16/44.1 · 2 碟 · 27 轨（虚拟）· 1.2 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "4-main-list-dark",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.disc.1.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.disc.1",
+      "label": "CD1 · CD1/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d1.1",
+      "label": "Brandenburg Concerto No. 1 in F, BWV 1046 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d1.2",
+      "label": "— II. Adagio",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d1.3",
+      "label": "— III. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d1.4",
+      "label": "— IV. Menuetto – Trio – Polacca",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d1.5",
+      "label": "Brandenburg Concerto No. 2 in F, BWV 1047 — I. (Allegro)",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.disc.2.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.disc.2",
+      "label": "CD2 · CD2/CDImage.ape + CDImage.cue",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d2.1",
+      "label": "Brandenburg Concerto No. 4 in G, BWV 1049 — I. Allegro",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d2.2",
+      "label": "— II. Andante",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.track.d2.3",
+      "label": "— III. Presto",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.title.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.title",
+      "label": "标题：Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.artist.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.artist",
+      "label": "演奏者：I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.composer.source",
+      "label": "来源：CUE（来自 CUE 分轨表）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.composer",
+      "label": "作曲家：J.S. Bach",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.catalog.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.catalog",
+      "label": "唱片编号：438 317-2",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.collection.source",
+      "label": "来源：目录名（从目录名解析）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.field.collection",
+      "label": "套装：Philips Duo（193 张）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.cover-change",
+      "label": "更换",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.cover-source",
+      "label": "封面来自 cover.jpg（目录图片）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.cover",
+      "label": "专辑封面（点击更换）",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.title",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.artist",
+      "label": "I Musici",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.meta",
+      "label": "1993 · APE 16/44.1 · 2 碟 · 27 轨（虚拟）· 1.2 GB",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.edit",
+      "label": "编辑信息",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.open",
+      "label": "用默认播放器打开",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "detail.more",
+      "label": "更多：合并、拆分、选择封面、在访达中显示",
+      "src": "crates/voon-app/src/ui/album_detail.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "toolbar.view",
+      "label": "视图：网格（可切换为列表）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "toolbar.sort",
+      "label": "排序：最近添加",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.suwanai",
+      "label": "J.S. Bach: Sonatas and Partitas for Solo Violin",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.kv563",
+      "label": "MOZART Divertimento KV 563",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.evanescence",
+      "label": "Evanescence",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.aga",
+      "label": "Luna (2nd edition)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.bachdsd",
+      "label": "巴赫：双小提琴协奏曲",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.brandenburg",
+      "label": "Bach: Brandenburg Concertos · Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.emiri",
+      "label": "classique",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.tongli",
+      "label": "粤语十大金曲 HQCDⅡ",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.kleiber",
+      "label": "Beethoven: Symphony No. 5 & 7",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.lisiecki",
+      "label": "Chopin: Complete Nocturnes",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.wukong",
+      "label": "《黑神话：悟空》交响音乐会纪念专辑",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.quiet",
+      "label": "Quiet Winter Night",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.karajan9",
+      "label": "Beethoven: 9 Symphonies (1963)",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.langlang",
+      "label": "The Mozart Album",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.guzheng",
+      "label": "鼓宴 · 须弥三国",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.twelve",
+      "label": "Beautiful Energy",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.vikingur",
+      "label": "Mozart & Contemporaries",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "grid.album.mozartvn",
+      "label": "MOZART Violin Concertos",
+      "src": "crates/voon-app/src/ui/album_grid.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "5-detail-multidisc-dark",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.filter.all",
+      "label": "全部 23",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.filter.untagged",
+      "label": "无标签 4",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.filter.cue-encoding",
+      "label": "CUE 乱码 3",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.filter.unmerged",
+      "label": "多碟未合并 5",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.filter.no-cover",
+      "label": "无封面 9",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.filter.cue-mismatch",
+      "label": "CUE 不匹配 2",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.numeric.edit",
+      "label": "手动填写",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.numeric.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.numeric",
+      "label": "Unknown_Artist/[未命名] — 文件名全是数字，且没有内嵌标签",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.group2007.encoding",
+      "label": "选择编码…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.group2007.skip",
+      "label": "忽略",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.group2007",
+      "label": "群星.-.[2007十大流行发烧唱片].专辑.(APE) — CUE 编码无法识别，曲目名显示为乱码",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.kuraki.merge",
+      "label": "合并为 2 碟",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.kuraki.skip",
+      "label": "不是同一张",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.kuraki",
+      "label": "[Hires]倉木麻衣 - MAI KURAKI BEST 151A -LOVE & HOPE- Disc 1[24bit 96khz FLAC] — 疑似同一张专辑的两张碟被识别成两张专辑",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.hires.split",
+      "label": "拆分…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.hires.cover",
+      "label": "选择封面…",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.hires",
+      "label": "Hi-res Selection — 没有找到封面图片，音频也没有内嵌封面",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.sens.relink",
+      "label": "改用 SENS.ape",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.sens.open",
+      "label": "在访达中显示",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "inbox.item.sens",
+      "label": "SENS — CUE 引用的音频文件不存在",
+      "src": "crates/voon-app/src/ui/inbox_view.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "toolbar.search",
+      "label": "搜索专辑、艺术家、作曲家",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "toolbar.rescan",
+      "label": "重新扫描（增量）",
+      "src": "crates/voon-app/src/ui/toolbar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "window.traffic-lights",
+      "label": "关闭、最小化、缩放",
+      "src": "crates/voon-app/src/ui/window.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.library",
+      "label": "音乐库",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.collections",
+      "label": "套装",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.composers",
+      "label": "作曲家",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.facets",
+      "label": "分面",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.tags",
+      "label": "标签",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.stacks",
+      "label": "合集",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.inbox",
+      "label": "待处理",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.stack.night",
+      "label": "睡前小提琴",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.stack.dsd",
+      "label": "DSD 试音碟",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.stack.car",
+      "label": "车载 · 粤语",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    },
+    {
+      "frame": "14-inbox-dark",
+      "id": "sidebar.library-status",
+      "label": "NAS1 · 已连接",
+      "src": "crates/voon-app/src/ui/sidebar.rs"
+    }
+  ]
+}

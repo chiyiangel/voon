@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Voon 设计画布</title>
+  </head>
+  <body>
+    <div id="viewport"><div id="world"></div></div>
+    <header id="hud">
+      <div class="hud-title">
+        <strong>Voon 设计画布 · 高保真原型（待审）</strong>
+        <span>点任意控件复制引用发给我 · V 选择 · H 平移 · 空格拖移 · ⌘/Ctrl 滚轮缩放</span>
+      </div>
+      <div class="hud-tools">
+        <button type="button" id="mode-select" class="is-on" title="选择元素 (V)">选择</button>
+        <button type="button" id="mode-pan" title="平移 (H)">平移</button>
+        <span class="hud-gap"></span>
+        <button type="button" id="zoom-fit" title="适应画布 (0)">适应</button>
+        <button type="button" id="zoom-100" title="实际大小 (1)">100%</button>
+        <span id="zoom-label">100%</span>
+        <label class="hud-jump">跳转 <select id="jump"></select></label>
+        <a id="index-link" href="./element-index.json">元素索引</a>
+      </div>
+    </header>
+    <div id="toast" role="status" hidden></div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>
